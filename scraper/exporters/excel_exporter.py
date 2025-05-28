@@ -44,6 +44,7 @@ def export(df, state_name, writer):
     worksheet.set_column('C:C', 30.5)
     worksheet.set_column('E:E', 24)
     worksheet.set_column('F:F', 20)
+    worksheet.set_column('G:G', 10)
 
     # row formats
     wrap_fmt = workbook.add_format({
