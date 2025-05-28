@@ -176,5 +176,5 @@ cython_debug/
 temp/
 rfpscraper/
 output/
-scraper/utils/data_utils.py
 .editorconfig
+.gitignore
