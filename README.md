@@ -144,8 +144,5 @@ Licensed under the MIT License. See `LICENSE` for full text.
 ---
 
 ## 📸 Screenshots
-
-(Replace these placeholders with real screenshots)
-
-![Sample Excel Output](/output_example.png)
-------------------------------------------------------
+Sample Output for California with "System" as a keyword:
+![Sample Excel Output](/output_example.png)  
