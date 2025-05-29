@@ -1,8 +1,6 @@
-# arizona.py
-# imports for html parsing, data handling, and http requests
 import logging
 from io import StringIO
-from urllib.parse import parse_qsl, urlencode
+from urllib.parse import parse_qsl, urlencode, urljoin
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -13,24 +11,18 @@ from scraper.utils.data_utils import filter_by_keywords
 
 
 class ArizonaScraper(RequestsScraper):
-    # scraper for arizona state rfp site
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["arizona"])
-        self.hidden_fields = {}       # store form hidden inputs
-        self.previous_df = None       # for comparing pages
+        self.hidden_fields = {}
+        self.previous_df = None
         self.current_df = None
         self.logger = logging.getLogger(__name__)
 
     def _scrape_hidden_fields(self, html_text):
-        # extract all hidden input values from html
         soup = BeautifulSoup(html_text, "html.parser")
-        hidden = {}
-        for inp in soup.find_all("input", type="hidden"):
-            name = inp.get("name")
-            if name:
-                hidden[name] = inp.get("value", "")
-        self.logger.debug(f"extracted {len(hidden)} hidden fields")
-        return hidden
+        return {inp["name"]: inp.get("value", "")
+                for inp in soup.find_all("input", type="hidden") if inp.get("name")}
+
 
     def _build_search_payload(self):
         # build initial post data for search
@@ -185,24 +177,50 @@ class ArizonaScraper(RequestsScraper):
         return resp.text
 
     def extract_data(self, page_content):
-        # parse html tables and return list of records
         self.logger.debug("extracting data from page")
         try:
+            # table parse
             tables = pd.read_html(StringIO(page_content))
             if len(tables) <= 4:
                 self.logger.error("unexpected table count, saving debug html")
                 with open(f"debug_page_{getattr(self, 'page_num', 1)}.html", "w", encoding="utf-8") as f:
                     f.write(page_content)
                 return []
-
             df = tables[4].reset_index(drop=True)
+
+            # BeautifulSoup locates the table
+            soup = BeautifulSoup(page_content, "html.parser")
+            tbl = soup.find("table", id="body_x_grid_grd")
+            rows = tbl.select("tbody > tr")
+
+            # extract href from the <a> in the first <td> of each row
+            links = []
+            for tr in rows:
+                first_td = tr.find_all("td", recursive=False)[0]
+                a = first_td.find("a", href=True)
+                href = a["href"] if a else None
+                # make absolute if needed
+                if href and not href.startswith("http"):
+                    href = urljoin(self.base_url, href)
+                links.append(href)
+
+            # check
+            if len(links) < len(df):
+                links += [None] * (len(df) - len(links))
+            elif len(links) > len(df):
+                links = links[: len(df)]
+
+            # insert
+            df["Link"] = links
+
             self.current_df = df
-            self.logger.info(f"found {len(df)} records")
+            self.logger.info(f"found {len(df)} records (with Link column)")
             return df.to_dict("records")
 
         except Exception as e:
             self.logger.error(f"error extracting data: {e}")
             return []
+
 
     def scrape(self, **kwargs):
         # orchestrate full scrape with pagination and filtering
