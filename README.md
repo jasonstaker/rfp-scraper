@@ -128,21 +128,15 @@ The exported `.xlsx` file includes:
 * Decision Date
 * Keyword Hits
 
----
-
 ## 🤝 Contributing
 
 This project is not accepting external contributions at this time.
 If you have any ideas of how to contribute, please contact me through my information on my GitHub profile.
 
----
-
 ## 📄 License
 
 Licensed under the MIT License. See `LICENSE` for full text.
 
----
-
 ## 📸 Screenshots
 Sample Output for California with "System" as a keyword:
-![Sample Excel Output](/output_example.png)  
+![Sample Excel Output](/assets/output_example.png)  
