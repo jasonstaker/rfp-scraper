@@ -27,29 +27,29 @@ Manually monitoring 20+ keywords across 50+ state procurement websites is a huge
 ## 📂 Repo Layout
 .  
 ├── output/  
-│   ├── rfp\_scraping\_output.xlsx  
+│   ├── rfp_scraping_output.xlsx  
 │   └── scraper.log  
 ├── scraper/  
 │   ├── config/  
 │   │   ├── keywords.txt  
 │   │   └── settings.py  
 │   ├── core/  
-│   │   ├── base\_scraper.py  
-│   │   ├── requests\_scraper.py  
-│   │   └── selenium\_scraper.py  
+│   │   ├── base_scraper.py  
+│   │   ├── requests_scraper.py  
+│   │   └── selenium_scraper.py  
 │   ├── exporters/  
-│   │   └── excel\_exporter.py  
+│   │   └── excel_exporter.py  
 │   ├── scrapers/  
 │   │   ├── arizona.py  
 │   │   └── california.py  
 │   ├── tests/  
-│   │   ├── test\_core.py  
-│   │   └── test\_scrapers.py  
+│   │   ├── test_core.py  
+│   │   └── test_scrapers.py  
 │   ├── utils/  
-│   │   ├── data\_utils.py  
-│   │   ├── date\_utils.py  
-│   │   └── text\_utils.py  
-│   └── logging\_config.py  
+│   │   ├── data_utils.py  
+│   │   ├── date_utils.py  
+│   │   └── text_utils.py  
+│   └── logging_config.py  
 ├── temp/  
 ├── venv/  
 ├── LICENSE  

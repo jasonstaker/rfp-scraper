@@ -192,6 +192,7 @@ def export_all(state_to_df_map, writer):
         'format':   grey_fill
     })
 
+    # insert image
     img = Image.open('./assets/hotb_logo.jpg')
     img_width, img_height = img.size
 

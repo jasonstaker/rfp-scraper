@@ -12,11 +12,15 @@ import pandas as pd
 # project imports
 from scraper.scrapers import SCRAPER_MAP
 from scraper.exporters.excel_exporter import export_all
+from scraper.utils.data_utils import sync_hidden_from_excel
 
 def main():
     # Ensure output directory exists
     output_dir = "./output"
     os.makedirs(output_dir, exist_ok=True)
+
+    # sync hidden rfps
+    sync_hidden_from_excel()
 
     # Configure logging to file
     logging.basicConfig(
@@ -51,7 +55,7 @@ def main():
     if not to_run:
         return
 
-    output_path = os.path.join(output_dir, "rfq_scraping_output.xlsx")
+    output_path = os.path.join(output_dir, "rfp_scraping_output.xlsx")
 
     # Run each scraper and collect DataFrames into a dictionary
     state_to_df_map = {}
