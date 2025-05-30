@@ -1,165 +1,111 @@
-# california.py
-# suppress tensorflow logs
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-# silence unwanted logger noise
+# california.py – scrape California RFP listings from in‑page HTML table
 import logging
-logging.getLogger('WDM').setLevel(logging.ERROR)
-logging.getLogger('selenium').setLevel(logging.ERROR)
-
-# standard imports
 import time
-import glob
-import shutil
-import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium import webdriver
+from io import StringIO
+
+import pandas as pd
+from bs4 import BeautifulSoup
 
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
-from scraper.exporters.excel_exporter import export
 from scraper.utils.data_utils import filter_by_keywords
 
+from scraper.config.settings import BUSINESS_UNIT_DICT
 
 class CaliforniaScraper(SeleniumScraper):
-    # scraper for california state rfp site
+    # Scraper for California state RFP portal, parsing the on‑page table
     def __init__(self):
-        # setup headless chrome
+        # configure headless Chrome with minimal logs
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--log-level=3')
         chrome_options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
 
-        # download directory
-        temp_dir = r'C:\Users\jason\vscode\rfp-scraper\temp'
-        os.makedirs(temp_dir, exist_ok=True)
-        chrome_options.add_experimental_option('prefs', {
-            'download.default_directory': temp_dir,
-            'download.prompt_for_download': False,
-            'download.directory_upgrade': True,
-            'safebrowsing.enabled': True
-        })
-
+        # initialize base scraper with our options
         super().__init__(STATE_RFP_URL_MAP['california'], options=chrome_options)
 
-        # replace driver with silent service
+        # replace driver service to suppress console noise
         try:
             self.driver.quit()
         except:
             pass
-        service = Service(log_path=os.devnull, service_args=['--silent'])
+        service = Service(log_path=None, service_args=['--silent'])
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
         self.logger = logging.getLogger('california')
-        self.temp_dir = temp_dir
-        self.output_dir = r'C:\Users\jason\vscode\rfp-scraper\output'
 
     def search(self, **kwargs):
-        # clear temp directory
-        for f in glob.glob(os.path.join(self.temp_dir, '*')):
-            try:
-                os.remove(f)
-            except:
-                pass
-
-        # navigate and export
+        # navigate to page and wait for results table to load
+        self.logger.info('navigating to California RFP page')
         self.driver.get(self.base_url)
+        # wait until table with id 'datatable-ready' appears
         WebDriverWait(self.driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, '//*[@id="searchForm"]/section[2]'))
+            EC.presence_of_element_located((By.XPATH, '//*[@id="datatable-ready"]'))
         )
-        export_button = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="RESP_INQA_HD_VW_GR$hexcel$0"]'))
-        )
-        export_button.click()
+        # give JS time to populate rows if needed
         time.sleep(2)
+    
+        return self.driver.page_source
 
-        # handle download
-        original = self.driver.current_window_handle
-        download_button = WebDriverWait(self.driver, 20).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="downloadButton"]'))
-        )
-        download_button.click()
-        time.sleep(2)
+    from scraper.config.settings import BUSINESS_UNIT_DICT
 
-        if len(self.driver.window_handles) > 1:
-            for w in self.driver.window_handles:
-                if w != original:
-                    self.driver.switch_to.window(w)
-                    self.driver.close()
-            self.driver.switch_to.window(original)
+    def extract_data(self, page_source):
+        self.logger.debug('parsing HTML table for records')
+        try:
+            soup = BeautifulSoup(page_source, 'html.parser')
+            table = soup.find('table', id='datatable-ready')
+            df = pd.read_html(StringIO(str(table)))[0]
 
-        return self._wait_for_download()
+            # Prepare a list of links based on department name and event ID
+            links = []
+            for _, row in df.iterrows():
+                department_name = row.iloc[3]  # department column
+                event_id = row.iloc[1]         # event ID column
+                bu = BUSINESS_UNIT_DICT.get(department_name)
+                if bu:
+                    url = f"https://caleprocure.ca.gov/event/{bu}/{event_id}"
+                else:
+                    url = None
+                links.append(url)
 
-    def _wait_for_download(self, timeout=60):
-        # wait for file to appear
-        start = time.time()
-        downloads = os.path.expanduser('~/Downloads')
-        while time.time() - start < timeout:
-            temp_files = glob.glob(os.path.join(self.temp_dir, '*.csv')) + \
-                         glob.glob(os.path.join(self.temp_dir, '*.xlsx')) + \
-                         glob.glob(os.path.join(self.temp_dir, '*.xls'))
-            if temp_files:
-                return max(temp_files, key=os.path.getctime)
+            # Construct the final mapped DataFrame with links included
+            mapped = pd.DataFrame({
+                'Label': df.iloc[:, 2],            # Event Name
+                'Code': df.iloc[:, 1],             # Event ID
+                'End (UTC-7)': df.iloc[:, 4],      # End Date
+                'Type': 'RFP',
+                'Keyword Hits': '',
+                'Link': links
+            })
+            mapped['Link'] = mapped['Link'].fillna('https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx')
+            return mapped.to_dict('records')
 
-            download_files = glob.glob(os.path.join(downloads, '*.csv')) + \
-                             glob.glob(os.path.join(downloads, '*.xlsx')) + \
-                             glob.glob(os.path.join(downloads, '*.xls'))
-            if download_files:
-                latest = max(download_files, key=os.path.getctime)
-                dest = os.path.join(self.temp_dir, os.path.basename(latest))
-                shutil.move(latest, dest)
-                return dest
+        except Exception as e:
+            self.logger.error(f'error parsing HTML table: {e}')
+            return []
 
-            time.sleep(1)
-        self.logger.error('download file not found')
-        return None
 
-    def extract_data(self, file_path):
-        # read file into dataframe
-        if file_path.endswith('.csv'):
-            df = pd.read_csv(file_path, encoding='utf-8-sig')
-        else:
-            try:
-                df = pd.read_excel(file_path, engine='xlrd')
-            except:
-                df = pd.read_html(file_path)[0]
-
-        # map to standard schema
-        mapped = pd.DataFrame({
-            'Label': df.get('Event Name', ''),
-            'Code': df.get('Event ID', ''),
-            'End (UTC-7)': df.get('End Date', ''),
-            'Type': df.get('Type', 'RFP'),
-            'Keyword Hits': ''
-        })
-        return mapped.to_dict('records')
 
     def scrape(self, **kwargs):
-        start = time.time()
-        file_path = None
+        # high‑level orchestration: load page, parse, filter
+        self.logger.info('starting scrape process')
         try:
-            file_path = self.search(**kwargs)
-            records = self.extract_data(file_path) if file_path else []
-            if records:
-                df = pd.DataFrame(records)
-                filtered = filter_by_keywords(df)
-                if not filtered.empty:
-                    return filtered
+            html = self.search(**kwargs)
+            records = self.extract_data(html)
+            if not records:
+                return []
+            df = pd.DataFrame(records)
+            filtered = filter_by_keywords(df)
+            return filtered.to_dict('records')
         except Exception as e:
-            self.logger.error(f'Scraping failed: {e}')
+            self.logger.error(f'scrape failed: {e}')
+            return []
         finally:
-            if file_path and os.path.exists(file_path):
-                try:
-                    os.remove(file_path)
-                except:
-                    pass
             self.close()
-            elapsed = time.time() - start
-            self.logger.info(f'Time taken scraping {elapsed:.1f}s')
-        return []

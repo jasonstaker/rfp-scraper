@@ -4,23 +4,10 @@ import os
 import pandas as pd
 
 def get_final_excel(original_df, state_name):
-    # build a DataFrame with the desired columns, moving 'Link' to the last position
     state_title = state_name.capitalize()
-    if state_name == 'california':
-        # California uses a fixed URL placeholder
-        return pd.DataFrame({
-            'Select': '',
-            'Proposal title': original_df['Label'],
-            'State': state_title,
-            'Solicitation #': original_df['Code'],
-            'Due Date': original_df['End (UTC-7)'],
-            'Keyword Hits': original_df['Keyword Hits'],
-            'Link': 'https://hotbsoftware.com'
-        })
 
-    # For other states, use the scraped Link column
     return pd.DataFrame({
-        'Select': '',                   # placeholder for checkbox
+        'Hide': '', # placeholder for checkbox
         'Proposal title': original_df['Label'],
         'State': state_title,
         'Solicitation #': original_df['Code'],
