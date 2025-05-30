@@ -2,12 +2,13 @@
 import math
 import os
 import pandas as pd
+from PIL import Image
 
 def get_final_excel(original_df, state_name):
     state_title = state_name.capitalize()
 
     return pd.DataFrame({
-        'Hide': '', # placeholder for checkbox
+        '': '', # placeholder for checkbox
         'Proposal title': original_df['Label'],
         'State': state_title,
         'Solicitation #': original_df['Code'],
@@ -46,8 +47,11 @@ def export_all(state_to_df_map, writer):
         'font_size':  14,
         'font_name':  'Aptos Narrow Bold'
     })
+    white_fill = workbook.add_format({'bg_color': 'white'})
+
     for col_idx, col_name in enumerate(all_final.columns):
         worksheet.write(0, col_idx, col_name, header_fmt)
+    worksheet.write_blank('A1', None, white_fill)
     worksheet.set_row(0, 66)
 
     # add autofilter on the "State" column
@@ -55,7 +59,7 @@ def export_all(state_to_df_map, writer):
     worksheet.autofilter(0, 2, last_row, 2)
 
     # column widths
-    worksheet.set_column('A:A', 8)
+    worksheet.set_column('A:A', 20)
     worksheet.set_column('B:B', 41)
     worksheet.set_column('C:C', 14.5)
     worksheet.set_column('D:D', 30.5)
@@ -186,4 +190,16 @@ def export_all(state_to_df_map, writer):
         'type':     'formula',
         'criteria': '=INDIRECT("A"&ROW())=TRUE',
         'format':   grey_fill
+    })
+
+    img = Image.open('./assets/hotb_logo.jpg')
+    img_width, img_height = img.size
+
+    scale = 311 / 865
+    y_offset = (176 - 71) / 4
+
+    worksheet.insert_image('A1', './assets/hotb_logo.jpg', {
+        'x_scale': scale,
+        'y_scale': scale,
+        'y_offset': y_offset
     })

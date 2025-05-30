@@ -8,3 +8,4 @@ lxml
 chromedriver
 webdriver-manager
 xlrd
+pillow
