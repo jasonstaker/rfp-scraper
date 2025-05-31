@@ -68,8 +68,11 @@ def sync_hidden_from_excel(
         return
 
     # skip header row, grab hide flag (col 0) and solicitation # (col 3)
-    data = df.iloc[1:, [0, 3]].copy()
-    data.columns = ['Hide', 'Solicitation#']
+    try:
+        data = df.iloc[1:, [0, 3]].copy()
+        data.columns = ['Hide', 'Solicitation#']
+    except IndexError:
+        return
 
     # collect newly hidden ids
     newly = set(data.loc[data['Hide'] == True, 'Solicitation#'].astype(str).tolist())
