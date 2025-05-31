@@ -2,8 +2,11 @@
 
 from pathlib import Path
 STATE_RFP_URL_MAP = {
+    "alabama": 'https://procurement.staars.alabama.gov/PRDVSS1X1/AltSelfService',
+    "arkansas": 'https://arbuy.arkansas.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
     "arizona": 'https://app.az.gov/page.aspx/en/rfp/request_browse_public',
-    "california": 'https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx' 
+    "california": 'https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx',
+    "colorado": 'https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4'
 }
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
 KEYWORD_FILE = './scraper/config/keywords.txt'
