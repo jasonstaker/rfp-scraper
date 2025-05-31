@@ -1,4 +1,4 @@
-# california.py – scrape California RFP listings from in‑page HTML table
+# california.py
 import logging
 import time
 from selenium.webdriver.support.ui import WebDriverWait
