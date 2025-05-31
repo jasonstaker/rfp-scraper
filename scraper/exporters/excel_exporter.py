@@ -52,7 +52,7 @@ def export_all(state_to_df_map, writer):
     for col_idx, col_name in enumerate(all_final.columns):
         worksheet.write(0, col_idx, col_name, header_fmt)
     worksheet.write_blank('A1', None, white_fill)
-    worksheet.set_row(0, 66)
+    worksheet.set_row(0, 40)
 
     # add autofilter on the "State" column
     last_row = all_final.shape[0]
@@ -196,8 +196,8 @@ def export_all(state_to_df_map, writer):
     img = Image.open('./assets/hotb_logo.jpg')
     img_width, img_height = img.size
 
-    scale = 311 / 865
-    y_offset = (176 - 71) / 4
+    scale = 311 / 858
+    y_offset = (107 - 71) / 4
 
     worksheet.insert_image('A1', './assets/hotb_logo.jpg', {
         'x_scale': scale,
