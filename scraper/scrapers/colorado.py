@@ -8,16 +8,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import convert_to_pst
 
+from scraper.config.settings import STATE_RFP_URL_MAP
+
 
 class ColoradoScraper(SeleniumScraper):
-    # scraper for Colorado published solicitations
+    # Scraper for Colorado published solicitations
     def __init__(self):
-        # configure headless Chrome with fixed viewport, UA, and minimal logs
+        # Configure headless Chrome (you can uncomment headless if you want)
         chrome_options = Options()
         chrome_options.add_argument('--headless=new')
         chrome_options.add_argument('--disable-gpu')
@@ -29,17 +32,17 @@ class ColoradoScraper(SeleniumScraper):
         )
         chrome_options.add_argument('--disable-dev-shm-usage')
 
-        super().__init__('https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4', options=chrome_options)
+        super().__init__(STATE_RFP_URL_MAP['colorado'], options=chrome_options)
         self.logger = logging.getLogger(__name__)
 
     def search(self, **kwargs):
-        # navigate to portal and click “View Published Solicitations”
+        # Navigate to portal and click “View Published Solicitations”
         self.logger.info('navigating to Colorado RFP portal')
         self.driver.get(self.base_url)
 
         try:
-            # use data-qa attribute for robust locator
-            button_locator = (By.XPATH,
+            button_locator = (
+                By.XPATH,
                 "//div[@data-qa='vss.page.VAXXX03153.carouselView.carousel.solicitations']"
             )
             WebDriverWait(self.driver, 20).until(
@@ -47,21 +50,21 @@ class ColoradoScraper(SeleniumScraper):
             ).click()
             self.logger.info("clicked 'View Published Solicitations'")
 
-            # wait for the solicitations table
-            table_locator = (By.ID, 'vsspageVVSSX10019gridView1group1cardGridgrid1')
+            # Wait for the solicitations table container to appear
             WebDriverWait(self.driver, 20).until(
-                EC.presence_of_element_located(table_locator)
+                EC.presence_of_element_located((By.ID, 'vsspageVVSSX10019gridView1group1cardGridgrid1'))
             )
+            # Give a moment for rows to actually render
             time.sleep(1)
             self.logger.info('solicitations table loaded')
-            return self.driver.page_source
+            return True
 
         except Exception as e:
             self.logger.error(f"search() failed: {e}", exc_info=True)
-            return None
+            return False
 
     def extract_data(self, page_source):
-        # parse the HTML table into raw records
+        # Parse the HTML table into raw records
         self.logger.info('parsing Colorado solicitations table')
         if not page_source:
             return []
@@ -80,19 +83,20 @@ class ColoradoScraper(SeleniumScraper):
         records = []
         for row in tbody.find_all('tr'):
             cols = row.find_all('td')
-            # expect at least 5 columns: selector, _, label, link cell, date cell
+            # Expect at least 5 columns: (0)=expand, (1)=description, (2)=dept/buyer, 
+            # (3)=solicitation link cell, (4)=date cell, ...
             if len(cols) < 5:
                 continue
 
             label = cols[1].get_text(strip=True)
-            anchor = cols[3].find('a', href=True)
+            anchor = cols[3].find('a')
             if not anchor:
                 continue
 
             code = anchor.get_text(strip=True)
-            link = anchor['href']
+            link = STATE_RFP_URL_MAP['colorado']
 
-            # convert raw date string into PST
+            # Convert raw date string into PST
             date_span = cols[4].find('span')
             raw_date = date_span.get_text(strip=True) if date_span else ''
             try:
@@ -113,18 +117,54 @@ class ColoradoScraper(SeleniumScraper):
         return records
 
     def scrape(self, **kwargs):
-        # orchestrate search, extract, and filter
+        # Orchestrate search, extract, and filter across all pages
         self.logger.info('starting Colorado scrape')
         try:
-            page = self.search(**kwargs)
-            if not page:
+            if not self.search(**kwargs):
                 return []
 
-            records = self.extract_data(page)
+            all_records = []
 
-            # (Pagination can be added here later)
+            while True:
+                # 1) Extract data from the current page
+                page_source = self.driver.page_source
+                page_records = self.extract_data(page_source)
+                all_records.extend(page_records)
+                self.logger.info(f'collected {len(page_records)} rows on this page, total so far: {len(all_records)}')
 
-            df = pd.DataFrame(records)
+                # 2) Attempt to locate any “Next” button (class="css-1yn6b58")
+                next_buttons = self.driver.find_elements(By.CLASS_NAME, "css-1yn6b58")
+                if not next_buttons:
+                    self.logger.info('“Next” button not found; assuming last page')
+                    break
+
+                # 3) From those candidates, pick the first one that’s both displayed & enabled
+                next_btn = None
+                for btn in next_buttons:
+                    if btn.is_displayed() and btn.is_enabled():
+                        next_btn = btn
+                        break
+
+                if not next_btn:
+                    # If none are clickable, we’re done paginating
+                    self.logger.info('No clickable “Next” button; stopping pagination')
+                    break
+
+                # 4) Before clicking, grab the ID of the first <tr> on this page (if any)
+                try:
+                    first_row = self.driver.find_element(By.CSS_SELECTOR, "tr[id^='tableDataRow']")
+                    old_row_id = first_row.get_attribute("id")
+                except NoSuchElementException:
+                    old_row_id = None
+
+                # 5) Click “Next”
+                next_btn.click()
+                self.logger.info('clicked “Next” to advance page')
+
+                # Loop will repeat on the new page
+
+            # 7) After collecting all pages, filter + return
+            df = pd.DataFrame(all_records)
             self.logger.info(f'total records before filter: {len(df)}')
             filtered = filter_by_keywords(df)
             self.logger.info(f'total records after filter: {len(filtered)}')
