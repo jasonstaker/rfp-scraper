@@ -6,7 +6,8 @@ STATE_RFP_URL_MAP = {
     "arkansas": 'https://arbuy.arkansas.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
     "arizona": 'https://app.az.gov/page.aspx/en/rfp/request_browse_public',
     "california": 'https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx',
-    "colorado": 'https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4'
+    "colorado": 'https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4',
+    "connecticut": 'https://portal.ct.gov/das/ctsource/bidboard?language=en_US'
 }
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
 KEYWORD_FILE = './scraper/config/keywords.txt'

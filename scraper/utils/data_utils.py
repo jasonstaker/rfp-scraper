@@ -20,7 +20,7 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     if 'Code' in df.columns and hidden:
         df = df[~df['Code'].astype(str).isin(hidden)]
 
-    # 1 load keywords
+    # load keywords
     try:
         with open(KEYWORD_FILE, 'r', encoding='utf-8') as f:
             keywords = [line.strip().lower() for line in f if line.strip()]

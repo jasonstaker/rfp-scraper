@@ -4,17 +4,14 @@ import unittest
 
 import pandas as pd
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date
 from scraper.utils.text_utils import clean_text
-from scraper.config.settings import KEYWORD_FILE
 
 
 class TestDataUtils(unittest.TestCase):
     def setUp(self):
-        with open(KEYWORD_FILE, "r", encoding="utf-8") as f:
+        with open('keywords.txt', "r", encoding="utf-8") as f:
             self.keywords = [line.strip().lower() for line in f if line.strip()]
 
         if len(self.keywords) < 2:

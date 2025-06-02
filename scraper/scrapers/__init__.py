@@ -4,11 +4,13 @@ from .arkansas import ArkansasScraper
 from .arizona import ArizonaScraper
 from .california import CaliforniaScraper
 from .colorado import ColoradoScraper
+from .connecticut import ConnecticutScraper
 
 SCRAPER_MAP = {
     "alabama": AlabamaScraper,
     "arkansas": ArkansasScraper,
     "arizona": ArizonaScraper,
     "california": CaliforniaScraper,
-    "colorado": ColoradoScraper
+    "colorado": ColoradoScraper,
+    "connecticut": ConnecticutScraper
 }
