@@ -1,5 +1,4 @@
 # california.py
-# Scraper for California state RFP portal (uses Selenium, parses the on-page table)
 
 import logging
 import time

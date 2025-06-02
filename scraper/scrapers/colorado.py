@@ -1,5 +1,4 @@
 # colorado.py
-# Scraper for Colorado published solicitations (uses Selenium)
 
 import logging
 import time

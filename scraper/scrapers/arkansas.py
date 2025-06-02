@@ -1,5 +1,4 @@
 # arkansas.py
-# Scraper for Arkansas open bids (ARBuy)
 
 import logging
 import requests

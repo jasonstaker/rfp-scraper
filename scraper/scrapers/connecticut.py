@@ -1,5 +1,4 @@
 # connecticut.py
-# Scraper for Connecticut bid board (fetches JSON pages of open solicitations)
 
 import logging
 from datetime import datetime

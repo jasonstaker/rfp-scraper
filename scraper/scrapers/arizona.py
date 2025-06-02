@@ -233,7 +233,6 @@ class ArizonaScraper(RequestsScraper):
 
             df = pd.DataFrame(all_records)
             self.logger.info(f"records before filter: {len(df)}")
-            print(df.drop_duplicates())
             filtered = filter_by_keywords(df)
             self.logger.info(f"records after filter: {len(filtered)}")
             return filtered.to_dict("records")
