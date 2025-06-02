@@ -14,7 +14,6 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
-from scraper.utils.date_utils import convert_to_pst
 from scraper.config.settings import STATE_RFP_URL_MAP
 
 
@@ -107,17 +106,12 @@ class ColoradoScraper(SeleniumScraper):
 
                 date_span = cols[4].find("span")
                 raw_date = date_span.get_text(strip=True) if date_span else ""
-                try:
-                    end_pst = convert_to_pst(raw_date)
-                except Exception as de:
-                    self.logger.warning(f"date conversion failed for '{raw_date}': {de}")
-                    end_pst = raw_date
 
                 records.append(
                     {
                         "Label": label,
                         "Code": code,
-                        "End (UTC-7)": end_pst,
+                        "End (UTC-7)": raw_date,
                         "Keyword Hits": "",
                         "Link": link,
                     }

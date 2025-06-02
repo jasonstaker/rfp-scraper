@@ -9,6 +9,7 @@ import requests
 
 from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
+from scraper.config.settings import STATE_RFP_URL_MAP
 
 
 class ConnecticutScraper(RequestsScraper):
@@ -106,7 +107,7 @@ class ConnecticutScraper(RequestsScraper):
                     end_str = ""
 
                 # No per-record link available, use base URL as placeholder
-                link = self.base_url
+                link = STATE_RFP_URL_MAP['connecticut']
 
                 output.append(
                     {

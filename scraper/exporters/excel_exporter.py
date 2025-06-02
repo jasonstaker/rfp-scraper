@@ -4,6 +4,9 @@ import os
 import pandas as pd
 from PIL import Image
 
+from scraper.utils.date_utils import parse_date_generic
+from scraper.utils.date_utils import filter_by_dates
+
 def get_final_excel(original_df, state_name):
     state_title = state_name.capitalize()
 
@@ -12,7 +15,7 @@ def get_final_excel(original_df, state_name):
         'Proposal title': original_df['Label'],
         'State': state_title,
         'Solicitation #': original_df['Code'],
-        'Due Date': original_df['End (UTC-7)'],
+        'Due Date': original_df['End (UTC-7)'].apply(parse_date_generic),
         'Keyword Hits': original_df['Keyword Hits'],
         'Link': original_df['Link']
     })
@@ -27,7 +30,7 @@ def export_all(state_to_df_map, writer):
         all_chunks.append(chunk)
 
     # concatenate all states into one DataFrame
-    all_final = pd.concat(all_chunks, ignore_index=True)
+    all_final = filter_by_dates(pd.concat(all_chunks, ignore_index=True))
 
     # write to a single sheet called "All RFPs"
     sheet_name = "All RFPs"
@@ -56,7 +59,7 @@ def export_all(state_to_df_map, writer):
 
     # add autofilter on the "State" column
     last_row = all_final.shape[0]
-    worksheet.autofilter(0, 2, last_row, 2)
+    worksheet.autofilter(0, 1, last_row, 5)
 
     # column widths
     worksheet.set_column('A:A', 20)
