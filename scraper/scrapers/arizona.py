@@ -34,21 +34,65 @@ class ArizonaScraper(RequestsScraper):
     def _build_search_payload(self):
         # construct form data for the initial search request
         data = {**self.hidden_fields}
-        data.update(
-            {
-                "hdnUserValue": "%2Cbody_x_txtRfpAwarded_1",
-                "__LASTFOCUS": "body_x_prxFilterBar_x_cmdSearchBtn",
-                "__EVENTTARGET": "body:x:prxFilterBar:x:cmdSearchBtn",
-                "REQUEST_METHOD": "POST",
-                "body:x:txtRfpAwarded_1": "False",
-                "hdnRowCountbody_x_grid_grd": "100",
-                "maxpageindexbody_x_grid_grd": "6",
-                "ajaxrowsiscountedbody_x_grid_grd": "True",
-                "CSRFToken": self.hidden_fields.get("CSRFToken", FALLBACK_CSRF),
-            }
-        )
-        params = urlencode(data, safe=":/|%")
-        return params
+        data.update({
+            "hdnUserValue": ",body_x_txtRfpAwarded_1,body_x_selStatusCode_1",
+            "__LASTFOCUS": "body_x_prxFilterBar_x_cmdSearchBtn",
+            "__VIEWSTATE": "WWiOsLESxYi9%2Fl27AYlyjWfYcGBwl9hk0gCWfkDbBr6HObEZkaU6TPdUyt3MosTOPDlCccuQqNMQNZNYPpwss%2F9x%2FsJWfZcotfE%2Fc4Q6XrI%3D",
+            "__EVENTTARGET": "body:x:prxFilterBar:x:cmdSearchBtn",
+            "__EVENTARGUMENT": "",
+            "__VIEWSTATEGENERATOR": "7C067871",
+            "__VIEWSTATEENCRYPTED": "",
+            "HTTP_RESOLUTION": "",
+            "REQUEST_METHOD": "POST",
+            "header:x:prxHeaderLogInfo:x:ContrastModal:chkContrastTheme_radio": "true",
+            "header:x:prxHeaderLogInfo:x:ContrastModal:chkContrastTheme": "True",
+            "x_headaction": "",
+            "x_headloginName": "",
+            "header:x:prxHeaderLogInfo:x:ContrastModal:chkPassiveNotification": "0",
+            "proxyActionBar:x:txtWflRefuseMessage": "",
+            "hdnMandatory": "0",
+            "hdnWflAction": "",
+            "body:_ctl0": "",
+            "body:x:txtQuery": "",
+            "body_x_selFamily_text": "",
+            "body:x:selFamily": "",
+            "body:x:prxFilterBar:x:cmdSearchBtn": "",
+            "body:x:prxFilterBar:x:hdnResetFilterUrlbody_x_prxFilterBar_x_cmdRazBtn": "",
+            "body_x_selRfptypeCode_text": "",
+            "body:x:selRfptypeCode": "",
+            "body_x_selStatusCode_1_text": "",
+            "body:x:selStatusCode_1": "val",
+            "body:x:txtRfpBeginDate": "",
+            "body:x:txtRfpBeginDatemax": "",
+            "body_x_txtRfpAwarded_1_text": "",
+            "body:x:txtRfpAwarded_1": "",
+            "body_x_selOrgaLevelOrgaNode_78E9FF04_1_text": "",
+            "body:x:selOrgaLevelOrgaNode_78E9FF04_1": "",
+            "body:x:grid:grd:tr_12754:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12753:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12752:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12751:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12748:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12747:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12746:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12745:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12744:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12743:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12742:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12740:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12736:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12735:ctrl_txtRfpAwarded": "False",
+            "body:x:grid:grd:tr_12734:ctrl_txtRfpAwarded": "False",
+            "hdnSortExpressionbody_x_grid_grd": "",
+            "hdnSortDirectionbody_x_grid_grd": "",
+            "hdnCurrentPageIndexbody_x_grid_grd": "0",
+            "hdnRowCountbody_x_grid_grd": "34",
+            "maxpageindexbody_x_grid_grd": "2",
+            "ajaxrowsiscountedbody_x_grid_grd": "True",
+            "CSRFToken": self.hidden_fields.get("CSRFToken", FALLBACK_CSRF),
+        })
+        return urlencode(data, safe=":/|%")
+
 
     def _build_pagination_payload(self, page_num):
         # construct form data for next page requests
@@ -189,6 +233,7 @@ class ArizonaScraper(RequestsScraper):
 
             df = pd.DataFrame(all_records)
             self.logger.info(f"records before filter: {len(df)}")
+            print(df.drop_duplicates())
             filtered = filter_by_keywords(df)
             self.logger.info(f"records after filter: {len(filtered)}")
             return filtered.to_dict("records")
