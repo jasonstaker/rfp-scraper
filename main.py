@@ -96,9 +96,31 @@ def main():
     # run each scraper and collect DataFrames
     state_to_df_map = {}
     for state in to_run:
-        logging.info(f"[{state}] Instantiating scraper")
-        scraper = SCRAPER_MAP[state]()
-        df = pd.DataFrame(scraper.scrape())
+        logging.info(f"[{state}] Instantiating and scraping (up to 3 attempts)")
+        records = []
+        success = False
+
+        # retry loop: instantiate a fresh scraper each attempt
+        for attempt in range(1, 4):
+            scraper = SCRAPER_MAP[state]()
+            try:
+                scraped = scraper.scrape()
+                # if scrape() returns normally, mark success
+                records = scraped
+                success = True
+                break
+            except Exception as e:
+                logging.error(f"[{state}] attempt {attempt} failed: {e}")
+                if attempt < 3:
+                    logging.info(f"[{state}] retrying (attempt {attempt + 1}) …")
+                else:
+                    logging.error(f"[{state}] All 3 attempts failed; moving on with empty results")
+            finally:
+                logging.info("Closing scraper")
+                scraper.close()
+
+        # convert results (possibly empty) into a DataFrame
+        df = pd.DataFrame(records)
         if df.empty:
             logging.info(f"[{state}] No records found")
             continue

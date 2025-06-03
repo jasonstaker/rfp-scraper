@@ -38,7 +38,8 @@ class BaseScraper(ABC):
                 response = self.next_page()
             return results
         except Exception as e:
+            # Let errors bubble up instead of returning an empty list.
             self.logger.error(f"Scraping failed: {e}")
-            return []
+            raise
         finally:
             self.close()

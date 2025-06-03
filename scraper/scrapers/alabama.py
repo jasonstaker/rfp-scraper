@@ -131,6 +131,5 @@ class AlabamaScraper(SeleniumScraper):
             return filtered.to_dict("records")
         except Exception as e:
             self.logger.error(f"Scrape failed: {e}", exc_info=True)
-            return []
-        finally:
-            self.close()
+            # Now raise so main.py can retry up to 3 times
+            raise

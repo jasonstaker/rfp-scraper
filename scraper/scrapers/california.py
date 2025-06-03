@@ -108,6 +108,5 @@ class CaliforniaScraper(SeleniumScraper):
             return filtered.to_dict("records")
         except Exception as e:
             self.logger.error(f"Scrape failed: {e}", exc_info=True)
-            return []
-        finally:
-            self.close()
+            # Raise so main.py can retry
+            raise

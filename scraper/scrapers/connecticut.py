@@ -164,6 +164,5 @@ class ConnecticutScraper(RequestsScraper):
 
         except Exception as e:
             self.logger.error(f"Connecticut scrape failed: {e}", exc_info=True)
-            return []
-        finally:
-            self.close()
+            # Raise so main.py can retry
+            raise
