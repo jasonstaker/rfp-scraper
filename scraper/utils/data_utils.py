@@ -24,8 +24,6 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     try:
         with open(KEYWORD_FILE, 'r', encoding='utf-8') as f:
             keywords = [line.strip().lower() for line in f if line.strip()]
-            if not keywords:
-                return df
     except FileNotFoundError:
         # no keywords file found
         return df
@@ -33,6 +31,11 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     # nothing to filter
     if df.empty:
         return pd.DataFrame()
+    
+    if not keywords:
+        df = df.copy()
+        df['Keyword Hits'] = 0
+        return df.reset_index(drop=True)
 
     # collect keyword hit counts
     hits = []
