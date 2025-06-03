@@ -1,14 +1,39 @@
 # selenium_scraper.py
+
+import os
+import subprocess
+import sys
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from contextlib import redirect_stdout
 from webdriver_manager.chrome import ChromeDriverManager
 from .base_scraper import BaseScraper
 
 class SeleniumScraper(BaseScraper):
-    def __init__(self, base_url, options=None):
+    def __init__(self, base_url):
         super().__init__(base_url)
-        self.options = options if options else webdriver.ChromeOptions()
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=self.options)
+
+        # tell ChromeDriver to dump its stdout/stderr to nul
+        null_log = "nul"
+        service = Service(
+            executable_path=ChromeDriverManager().install(),
+            log_path=null_log,
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
+
+        # build ChromeOptions
+        self.options = webdriver.ChromeOptions()
+        self.options.add_argument("--headless=new")
+        self.options.add_argument(
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/115.0.0.0 Safari/537.36"
+        )
+
+        # launch Chrome via that Service
+        with redirect_stdout(open(os.devnull, 'w')):
+            self.driver = webdriver.Chrome(service=service, options=self.options)
         self.current_response = None
 
     def search(self, **kwargs):
