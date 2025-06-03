@@ -1,13 +1,17 @@
 # excel_exporter.py
 import math
-import os
+import logging
 import pandas as pd
 from PIL import Image
 
 from scraper.utils.date_utils import parse_date_generic
 from scraper.utils.date_utils import filter_by_dates
 
+# Initialize logger
+logger = logging.getLogger(__name__)
+
 def get_final_excel(original_df, state_name):
+    # Format DataFrame for Excel output with specified columns
     state_title = state_name.capitalize()
 
     return pd.DataFrame({
@@ -20,9 +24,10 @@ def get_final_excel(original_df, state_name):
         'Link': original_df['Link']
     })
 
-
 def export_all(state_to_df_map, writer):
     # collect each state's DataFrame, drop duplicates, and reshape for Excel
+    logger.info("Starting Excel export")
+    logger.info("Processing state data")
     all_chunks = []
     for state_name, orig_df in state_to_df_map.items():
         deduped = orig_df.drop_duplicates()
@@ -33,9 +38,10 @@ def export_all(state_to_df_map, writer):
     all_final = filter_by_dates(pd.concat(all_chunks, ignore_index=True))
 
     # write to a single sheet called "All RFPs"
+    logger.info("Writing to Excel sheet 'All RFPs'")
     sheet_name = "All RFPs"
     all_final.to_excel(writer, sheet_name=sheet_name, index=False)
-    workbook  = writer.book
+    workbook = writer.book
     worksheet = writer.sheets[sheet_name]
 
     # header formatting
@@ -207,3 +213,5 @@ def export_all(state_to_df_map, writer):
         'y_scale': scale,
         'y_offset': y_offset
     })
+
+    logger.info("Completed Excel export")

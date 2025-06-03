@@ -1,4 +1,5 @@
 # california.py
+# url: https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx
 
 import logging
 import time
@@ -7,9 +8,6 @@ from io import StringIO
 from bs4 import BeautifulSoup
 import pandas as pd
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,26 +20,7 @@ from scraper.utils.data_utils import filter_by_keywords
 
 class CaliforniaScraper(SeleniumScraper):
     def __init__(self):
-        # configure headless Chrome with minimal logs
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--log-level=3")
-        chrome_options.add_experimental_option(
-            "excludeSwitches", ["enable-logging", "enable-automation"]
-        )
-
-        super().__init__(STATE_RFP_URL_MAP["california"], options=chrome_options)
-
-        # replace driver service to suppress console noise
-        try:
-            self.driver.quit()
-        except Exception:
-            pass
-
-        service = Service(log_path=None, service_args=["--silent"])
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
-
+        super().__init__(STATE_RFP_URL_MAP["california"])
         self.logger = logging.getLogger(__name__)
 
     def search(self, **kwargs):
@@ -113,21 +92,22 @@ class CaliforniaScraper(SeleniumScraper):
 
     def scrape(self, **kwargs):
         # high-level orchestration: search → extract → filter → return
-        self.logger.info("starting California scrape")
+        self.logger.info("Starting scrape for California")
         try:
             html = self.search(**kwargs)
             if not html:
-                self.logger.warning("search() returned no HTML; aborting scrape")
+                self.logger.warning("Search returned no HTML; aborting scrape")
                 return []
 
+            self.logger.info("Processing data")
             records = self.extract_data(html)
             df = pd.DataFrame(records)
-            self.logger.info(f"total records before filter: {len(df)}")
+            self.logger.info("Applying filters")
             filtered = filter_by_keywords(df)
-            self.logger.info(f"total records after filter: {len(filtered)}")
+            self.logger.info(f"Found {len(filtered)} records after filtering")
             return filtered.to_dict("records")
         except Exception as e:
-            self.logger.error(f"scrape failed: {e}", exc_info=True)
+            self.logger.error(f"Scrape failed: {e}", exc_info=True)
             return []
         finally:
             self.close()

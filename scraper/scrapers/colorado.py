@@ -1,4 +1,5 @@
 # colorado.py
+# url: https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4
 
 import logging
 import time
@@ -9,7 +10,6 @@ import pandas as pd
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
 from scraper.core.selenium_scraper import SeleniumScraper
@@ -19,19 +19,7 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 
 class ColoradoScraper(SeleniumScraper):
     def __init__(self):
-        # configure headless Chrome
-        chrome_options = Options()
-        chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument(
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/115.0.0.0 Safari/537.36"
-        )
-        chrome_options.add_argument("--disable-dev-shm-usage")
-
-        super().__init__(STATE_RFP_URL_MAP["colorado"], options=chrome_options)
+        super().__init__(STATE_RFP_URL_MAP["colorado"])
         self.logger = logging.getLogger(__name__)
 
     def search(self, **kwargs):
@@ -73,7 +61,6 @@ class ColoradoScraper(SeleniumScraper):
 
     def extract_data(self, page_source):
         # parse the solicitations table into raw records
-        self.logger.info("parsing Colorado solicitations table")
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
             return []
@@ -117,7 +104,6 @@ class ColoradoScraper(SeleniumScraper):
                     }
                 )
 
-            self.logger.info(f"parsed {len(records)} raw records")
             return records
 
         except Exception as e:
@@ -126,15 +112,17 @@ class ColoradoScraper(SeleniumScraper):
 
     def scrape(self, **kwargs):
         # high-level orchestration: search → extract/paginate → filter → return
-        self.logger.info("starting Colorado scrape")
+        self.logger.info("Starting scrape for Colorado")
         all_records = []
         try:
             success = self.search(**kwargs)
             if not success:
-                self.logger.warning("search() returned False; skipping scrape")
+                self.logger.warning("Search returned False; skipping scrape")
                 return []
 
+            page_num = 1
             while True:
+                self.logger.info(f"Processing page {page_num}")
                 page_source = None
                 try:
                     page_source = self.driver.page_source
@@ -144,9 +132,6 @@ class ColoradoScraper(SeleniumScraper):
 
                 batch = self.extract_data(page_source)
                 all_records.extend(batch)
-                self.logger.info(
-                    f"collected {len(batch)} rows on this page, total so far: {len(all_records)}"
-                )
 
                 next_buttons = []
                 try:
@@ -165,7 +150,7 @@ class ColoradoScraper(SeleniumScraper):
                         continue
 
                 if not next_btn:
-                    self.logger.info("No clickable “Next” button; stopping pagination")
+                    self.logger.info("No clickable Next button. Terminating pagination")
                     break
 
                 try:
@@ -176,19 +161,21 @@ class ColoradoScraper(SeleniumScraper):
 
                 try:
                     next_btn.click()
-                    self.logger.info("clicked “Next” to advance page")
                 except WebDriverException as we:
                     self.logger.error(f"failed to click next button: {we}", exc_info=False)
                     break
 
+                page_num += 1
+
+            self.logger.info("Completed parsing")
             df = pd.DataFrame(all_records)
-            self.logger.info(f"total records before filter: {len(df)}")
+            self.logger.info("Applying filters")
             filtered = filter_by_keywords(df)
-            self.logger.info(f"total records after filter: {len(filtered)}")
+            self.logger.info(f"Found {len(filtered)} records after filtering")
             return filtered.to_dict("records")
 
         except Exception as e:
-            self.logger.error(f"scrape() failed: {e}", exc_info=True)
+            self.logger.error(f"Scrape failed: {e}", exc_info=True)
             return []
         finally:
             self.logger.info("closing browser")

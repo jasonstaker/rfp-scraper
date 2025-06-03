@@ -1,4 +1,5 @@
 # connecticut.py
+# url: https://portal.ct.gov/das/ctsource/bidboard?language=en_US
 
 import logging
 from datetime import datetime
@@ -126,23 +127,24 @@ class ConnecticutScraper(RequestsScraper):
 
     def scrape(self, **kwargs):
         # high-level orchestration: search → paginate through offsets → extract → filter → return
-        self.logger.info("starting Connecticut scrape")
+        self.logger.info("Starting scrape for Connecticut")
         all_records = []
         try:
             total_hits, page_size, first_page = self.search(**kwargs)
             if total_hits is None:
-                self.logger.warning("search() returned no total_hits; aborting scrape")
+                self.logger.warning("Search returned no total_hits; aborting scrape")
                 return []
 
+            self.logger.info("Processing page 1")
             batch = self.extract_data(first_page)
             all_records.extend(batch)
-            self.logger.info(f"collected {len(batch)} records from offset=0")
 
             customerid = kwargs.get("customerid", 51)
             offset = page_size
+            page_num = 2
 
             while offset < total_hits:
-                self.logger.info(f"fetching next page: offset={offset}")
+                self.logger.info(f"Processing page {page_num}")
                 page_json = self._fetch_page(offset=offset, customerid=customerid)
                 if not page_json:
                     self.logger.error(f"failed to fetch page at offset={offset}; stopping pagination")
@@ -150,17 +152,18 @@ class ConnecticutScraper(RequestsScraper):
 
                 batch = self.extract_data(page_json)
                 all_records.extend(batch)
-                self.logger.info(f"collected {len(batch)} records from offset={offset}")
                 offset += page_size
+                page_num += 1
 
+            self.logger.info("Completed parsing")
             df = pd.DataFrame(all_records)
-            self.logger.info(f"total records before filter: {len(df)}")
+            self.logger.info("Applying filters")
             filtered = filter_by_keywords(df)
-            self.logger.info(f"total records after filter: {len(filtered)}")
+            self.logger.info(f"Found {len(filtered)} records after filtering")
             return filtered.to_dict("records")
 
         except Exception as e:
-            self.logger.error(f"connecticut scrape failed: {e}", exc_info=True)
+            self.logger.error(f"Connecticut scrape failed: {e}", exc_info=True)
             return []
         finally:
             self.close()
