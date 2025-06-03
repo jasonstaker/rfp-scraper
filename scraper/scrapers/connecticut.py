@@ -95,7 +95,7 @@ class ConnecticutScraper(RequestsScraper):
                 label = rec.get("title", "").strip()
                 code = rec.get("bidNumber", "").strip()
 
-                end_ts = rec.get("prtcpEndDate")
+                end_ts = rec.get("openDate")
                 if end_ts is not None:
                     try:
                         dt_utc = datetime.fromtimestamp(end_ts / 1000, tz=pytz.UTC)
