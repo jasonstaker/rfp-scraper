@@ -47,4 +47,3 @@ def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
     parsed = parsed.dt.tz_localize(None)
     # keep rows whose due date is today or later
     return df[parsed >= today].copy().reset_index(drop=True)
-

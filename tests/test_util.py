@@ -1,17 +1,23 @@
+# tests/test_data_utils.py
+
 import os
 import sys
 import unittest
 
 import pandas as pd
 
-from scraper.utils.data_utils import filter_by_keywords
-from scraper.utils.date_utils import parse_date
-from scraper.utils.text_utils import clean_text
+from src.scraper.config import KEYWORDS_FILE
+from src.scraper.utils.data_utils import filter_by_keywords
+from src.scraper.utils.date_utils import parse_date
+from src.scraper.utils.text_utils import clean_text
 
 
 class TestDataUtils(unittest.TestCase):
     def setUp(self):
-        with open('keywords.txt', "r", encoding="utf-8") as f:
+        test_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.abspath(os.path.join(test_dir, "..", ".."))
+        os.chdir(project_root)
+        with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
             self.keywords = [line.strip().lower() for line in f if line.strip()]
 
         if len(self.keywords) < 2:

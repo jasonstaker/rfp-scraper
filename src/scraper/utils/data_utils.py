@@ -1,10 +1,11 @@
-# data_utils.py
+# src/scraper/utils/data_utils.py
+
 import pandas as pd
 import json
 from pathlib import Path
 
 # project settings
-from scraper.config.settings import KEYWORD_FILE, HIDDEN_IDS_FILE
+from src.config import KEYWORDS_FILE, HIDDEN_IDS_FILE
 
 # load hidden solicitation ids from persistence file
 def load_hidden_ids() -> set[str]:
@@ -22,7 +23,7 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
 
     # load keywords
     try:
-        with open(KEYWORD_FILE, 'r', encoding='utf-8') as f:
+        with open(KEYWORDS_FILE, 'r', encoding='utf-8') as f:
             keywords = [line.strip().lower() for line in f if line.strip()]
     except FileNotFoundError:
         # no keywords file found

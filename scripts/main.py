@@ -15,20 +15,21 @@ from scraper.scrapers import SCRAPER_MAP
 from scraper.exporters.excel_exporter import export_all
 from scraper.utils.data_utils import sync_hidden_from_excel
 from scraper.logging_config import configure_logging
+from src.config import OUTPUT_DIR, CACHE_DIR, LOG_FILE, ensure_dirs_exist
+
 
 def main():
     # ensure output directory exists (for logs & cache)
-    output_dir = "./output"
-    os.makedirs(output_dir, exist_ok=True)
+    ensure_dirs_exist()
+    output_dir = OUTPUT_DIR
 
     # create (or ensure) cache subfolder
-    cache_dir = os.path.join(output_dir, "cache")
-    os.makedirs(cache_dir, exist_ok=True)
+    cache_dir = str(CACHE_DIR)
 
     # separate log sessions
-    log_file = os.path.join(output_dir, "scraper.log")
-    with open(log_file, 'a') as f:
-        f.write("\n")
+    log_file = str(LOG_FILE)
+    with open(log_file, 'a'):
+        pass
 
     # suppress WDM and TF logs
     os.environ['WDM_LOG'] = "0"

@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from contextlib import redirect_stdout
 from webdriver_manager.chrome import ChromeDriverManager
 from .base_scraper import BaseScraper
+from src.config import SELENIUM_HEADLESS
 
 class SeleniumScraper(BaseScraper):
     def __init__(self, base_url):
@@ -24,7 +25,8 @@ class SeleniumScraper(BaseScraper):
 
         # build ChromeOptions
         self.options = webdriver.ChromeOptions()
-        self.options.add_argument("--headless=new")
+        if SELENIUM_HEADLESS:
+            self.options.add_argument("--headless=new")
         self.options.add_argument(
             "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "

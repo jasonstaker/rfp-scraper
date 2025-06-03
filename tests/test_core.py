@@ -3,11 +3,9 @@ import sys
 import unittest
 from unittest.mock import patch, MagicMock
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-
-import scraper.core.base_scraper as base_scraper
-import scraper.core.requests_scraper as requests_scraper
-import scraper.core.selenium_scraper as selenium_scraper
+import src.scraper.core.base_scraper as base_scraper
+import src.scraper.core.requests_scraper as requests_scraper
+import src.scraper.core.selenium_scraper as selenium_scraper
 
 
 class DummyScraper(base_scraper.BaseScraper):

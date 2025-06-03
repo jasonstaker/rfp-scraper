@@ -1,4 +1,3 @@
-# excel_exporter.py
 import math
 import logging
 import pandas as pd
@@ -6,16 +5,17 @@ from PIL import Image
 
 from scraper.utils.date_utils import parse_date_generic
 from scraper.utils.date_utils import filter_by_dates
+from src.config import ASSETS_DIR
 
-# Initialize logger
+# initialize logger
 logger = logging.getLogger(__name__)
 
 def get_final_excel(original_df, state_name):
-    # Format DataFrame for Excel output with specified columns
+    # format DataFrame for Excel output with specified columns
     state_title = state_name.capitalize()
 
     return pd.DataFrame({
-        '': '', # placeholder for checkbox
+        '': '',  # placeholder for checkbox
         'Proposal title': original_df['Label'],
         'State': state_title,
         'Solicitation #': original_df['Code'],
@@ -92,12 +92,12 @@ def export_all(state_to_df_map, writer):
         'font_name':   'Aptos Narrow',
         'font_size':   11,
         'font_color':  'black',
-        'align':       'center',
-        'valign':      'vcenter',
-        'bg_color':    '#8388C1',
-        'bold':        True,
-        'text_wrap':   True,
-        'border':      5
+        'align':      'center',
+        'valign':     'vcenter',
+        'bg_color':   '#8388C1',
+        'bold':       True,
+        'text_wrap':  True,
+        'border':     5
     })
     default_fmt = workbook.add_format({
         'font_name':  'Aptos Narrow',
@@ -114,7 +114,7 @@ def export_all(state_to_df_map, writer):
         'align':      'center',
         'valign':     'vcenter',
         'border':     2,
-        'bg_color': "#DAE9F8"
+        'bg_color':   "#DAE9F8"
     })
     italic_fmt = workbook.add_format({
         'font_name':  'Aptos Narrow',
@@ -133,7 +133,7 @@ def export_all(state_to_df_map, writer):
         'align':      'center',
         'valign':     'vcenter',
         'border':     2,
-        'bg_color': "#DAE9F8"
+        'bg_color':   "#DAE9F8"
     })
     link_fmt = workbook.add_format({
         'font_name':  'Aptos Narrow',
@@ -201,14 +201,15 @@ def export_all(state_to_df_map, writer):
         'format':   grey_fill
     })
 
-    # insert image
-    img = Image.open('./assets/hotb_logo.jpg')
+    # insert image (now using ASSETS_DIR)
+    logo_path = ASSETS_DIR / "hotb_logo.jpg"
+    img = Image.open(str(logo_path))
     img_width, img_height = img.size
 
     scale = 311 / 858
     y_offset = (107 - 71) / 4
 
-    worksheet.insert_image('A1', './assets/hotb_logo.jpg', {
+    worksheet.insert_image('A1', str(logo_path), {
         'x_scale': scale,
         'y_scale': scale,
         'y_offset': y_offset
