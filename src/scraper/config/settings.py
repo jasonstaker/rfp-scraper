@@ -9,6 +9,7 @@ STATE_RFP_URL_MAP = {
     "colorado": 'https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4',
     "connecticut": 'https://portal.ct.gov/das/ctsource/bidboard?language=en_US'
 }
+AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
 KEYWORD_FILE = './scraper/config/keywords.txt'
 HIDDEN_IDS_FILE: Path = Path(__file__).resolve().parent.parent.parent / "persistence" / "hidden_ids.json"
