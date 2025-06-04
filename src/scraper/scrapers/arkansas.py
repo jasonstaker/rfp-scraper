@@ -11,14 +11,19 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-
+# a scraper class for arkansas rfp data using requests
 class ArkansasScraper(RequestsScraper):
+    # requires: nothing
+    # modifies: self
+    # effects: initializes the scraper with arkansas's rfp url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["arkansas"])
         self.logger = logging.getLogger(__name__)
 
+    # requires: nothing
+    # modifies: self.current_response
+    # effects: performs a get request to fetch the arkansas rfp page and returns the html content, or none if the request fails
     def search(self, **kwargs):
-        # GET request to fetch the ARBuy open solicitations page
         try:
             response = self.session.get(self.base_url, timeout=15)
             response.raise_for_status()
@@ -31,8 +36,10 @@ class ArkansasScraper(RequestsScraper):
             self.logger.error(f"search failed: {e}", exc_info=True)
             return None
 
+    # requires: html is a string containing html page source
+    # modifies: nothing
+    # effects: parses the html table from html and returns a list of raw records
     def extract_data(self, html):
-        # parse the ARBuy results table into a list of dicts
         if not html:
             self.logger.error("no HTML provided to extract_data")
             return []
@@ -69,8 +76,10 @@ class ArkansasScraper(RequestsScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             return []
 
+    # requires: nothing
+    # modifies: nothing
+    # effects: orchestrates the scraping process: search → extract → filter; returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
-        # orchestrate search → extract → filter → return
         self.logger.info("Starting scrape for Arkansas")
         try:
             html = self.search(**kwargs)

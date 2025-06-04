@@ -16,14 +16,19 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-
+# a scraper class for colorado rfp data using selenium to handle dynamic content
 class ColoradoScraper(SeleniumScraper):
+    # requires: nothing
+    # modifies: self
+    # effects: initializes the scraper with colorado's rfp url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["colorado"])
         self.logger = logging.getLogger(__name__)
 
+    # requires: nothing
+    # modifies: nothing (except through selenium's implicit state changes)
+    # effects: navigates to the colorado rfp portal, clicks 'view published solicitations', and waits for the table to load; returns true if successful, false otherwise
     def search(self, **kwargs):
-        # navigate to the Colorado RFP portal and click 'View Published Solicitations'
         self.logger.info("navigating to Colorado RFP portal")
         try:
             self.driver.get(self.base_url)
@@ -59,8 +64,10 @@ class ColoradoScraper(SeleniumScraper):
             self.logger.error(f"search() failed: {e}", exc_info=True)
             return False
 
+    # requires: page_source is a string containing html page source
+    # modifies: nothing
+    # effects: parses the solicitations table from page_source and returns a list of raw records
     def extract_data(self, page_source):
-        # parse the solicitations table into raw records
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
             return []
@@ -110,19 +117,21 @@ class ColoradoScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             return []
 
+    # requires: nothing
+    # modifies: nothing (except through selenium's implicit state changes)
+    # effects: orchestrates the scraping process: search → extract/paginate → filter; returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
-        # high-level orchestration: search → extract/paginate → filter → return
-        self.logger.info("Starting scrape for Colorado")
+        self.logger.info("starting Colorado scrape")
         all_records = []
         try:
             success = self.search(**kwargs)
             if not success:
-                self.logger.warning("Search returned False; skipping scrape")
+                self.logger.warning("search() returned False; skipping scrape")
                 return []
 
             page_num = 1
             while True:
-                self.logger.info(f"Processing page {page_num}")
+                self.logger.info(f"processing page {page_num}")
                 page_source = None
                 try:
                     page_source = self.driver.page_source
@@ -150,7 +159,7 @@ class ColoradoScraper(SeleniumScraper):
                         continue
 
                 if not next_btn:
-                    self.logger.info("No clickable Next button. Terminating pagination")
+                    self.logger.info("no clickable �Next� button; stopping pagination")
                     break
 
                 try:
@@ -167,14 +176,14 @@ class ColoradoScraper(SeleniumScraper):
 
                 page_num += 1
 
-            self.logger.info("Completed parsing")
+            self.logger.info("completed parsing")
             df = pd.DataFrame(all_records)
-            self.logger.info("Applying filters")
+            self.logger.info("applying filters")
             filtered = filter_by_keywords(df)
-            self.logger.info(f"Found {len(filtered)} records after filtering")
+            self.logger.info(f"found {len(filtered)} records after filtering")
             return filtered.to_dict("records")
 
         except Exception as e:
-            self.logger.error(f"Scrape failed: {e}", exc_info=True)
+            self.logger.error(f"scrape failed: {e}", exc_info=True)
             # Raise so main.py can retry
             raise

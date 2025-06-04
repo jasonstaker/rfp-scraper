@@ -1,3 +1,4 @@
+# excel_exporter.py
 import math
 import logging
 import pandas as pd
@@ -10,8 +11,10 @@ from src.config import ASSETS_DIR
 # initialize logger
 logger = logging.getLogger(__name__)
 
+# requires: original_df is a pandas DataFrame, state_name is a string
+# modifies: nothing
+# effects: returns a new DataFrame formatted for Excel with specified columns
 def get_final_excel(original_df, state_name):
-    # format DataFrame for Excel output with specified columns
     state_title = state_name.capitalize()
 
     return pd.DataFrame({
@@ -24,8 +27,10 @@ def get_final_excel(original_df, state_name):
         'Link': original_df['Link']
     })
 
+# requires: state_to_df_map is a dictionary mapping state names to DataFrames, writer is an ExcelWriter object
+# modifies: the Excel file through the writer
+# effects: processes state DataFrames, concatenates them, filters by dates, and writes to an Excel sheet with custom formatting
 def export_all(state_to_df_map, writer):
-    # collect each state's DataFrame, drop duplicates, and reshape for Excel
     logger.info("Starting Excel export")
     logger.info("Processing state data")
     all_chunks = []
@@ -92,7 +97,7 @@ def export_all(state_to_df_map, writer):
         'font_name':   'Aptos Narrow',
         'font_size':   11,
         'font_color':  'black',
-        'align':      'center',
+        'align':       'center',
         'valign':     'vcenter',
         'bg_color':   '#8388C1',
         'bold':       True,

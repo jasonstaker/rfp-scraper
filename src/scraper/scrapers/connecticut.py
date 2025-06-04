@@ -12,22 +12,23 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-
+# a scraper class for connecticut rfp data using requests and json
 class ConnecticutScraper(RequestsScraper):
+    # requires: nothing
+    # modifies: self
+    # effects: initializes the scraper with connecticut's rfp api url, sets up logging, and configures session headers for json
     def __init__(self):
-        # the full-text-search endpoint includes all required query parameters
         super().__init__("https://webprocure.proactiscloud.com/wp-full-text-search/search/sols")
         self.logger = logging.getLogger(__name__)
-        # instruct server to return JSON
-        self.session.headers.update(
-            {
-                "X-Requested-With": "XMLHttpRequest",
-                "Accept": "application/json",
-            }
-        )
+        self.session.headers.update({
+            "X-Requested-With": "XMLHttpRequest",
+            "Accept": "application/json",
+        })
 
+    # requires: offset is an integer, customerid is an integer
+    # modifies: nothing
+    # effects: fetches a json page from the api at the given offset and returns the json data, or none if the request fails
     def _fetch_page(self, offset, customerid):
-        # helper to GET one JSON page at the given offset
         params = {
             "customerid": customerid,
             "q": "*",
@@ -59,8 +60,10 @@ class ConnecticutScraper(RequestsScraper):
             )
             return None
 
+    # requires: nothing
+    # modifies: nothing
+    # effects: fetches the first json page to determine total_hits and page_size, returns these along with the first page data, or none if the request fails
     def search(self, **kwargs):
-        # fetch the first JSON page (offset=0) to determine total_hits and page_size
         customerid = kwargs.get("customerid", 51)
         self.logger.info("fetching first page of JSON (offset=0)...")
         try:
@@ -77,12 +80,16 @@ class ConnecticutScraper(RequestsScraper):
             self.logger.error(f"search failed: {e}", exc_info=True)
             return None, None, None
 
+    # requires: nothing
+    # modifies: nothing
+    # effects: not used; pagination is handled in scrape()
     def next_page(self):
-        # not used; pagination handled in scrape()
         return None
 
+    # requires: page_content is a dictionary containing json data with a "records" key
+    # modifies: nothing
+    # effects: parses the json records into a list of dictionaries with standardized fields
     def extract_data(self, page_content):
-        # parse one JSON page’s “records” into a list of dicts
         if not page_content or "records" not in page_content:
             self.logger.error('no page_content or missing "records" key')
             return []
@@ -125,8 +132,10 @@ class ConnecticutScraper(RequestsScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             return []
 
+    # requires: nothing
+    # modifies: nothing
+    # effects: orchestrates the scraping process: search → paginate through offsets → extract → filter; returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
-        # high-level orchestration: search → paginate through offsets → extract → filter → return
         self.logger.info("Starting scrape for Connecticut")
         all_records = []
         try:

@@ -13,8 +13,11 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.config.settings import FALLBACK_CSRF, STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-
+# a scraper class for arizona rfp data using post requests with hidden form fields
 class ArizonaScraper(RequestsScraper):
+    # requires: nothing
+    # modifies: self
+    # effects: initializes the scraper with arizona's rfp url and sets up logging and state variables
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["arizona"])
         self.logger = logging.getLogger(__name__)
@@ -23,8 +26,10 @@ class ArizonaScraper(RequestsScraper):
         self.current_df = None
         self.page_num = 2  # next_page() starts at page 2
 
+    # requires: html_text is a string containing html content
+    # modifies: nothing
+    # effects: extracts and returns a dictionary of hidden field names and values from html_text
     def _scrape_hidden_fields(self, html_text):
-        # extract hidden input values for POST payloads
         soup = BeautifulSoup(html_text, "html.parser")
         return {
             inp["name"]: inp.get("value", "")
@@ -32,8 +37,10 @@ class ArizonaScraper(RequestsScraper):
             if inp.get("name")
         }
 
+    # requires: self.hidden_fields is a dictionary
+    # modifies: nothing
+    # effects: constructs and returns the url-encoded form data for the initial search post request
     def _build_search_payload(self):
-        # construct form data for the initial search request
         data = {**self.hidden_fields}
         data.update({
             "hdnUserValue": ",body_x_txtRfpAwarded_1,body_x_selStatusCode_1",
@@ -94,8 +101,10 @@ class ArizonaScraper(RequestsScraper):
         })
         return urlencode(data, safe=":/|%")
 
+    # requires: page_num is an integer greater than or equal to 2
+    # modifies: nothing
+    # effects: constructs and returns the url-encoded form data for pagination post requests
     def _build_pagination_payload(self, page_num):
-        # construct form data for next page requests
         focus = page_num - 1
         prev_index = page_num - 2
         data = {
@@ -108,8 +117,10 @@ class ArizonaScraper(RequestsScraper):
         }
         return urlencode(data, safe=":/|%")
 
+    # requires: nothing
+    # modifies: self.hidden_fields, self.current_response, self.page_num
+    # effects: performs the initial search and returns the html content of the first page, or none if the request fails
     def search(self, **kwargs):
-        # initial GET to load hidden form state, then POST to retrieve first page
         try:
             resp = self.session.get(self.base_url, timeout=15)
             if resp.status_code != 200:
@@ -132,8 +143,10 @@ class ArizonaScraper(RequestsScraper):
             self.logger.error(f"search failed: {e}", exc_info=True)
             return None
 
+    # requires: self.current_response is set
+    # modifies: self.hidden_fields, self.current_response, self.page_num
+    # effects: fetches the next page via post and returns its html content, or none if no more pages
     def next_page(self):
-        # fetch the next page via POST, return new HTML text or None if none left
         if not getattr(self, "current_response", None):
             return None
         try:
@@ -157,8 +170,10 @@ class ArizonaScraper(RequestsScraper):
             self.logger.error(f"next_page failed: {e}", exc_info=True)
             return None
 
+    # requires: page_content is a string containing html page source
+    # modifies: self.current_df
+    # effects: parses the html table from page_content, extracts rfp records with links, and returns them as a list of dictionaries
     def extract_data(self, page_content):
-        # parse the HTML table (4th table) and extract links into a list of dicts
         if not page_content:
             self.logger.error("no page_content provided to extract_data")
             return []
@@ -191,38 +206,41 @@ class ArizonaScraper(RequestsScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             return []
 
+    # requires: nothing
+    # modifies: self.hidden_fields, self.current_response, self.page_num, self.previous_df, self.current_df
+    # effects: orchestrates the scraping process: search → extract → paginate → filter, returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
-        # search -> first extract -> loop next_page -> dedupe check -> filter -> return
-        self.logger.info("Starting scrape for Arizona")
+        self.logger.info("starting Arizona scrape")
         all_records = []
         try:
             page = self.search(**kwargs)
             if not page:
-                self.logger.warning("Search returned no page; skipping extraction")
+                self.logger.warning("search() returned no page; skipping extraction")
                 return []
-            self.logger.info("Processing page 1")
+            # first-page extraction
             all_records.extend(self.extract_data(page))
             self.previous_df = self.current_df
-            page_num = 2
+
+            # pagination loop
             while True:
                 page = self.next_page()
                 if not page:
                     break
-                self.logger.info(f"Processing page {page_num}")
                 all_records.extend(self.extract_data(page))
                 if self.current_df is not None and self.previous_df is not None:
                     if self.current_df.equals(self.previous_df):
-                        self.logger.info("Identical page detected, stopping pagination")
+                        self.logger.info("identical page detected, stopping pagination")
                         break
                 self.previous_df = self.current_df
-                page_num += 1
-            self.logger.info("Completed parsing")
+
+            # filtering
             df = pd.DataFrame(all_records)
-            self.logger.info("Applying filters")
+            self.logger.info(f"total records before filter: {len(df)}")
             filtered = filter_by_keywords(df)
-            self.logger.info(f"Found {len(filtered)} records after filtering")
+            self.logger.info(f"total records after filter: {len(filtered)}")
             return filtered.to_dict("records")
+
         except Exception as e:
-            self.logger.error(f"Scrape failed: {e}", exc_info=True)
+            self.logger.error(f"scrape failed: {e}", exc_info=True)
             # Raise so main.py can retry
             raise

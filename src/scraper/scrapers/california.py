@@ -17,14 +17,19 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import BUSINESS_UNIT_DICT, STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-
+# a scraper class for california rfp data using selenium
 class CaliforniaScraper(SeleniumScraper):
+    # requires: nothing
+    # modifies: self
+    # effects: initializes the scraper with california's rfp url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["california"])
         self.logger = logging.getLogger(__name__)
 
+    # requires: nothing
+    # modifies: self.driver (through selenium operations)
+    # effects: navigates to the california rfp page, waits for the table to load, and returns the page source if successful, otherwise none
     def search(self, **kwargs):
-        # navigate to the California RFP page and wait for the 'datatable-ready' table
         self.logger.info("navigating to California RFP page")
         try:
             self.driver.get(self.base_url)
@@ -43,8 +48,10 @@ class CaliforniaScraper(SeleniumScraper):
             self.logger.error(f"search failed: {e}", exc_info=True)
             return None
 
+    # requires: page_source is a string containing html page source
+    # modifies: nothing
+    # effects: parses the html table from page_source, constructs links, and returns a list of records
     def extract_data(self, page_source):
-        # parse the HTML table (#datatable-ready) into a list of dicts
         self.logger.info("parsing HTML table for California records")
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
@@ -90,8 +97,10 @@ class CaliforniaScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             return []
 
+    # requires: nothing
+    # modifies: self.driver (through selenium operations)
+    # effects: orchestrates the scraping process: search → extract → filter; returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
-        # high-level orchestration: search → extract → filter → return
         self.logger.info("Starting scrape for California")
         try:
             html = self.search(**kwargs)

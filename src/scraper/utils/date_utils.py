@@ -17,6 +17,9 @@ _TZINFOS = {
     "EDT": ZoneInfo("America/New_York"), "EST": ZoneInfo("America/New_York")
 }
 
+# requires: date_str is a string
+# modifies: nothing
+# effects: attempts to parse date_str into a datetime object, converts it to the target timezone, and returns it in a canonical format; returns the original string if parsing fails
 def parse_date_generic(date_str: str) -> str:
     if not isinstance(date_str, str) or not date_str.strip():
         return date_str  # return unchanged if not a nonempty string
@@ -30,14 +33,18 @@ def parse_date_generic(date_str: str) -> str:
     dt_in_target = dt.astimezone(_TARGET_ZONE)
     return dt_in_target.strftime(_CANONICAL_FMT)
 
-
+# requires: date_str is a string
+# modifies: nothing
+# effects: attempts to parse date_str in MM/DD/YYYY format and returns it in YYYY-MM-DD format; falls back to parse_date_generic if parsing fails
 def parse_date_simple(date_str: str) -> str:
-    # first try strict MM/DD/YYYY -> YYYY-MM-DD; else use generic parser.
     try:
         return datetime.strptime(date_str, "%m/%d/%Y").strftime("%Y-%m-%d")
     except (ValueError, TypeError):
         return parse_date_generic(date_str)
 
+# requires: df is a pandas DataFrame with a 'Due Date' column
+# modifies: nothing
+# effects: filters the DataFrame to keep only rows where the due date is today or later in the target timezone, returns the filtered DataFrame
 def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
     tz = ZoneInfo("America/Los_Angeles")
 

@@ -3,7 +3,11 @@ import logging
 from logging import FileHandler
 from logging import Formatter
 
+# a custom logging formatter that adjusts logger names for better readability
 class CustomFormatter(Formatter):
+    # requires: nothing
+    # modifies: record.name
+    # effects: formats the log record by adjusting logger names and returns the formatted string
     def format(self, record):
         if record.name == 'root':
             record.name = '[main]'
@@ -12,8 +16,10 @@ class CustomFormatter(Formatter):
             record.name = f'[{file_name}]'
         return super().format(record)
 
+# requires: log_file is a string or Path object specifying the log file path
+# modifies: the logging configuration
+# effects: sets up logging to write to log_file with a custom formatter and suppresses unwanted logs from specific libraries
 def configure_logging(log_file):
-    # Configure logging to file with custom formatter
     handler = FileHandler(log_file)
     formatter = CustomFormatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)

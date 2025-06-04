@@ -1,4 +1,4 @@
-# src/scraper/utils/data_utils.py
+# data_utils.py
 
 import pandas as pd
 import json
@@ -7,14 +7,18 @@ from pathlib import Path
 # project settings
 from src.config import KEYWORDS_FILE, HIDDEN_IDS_FILE
 
-# load hidden solicitation ids from persistence file
+# requires: nothing
+# modifies: nothing
+# effects: loads and returns a set of hidden solicitation ids from a json file, or an empty set if the file is not found or invalid
 def load_hidden_ids() -> set[str]:
     try:
         return set(json.loads(Path(HIDDEN_IDS_FILE).read_text(encoding='utf-8')))
     except (FileNotFoundError, json.JSONDecodeError):
         return set()
 
-# filter dataframe by keywords and hidden ids
+# requires: df is a pandas DataFrame
+# modifies: nothing
+# effects: filters the DataFrame based on hidden ids and keyword hits, returns a new DataFrame with filtered and sorted records
 def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     # drop rows with code in hidden ids
     hidden = load_hidden_ids()
@@ -54,7 +58,9 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     filtered['Keyword Hits'] = list(counts)
     return filtered.sort_values(by='Keyword Hits', ascending=False).reset_index(drop=True)
 
-# sync hidden ids from excel master file into persistence
+# requires: excel_path is a Path object pointing to an excel file
+# modifies: the hidden ids json file
+# effects: reads the excel file, extracts hidden solicitation ids, and updates the hidden ids json file with the union of existing and new hidden ids
 def sync_hidden_from_excel(
     excel_path: Path = Path('./output/rfp_scraping_output.xlsx'),
 ) -> None:

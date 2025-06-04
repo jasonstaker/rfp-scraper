@@ -16,14 +16,19 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-
+# a scraper class for alabama rfp data using selenium
 class AlabamaScraper(SeleniumScraper):
+    # requires: nothing
+    # modifies: self
+    # effects: initializes the scraper with alabama's rfp url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["alabama"])
         self.logger = logging.getLogger(__name__)
 
+    # requires: nothing
+    # modifies: self.driver (through selenium operations)
+    # effects: navigates to the alabama rfp portal, performs necessary clicks to load the solicitations table, and returns the page source if successful, otherwise none
     def search(self, **kwargs):
-        # navigate to Alabama STAARS Public Access and open the 'Open Solicitations' table
         try:
             self.driver.get(self.base_url)
             pub_locator = (By.XPATH, '//*[@id="homelayout"]/td[1]/div/div[5]/div[3]/input')
@@ -31,7 +36,7 @@ class AlabamaScraper(SeleniumScraper):
             WebDriverWait(self.driver, 10).until(lambda d: len(d.window_handles) > 1)
             new_handle = [h for h in self.driver.window_handles if h != self.driver.current_window_handle][0]
             self.driver.switch_to.window(new_handle)
-            WebDriverWait(self.driver, 15).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "Display")))
+            WebDriverWait(self.driver,15).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "Display")))
             open_locator = (By.ID, "AMSBrowseOpenSolicit")
             WebDriverWait(self.driver, 15).until(EC.element_to_be_clickable(open_locator))
             self.driver.execute_script("arguments[0].click();", self.driver.find_element(*open_locator))
@@ -49,8 +54,10 @@ class AlabamaScraper(SeleniumScraper):
             self.logger.error(f"search failed: {e}", exc_info=True)
             return None
 
+    # requires: page_source is a string containing html page source
+    # modifies: nothing
+    # effects: parses the html table from page_source and returns a list of raw records
     def extract_data(self, page_source):
-        # parse the HTML table into a list of raw records
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
             return []
@@ -92,8 +99,10 @@ class AlabamaScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             return []
 
+    # requires: nothing
+    # modifies: self.driver (through selenium operations)
+    # effects: orchestrates the scraping process: search → paginate → extract → filter; returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
-        # high-level orchestration: search → paginate → extract → filter → return
         self.logger.info("Starting scrape for Alabama")
         all_records = []
         try:

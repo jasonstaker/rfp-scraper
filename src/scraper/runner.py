@@ -9,12 +9,29 @@ import threading
 from scraper.scrapers import SCRAPER_MAP
 from scraper.exporters.excel_exporter import export_all
 from scraper.utils.data_utils import sync_hidden_from_excel
-from src.config import CACHE_DIR, DEFAULT_TIMEOUT
+from src.config import CACHE_DIR, DEFAULT_TIMEOUT, KEYWORDS_FILE
 
+# requires: states is a list of state names to scrape, keywords is a list of keywords for filtering, cancel_event is an optional threading.event to signal cancellation
+# modifies: writes to KEYWORDS_FILE, modifies CACHE_DIR by deleting old excel files and writing a new excel file
+# effects: writes keywords to KEYWORDS_FILE, runs scrapers for each state, collects and filters records, writes results to a timestamped excel file in CACHE_DIR, and returns the file path; raises RuntimeError if scraping is canceled or no records are scraped
 def run_scraping(
     states: list[str],
+    keywords: list[str],
     cancel_event: threading.Event | None = None
 ) -> Path:
+    """
+    Writes the given keywords to keywords.txt, then runs each state's scraper.
+    """
+
+    # Write keywords into the keywords.txt file (one per line)
+    try:
+        KEYWORDS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(KEYWORDS_FILE, "w", encoding="utf-8") as kw_file:
+            for kw in keywords:
+                kw_file.write(f"{kw}\n")
+        logging.info(f"Wrote {len(keywords)} keyword(s) to {KEYWORDS_FILE}")
+    except Exception as e:
+        logging.warning(f"Failed to write keywords to {KEYWORDS_FILE}: {e}")
 
     # if no Event was provided, use a dummy Event that never gets set.
     if cancel_event is None:
@@ -31,7 +48,7 @@ def run_scraping(
             logging.info(f"Cancellation requested before starting [{state}]. Exiting.")
             break
 
-        logging.info(f"[{state}] Starting scrape…")
+        logging.info(f"[{state}] Starting scrape...")
         records: list[dict] = []
         success = False
 
@@ -41,6 +58,7 @@ def run_scraping(
                 logging.info(f"Cancellation requested during [{state}] attempt {attempt}.")
                 break
 
+            # Instantiate scraper, which can now read keywords from KEYWORDS_FILE internally if needed
             scraper = SCRAPER_MAP[state]()
             try:
                 scraped = scraper.scrape(timeout=DEFAULT_TIMEOUT)
