@@ -1,0 +1,240 @@
+/* base widget styling */
+QWidget {
+    background-color: #FFFFFF;
+    color: #1A429A;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 25px;
+}
+
+/* text color for standard widgets */
+QLabel, QPushButton, QListWidget, QTableWidget, QPlainTextEdit {
+    color: #1A429A;
+}
+
+/* removes focus outline on buttons */
+QPushButton:focus {
+    outline: none;
+}
+
+/* header bar appearance */
+#header_bar {
+    background-color: #1A429A;
+    border-bottom: 2px solid #8388C1;
+    padding: 8px 12px;
+}
+
+/* header label styling */
+#header_bar QLabel {
+    color: #FFFFFF;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* button default styling */
+QPushButton {
+    background-color: #1A429A;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    min-height: 50px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+/* button hover effect */
+QPushButton:hover {
+    background-color: #8388C1;
+}
+
+/* button pressed effect */
+QPushButton:pressed {
+    background-color: #FFD486;
+    color: #1A429A;
+}
+
+/* disabled button appearance */
+QPushButton:disabled {
+    background-color: #CCCCCC;
+    color: #777777;
+}
+
+/* code editor styling */
+#code_editor {
+    background-color: #F5F5F5;
+    border: 2px solid #8388C1;
+    border-radius: 8px;
+    padding: 10px;
+    selection-background-color: #FFD486;
+    selection-color: #1A429A;
+    qproperty-frameShadow: Raised;
+}
+
+/* line number area styling */
+LineNumberArea {
+    background-color: #1A429A;
+    color: #FFFFFF;
+    padding-right: 6px;
+}
+
+/* current line highlight */
+#code_editor QPlainTextEdit::ExtraSelection {
+    background-color: #FFF7E0;
+}
+
+/* state list styling */
+#state_list {
+    background-color: #FFFFFF;
+    border: 2px solid #8388C1;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+/* state list item styling */
+#state_list::item {
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+/* state list hover effect */
+#state_list::item:hover {
+    background-color: #E0E0E0;
+}
+
+/* state list selected item styling */
+#state_list::item:selected {
+    background-color: #FFD486;
+    color: #1A429A;
+}
+
+/* vertical scrollbar styling */
+QScrollBar:vertical {
+    background: #F5F5F5;
+    width: 18px;
+    margin: 0px;
+    border: none;
+    border-radius: 9px;
+}
+QScrollBar::handle:vertical {
+    background: #8388C1;
+    min-height: 40px;
+    border-radius: 9px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #6B6FA8;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* horizontal scrollbar styling */
+QScrollBar:horizontal {
+    background: #F5F5F5;
+    height: 18px;
+    margin: 0px;
+    border: none;
+    border-radius: 9px;
+}
+QScrollBar::handle:horizontal {
+    background: #8388C1;
+    min-width: 40px;
+    border-radius: 9px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #6B6FA8;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* results table styling */
+#status_table {
+    background-color: #FFFFFF;
+    border: 2px solid #8388C1;
+    border-radius: 8px;
+    gridline-color: #E0E0E0;
+}
+
+/* table corner styling */
+QTableCornerButton {
+    background-color: #1A429A;
+    border: none;
+}
+
+/* table header styling */
+#status_table QHeaderView::section {
+    background-color: #1A429A;
+    color: #FFFFFF;
+    border: none;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    qproperty-alignment: 'AlignHCenter';
+}
+
+/* alternate row styling */
+#status_table::item:!selected:alternate {
+    background-color: #F9F9FB;
+}
+
+/* table cell styling */
+#status_table::item {
+    padding: 10px 14px;
+    font-size: 22px;
+    qproperty-textAlignment: 'AlignHCenter';
+}
+
+/* selected table cell styling */
+#status_table::item:selected {
+    background-color: #FFD486;
+    color: #1A429A;
+}
+
+/* log output styling */
+#log_output {
+    background-color: #F5F5F5;
+    border: 2px solid #8388C1;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 22px;
+    selection-background-color: #FFD486;
+    selection-color: #1A429A;
+    qproperty-frameShadow: Raised;
+}
+
+/* status header label styling */
+#status_header_label {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1A429A;
+    margin: 16px 0;
+    qproperty-alignment: 'AlignHCenter';
+}
+
+/* run info label styling */
+#run_info_label {
+    font-size: 28px;
+    font-style: italic;
+    color: #1A429A;
+    margin: 12px 0;
+    qproperty-alignment: 'AlignHCenter';
+}
+
+/* error label styling */
+#status_error_label {
+    color: red;
+    font-size: 24px;
+    margin-bottom: 12px;
+    qproperty-alignment: 'AlignHCenter';
+}
+
+/* focus outline styling */
+QWidget:focus {
+    outline: 4px solid #FFD486;
+    outline-offset: 2px;
+}
