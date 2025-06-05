@@ -1,5 +1,7 @@
 # main_window.py
 
+import sys
+import ctypes
 import threading
 import traceback
 from pathlib import Path
@@ -80,6 +82,9 @@ class MainWindow(QMainWindow):
         super().__init__()
         ensure_dirs_exist()
         configure_logging(LOG_FILE)
+        if sys.platform == "win32":
+            myappid = 'com.hotb.rfpscraper.1.0'
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         self.setWindowTitle("RFP Scraper")
         self.setWindowIcon(QIcon(str(Path(ASSETS_DIR) / "hotb_logo_square.png")))
         screen_geom = QApplication.primaryScreen().availableGeometry()

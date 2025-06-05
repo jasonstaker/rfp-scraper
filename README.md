@@ -1,238 +1,259 @@
 # RFP Scraper
 
-**Modular, scalable Python RFP Scraper** for 50+ U.S. state procurement portals—plug-and-play scraper classes with Excel export.
-*Tags:* `rfp` `procurement` `scraper` `selenium` `requests` `excel`
+**Tagline:** Automated RFP scraping with a simple, intuitive GUI.
 
----
+## Table of Contents
 
-## 🔍 Why?
+1. [Introduction](#introduction)
+2. [Features](#features)
+3. [Screenshots](#screenshots)
+4. [Installation](#installation)
+5. [Usage](#usage)
+6. [GUI Overview](#gui-overview)
 
-Manually monitoring 20+ keywords across 50+ state procurement websites is a huge time sink.
-**RFP Scraper** centralizes all RFP postings into a single `.xlsx` file—so you never miss a bid.
+   * [Main Window](#main-window)
+   * [Run Page](#run-page)
+   * [Status Page](#status-page)
+7. [Configuration](#configuration)
+8. [Project Structure](#project-structure)
+9. [Dependencies](#dependencies)
+10. [Testing](#testing)
+11. [Roadmap](#roadmap)
+12. [Contributing](#contributing)
+13. [License](#license)
+14. [Contact / Support](#contact--support)
 
----
+## Introduction
 
-## 🚀 Features
+RFP Scraper is a cross-platform desktop application designed to automate the process of fetching current Request for Proposals (RFPs) from multiple state procurement websites. It features:
 
-* 🔌 Modular core with base classes for `requests`- and `Selenium`-powered scrapers
-* ✅ Out-of-the-box support for:
+* A clean PyQt-based GUI for selecting states, entering keywords, and monitoring progress.
+* Automated background scraping with retry logic and caching of results.
+* Export to Excel of all scraped RFP records.
+* A status page showing which state scrapers succeeded or failed.
 
-  * Alabama
-  * Arizona
-  * Arkansas
-  * California
-  * Colorado
-  * Connecticut
-  * (More Coming)
-* 🗂️ Keyword list (`keywords.txt`): one keyword per line
-* ⚙️ Simple settings link-up for new scrapers (add URL or endpoint in `settings.py`)
-* 📊 Excel export (`.xlsx`) with:
+## Features
 
-  * ✓ Header formatting, autofilter, checkboxes, and conditional formatting
-  * ✓ Logo insertion
-* 📝 Smoke test (`smoke_test.py`) to verify each scraper runs without crashing
-* 📈 Scales easily to all 50 states by dropping in new scraper files
-* 📝 Basic logging to `output/scraper.log` (INFO + ERROR)
+* **Keyword-driven Searches**
+  Enter one keyword per line; the scraper uses those terms to query each state’s RFP portal.
 
----
+* **Multi-State Selection**
+  Pick any combination of supported states from a checkable list, or click “Select All” to run them all.
 
-## 📂 Repo Layout
+* **Background Scraping with Cancel**
+  The scraper runs in a separate thread so the UI remains responsive. Click “Cancel” at any time to stop.
 
-```
-.  
-├── assets/  
-│   └── hotb_logo.jpg  
-│   └── output_example.png      # sample Excel screenshot  
-├── output/  
-│   ├── rfp_scraping_output.xlsx  
-│   └── scraper.log  
-├── scraper/  
-│   ├── config/  
-│   │   ├── keywords.txt        # one keyword per line  
-│   │   └── settings.py         # STATE_RFP_URL_MAP, BUSINESS_UNIT_DICT, etc.  
-│   ├── core/  
-│   │   ├── base_scraper.py     # (if applicable)  
-│   │   ├── requests_scraper.py  
-│   │   └── selenium_scraper.py  
-│   ├── exporters/  
-│   │   └── excel_exporter.py   # builds formatted `.xlsx`  
-│   ├── scrapers/  
-│   │   ├── alabama.py  
-│   │   ├── arizona.py  
-│   │   ├── arkansas.py  
-│   │   ├── california.py  
-│   │   ├── colorado.py  
-│   │   └── connecticut.py  
-│   ├── tests/                  # (future) unit tests for core & scrapers  
-│   └── utils/  
-│       ├── data_utils.py       # filter_by_keywords, etc.  
-│       ├── date_utils.py       # convert_to_pst, etc.  
-│       └── text_utils.py       # (if needed)   
-├── main.py                     # entry point: parse args, run selected scrapers, call Excel exporter  
-├── LICENSE  
-├── README.md  
-└── requirements.txt  
-```
+* **Real-time Log Output**
+  View live progress and errors in the Run page as each state is processed.
 
----
+* **Results Status Page**
+  After scraping completes, see a table indicating “Passed” or “Failed” for each state.
 
-## ⚙️ Installation
+* **Excel Export & Caching**
+  All successful RFP results are written to a timestamped Excel file (keeping only the latest five). The most recent export can be opened automatically.
 
-```bash
-git clone https://github.com/jasonstaker/rfp-scraper.git
-cd rfp-scraper
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-```
+* **Persistent Keywords**
+  Keywords load from and write to a local `keywords.txt` file so your list is always up to date.
 
-Requires Python 3.x (tested on 3.13.3).
+## Screenshots
 
----
+1. **Home Page**
+   ![Home Page Screenshot](assets/screenshots/home_page.png)
+   *Enter keywords on the left, select states in the middle, and click “Run” on the right.*
 
-## 📖 Usage
+2. **Run Page**
+   ![Run Page Screenshot](assets/screenshots/run_page.png)
+   *Live log output streams as each state’s scraper runs. Click “Cancel” to stop.*
 
-```bash
-# Run all supported states:
-python main.py --states all
+3. **Status Page**
+   ![Status Page Screenshot](assets/screenshots/status_page.png)
+   *After completion, see which scrapers passed (✅) or failed (❌), and return to filters.*
 
-# Or target specific states (space-separated lowercase names):
-python main.py --states alabama colorado california
-```
+4. **Output Example**
+   ![Output Example Screenshot](assets/screenshots/output_example.png)
+   *After the program finishes, this is what could be displayed.*
 
-* `--states all` runs every scraper in `scraper/scrapers/`
-* `--states <name…>` for individual or multiple states
-* Outputs:
+## Installation
 
-  * `output/rfp_scraping_output.xlsx`
-  * `output/scraper.log`
+### Prerequisites
 
-### Smoke Test
+* **Python 3.8+**
+* **Platform support:** Windows 10/11, macOS 10.15+, Linux (Ubuntu 20.04+).
 
-```bash
-python smoke_test.py
-```
+### Step-by-Step
 
-Exits with code 0 if every scraper’s `scrape()` returned a `list` without unhandled exceptions; otherwise exits 1 and prints which state(s) failed.
-
----
-
-## 🛠️ Configuration
-
-* **Keywords**
-
-  * File: `scraper/config/keywords.txt`
-  * Add one keyword per line (case-insensitive). Any RFP whose title or description contains at least one keyword will be tagged.
-
-* **Settings**
-
-  * File: `scraper/config/settings.py`
-  * Contains:
-
-    * `STATE_RFP_URL_MAP` → state-to-URL mapping
-    * `BUSINESS_UNIT_DICT` → used by the California scraper
-    * Other constants (e.g. `FALLBACK_CSRF`)
-  * To add a new scraper:
-
-    1. Add its base URL (or endpoint) under `STATE_RFP_URL_MAP["<state>"]`.
-    2. If applicable (California), add department→BU mapping in `BUSINESS_UNIT_DICT`.
-
-* **Logging**
-
-  * Configured in `scraper/logging_config.py` (if present) or via `logging.basicConfig` in `main.py`.
-  * Output written to `output/scraper.log` at INFO + ERROR levels.
-
----
-
-## ➕ Adding a New State
-
-1. Create a new file in `scraper/scrapers/`, e.g. `illinois.py`.
-2. Subclass one of the base scrapers in `scraper/core/`:
-
-   * `RequestsScraper` for static HTML or JSON endpoints
-   * `SeleniumScraper` for dynamic/JS-driven pages
-3. Implement:
-
-   * `search(self, **kwargs)` → return page source or JSON
-   * `extract_data(self, page_source)` → parse and return `List[Dict]` of raw records
-   * (Optional) pagination via `next_page()`
-   * `scrape(self, **kwargs)` → orchestrate `search()`, `extract_data()`, pagination, DataFrame, filter, return `List[Dict]`
-4. Add entry into `STATE_RFP_URL_MAP` in `settings.py`.
-5. Run it with:
+1. **Clone the repository**
 
    ```bash
-   python main.py --states illinois
+   git clone https://github.com/jasonstaker/rfp-scraper.git
+   cd rfp-scraper
    ```
 
----
+2. **Create and activate a virtual environment**
 
-## ✅ Testing (Early Dev)
+   ```bash
+   python3 -m venv venv
+   # macOS/Linux:
+   source venv/bin/activate
+   # Windows PowerShell:
+   # .\venv\Scripts\Activate.ps1
+   ```
 
-*Currently no official unit tests.*
-For now, run:
+3. **Install dependencies**
 
-```bash
-python smoke_test.py
-```
+   ```bash
+   pip install -e .
+   ```
 
-to verify that all built-in scrapers complete without uncaught exceptions.
-We plan to add `pytest` tests for:
+4. **Run the Application**
 
-* Core scraper base classes
-* Utility functions (`data_utils`, `date_utils`)
-* Individual scraper logic (mocked HTML/JSON)
+   ```bash
+   rfp-scraper
+   ```
 
----
+   Or click the icon.
 
-## 📦 Output Columns
+## Usage
 
-The exported `.xlsx` file (“All RFPs” sheet) includes:
+1. **Launch the app** (double-click icon or run `python main.py`).
+2. On the **Home Page**:
 
-|   | Proposal title | State      | Solicitation # | Due Date           | Keyword Hits | Link      |
-| - | -------------- | ---------- | -------------- | ------------------ | ------------ | --------- |
-|   | **(checkbox)** | **(auto)** | **(auto)**     | **(UTC-7) string** | **(auto)**   | **(URL)** |
+   * Enter one keyword per line (e.g., “grants”, “IT services”).
+   * Check one or more states from the list (or click “Select All”).
+   * Click **Run**.
+3. The **Run Page** appears:
 
-1. **First column** is a clickable checkbox for “selected.”
-2. **Proposal title** → from each scraper’s `Label`.
-3. **State** → capitalized state name (e.g., “California”).
-4. **Solicitation #** → from each scraper’s `Code`.
-5. **Due Date** → formatted as string in PST (e.g., `2025-06-15 17:00:00 PST`).
-6. **Keyword Hits** → comma-separated matched keywords.
-7. **Link** → hyperlink to the solicitation page (or portal).
+   * Watch live log entries as each state is scraped.
+   * Click **Cancel** to abort at any time.
+4. When scraping completes, the **Status Page** shows:
 
-Conditional formatting:
+   * A table of each selected state with ✅ Passed or ❌ Failed.
+   * A “Back to Filters” button to return to Home and adjust keywords/states.
+5. The latest Excel file is saved in `output/cache/` and opened automatically on success.
 
-* Alternating row colors per state (blue / yellow).
-* Italic formatting for some date columns.
-* Hyperlink style on “Link” column.
-* Grey-out when checkbox is checked.
-* Logo inserted at top left (`A1`).
+## GUI Overview
 
-*Sample screenshot:*
-![Sample Excel Output](assets/output_example.png)
+### Main Window
 
----
+* **Navigation via QStackedWidget:**
 
-## 📦 requirements.txt
+  * Home → Run → Status pages in a single window.
+* **Half-screen sizing:**
+
+  * Window resizes to half of your monitor’s width and height.
+
+### Home Page
+
+* **Keyword Editor (left):**
+
+  * A multi-line `CodeEditor` with line numbers.
+  * Pre-loads from `keywords.txt`.
+* **State Selection (center):**
+
+  * A scrollable, checkable `QListWidget`.
+  * “Select All” toggles all states at once.
+* **Run Button (right):**
+
+  * Click to begin scraping with entered keywords and selected states.
+
+### Run Page
+
+* **Log Output:**
+
+  * A read-only `QPlainTextEdit` that tails `scraper.log` for new lines only.
+* **Cancel Button:**
+
+  * Stops the background worker and returns to Home immediately.
+
+### Status Page
+
+* **Results Table:**
+
+  * Two columns: **State** and **Status** (✅ Passed / ❌ Failed).
+  * Displays any run-level error message at the top.
+* **Back to Filters Button:**
+
+  * Returns to Home Page without clearing the keyword box.
+
+## Configuration
+
+* **`src/config.py`** contains paths and defaults:
+
+  * `KEYWORDS_FILE`: where keywords are read/written.
+  * `CACHE_DIR`: where the last five Excel exports are stored.
+  * `LOG_FILE`: path to `output/scraper.log`.
+* **`scraper/config/settings.py`** defines:
+
+  * `STATE_RFP_URL_MAP`: mapping of state names to RFP URLs.
+  * `AVAILABLE_STATES`: list of state keys used by the UI.
+
+## Project Structure
 
 ```text
-beautifulsoup4
-pandas
-selenium
-Pillow
-XlsxWriter
-requests
-pytz
-lxml
+rfp-scraper/
+├── README.md
+├── LICENSE
+├── scripts/
+│   └── main.py               # CLI entry point
+├── assets/
+│   ├── hotb_logo.jpg
+│   ├── hotb_logo_square.png
+│   └── output_example.png
+├── output/
+│   ├── cache/                # Latest 5 Excel outputs
+│   └── scraper.log
+├── persistence/
+│   └── hidden_ids.json       # For what the user wants to hide
+├── src/
+│   ├── config.py             # Paths & defaults
+│   ├── ui/
+│   │   ├── main_window.py
+│   │   └── pages/
+│   │       ├── home_page.py
+│   │       ├── run_page.py
+│   │       └── status_page.py
+│   └── scraper/
+│       ├── config/
+│       │   ├── keywords.txt  # (auto-written by runner)
+│       │   └── settings.py   
+│       ├── core/
+│       ├── exporters/
+│       ├── scrapers/         # Where all the state scrapers live
+│       ├── utils/
+│       ├── logging_config.py
+│       └── runner.py
+└── tests/                    # Unit tests (e.g., test_core.py, test_util.py)
 ```
 
----
+## Testing
 
-## 🤝 Contributing
+```bash
+# Run all tests with pytest:
+pytest
+```
 
-This project is in early development. If you have ideas—tests, new scrapers, bug fixes—please open an issue or contact me via GitHub.
+* **Unit tests** are under `tests/`.
+* Tests cover core scraper logic and utility functions.
+* GUI behavior can be manually verified (no automated GUI tests included yet).
 
----
+## Roadmap
 
-## 📄 License
+* **Add multi-thread progress bar** for each state’s scraping progress.
+* **Support more states** by extending `STATE_RFP_URL_MAP`.
+* **Implement keyword “suggestions”** based on past scrapes (auto-complete).
+* **Option to export report in CSV or PDF** in addition to Excel.
+* **Various Improvments in GUI** based on feedback
 
-Licensed under the MIT License. See `LICENSE` for full text.
+## Contributing
+
+We are currently not accepting all changes from everybody. If you have an idea for the project please send me an email below.
+
+## License
+
+This project is licensed under the **MIT License**—see the [LICENSE](LICENSE) file for details.
+
+## Contact / Support
+
+* **Author:** Jason Staker (`jason.staker@yahoo.com`)
+
+Feel free to send me an email if you need help or want to contribute.
