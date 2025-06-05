@@ -122,7 +122,6 @@ class AlabamaScraper(SeleniumScraper):
                     WebDriverWait(self.driver, 20).until(
                         EC.presence_of_element_located((By.XPATH, '//*[@id="PageContent"]/table[4]'))
                     )
-                    time.sleep(1)
                     self.logger.info(f"Processing page {page_num}")
                     all_records.extend(self.extract_data(self.driver.page_source))
                     page_num += 1
