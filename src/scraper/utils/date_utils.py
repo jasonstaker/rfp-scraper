@@ -14,24 +14,40 @@ _TZINFOS = {
     "CDT": ZoneInfo("America/Chicago"), "CST": ZoneInfo("America/Chicago"),
     "MDT": ZoneInfo("America/Denver"),  "MST": ZoneInfo("America/Denver"),
     "PDT": ZoneInfo("America/Los_Angeles"), "PST": ZoneInfo("America/Los_Angeles"),
-    "EDT": ZoneInfo("America/New_York"), "EST": ZoneInfo("America/New_York")
+    "EDT": ZoneInfo("America/New_York"), "EST": ZoneInfo("America/New_York"),
+    "ET": ZoneInfo("America/New_York")
 }
 
-# requires: date_str is a string
+# requires: date_str is a string (e.g. "Jun 05, 2025 @ 02:30 PM" or any other common format)
 # modifies: nothing
-# effects: attempts to parse date_str into a datetime object, converts it to the target timezone, and returns it in a canonical format; returns the original string if parsing fails
+# effects: attempts to parse date_str into a datetime object, converts it to the target timezone (PST),
+#          and returns it in a canonical format ("YYYY-MM-DD HH:MM:SS"); returns the original string if parsing fails.
 def parse_date_generic(date_str: str) -> str:
     if not isinstance(date_str, str) or not date_str.strip():
         return date_str  # return unchanged if not a nonempty string
+
+    cleaned = date_str.strip()
+
+    # Special case: "Jun 05, 2025 @ 02:30 PM"
     try:
-        # pass tzinfos so CDT/PDT/MDT/etc. are recognized
-        dt = parser.parse(date_str, tzinfos=_TZINFOS)
-    except (ValueError, OverflowError):
-        return date_str  # fallback on parse failure
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=_TARGET_ZONE)
+        dt_naive = datetime.strptime(cleaned, "%b %d, %Y @ %I:%M %p")
+        # Localize as Eastern Time
+        dt = dt_naive.replace(tzinfo=ZoneInfo("America/New_York"))
+    except ValueError:
+        # Fallback to generic parser with tzinfos
+        try:
+            dt = parser.parse(cleaned, tzinfos=_TZINFOS)
+        except (ValueError, OverflowError):
+            return date_str  # fallback on parse failure
+
+        # If parsed datetime has no tzinfo, assume Eastern Time
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=ZoneInfo("America/New_York"))
+
+    # Convert from Eastern Time (or whatever tz identified) to Pacific Time
     dt_in_target = dt.astimezone(_TARGET_ZONE)
     return dt_in_target.strftime(_CANONICAL_FMT)
+
 
 # requires: date_str is a string
 # modifies: nothing
