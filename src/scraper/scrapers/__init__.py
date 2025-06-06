@@ -9,6 +9,8 @@ from .dc import DCScraper
 from .delaware import DelawareScraper
 from .florida import FloridaScraper
 from .georgia import GeorgiaScraper
+from .hawaii import HawaiiScraper
+from .iowa import IowaScraper
 
 SCRAPER_MAP = {
     "alabama": AlabamaScraper,
@@ -20,5 +22,7 @@ SCRAPER_MAP = {
     "district of columbia": DCScraper,
     "delaware": DelawareScraper,
     "florida": FloridaScraper,
-    "georgia": GeorgiaScraper
+    "georgia": GeorgiaScraper,
+    "hawaii": HawaiiScraper,
+    "iowa": IowaScraper
 }

@@ -11,7 +11,9 @@ STATE_RFP_URL_MAP = {
     "district of columbia": 'https://contracts.ocp.dc.gov/solicitations/search',
     "delaware": 'https://mmp.delaware.gov/Bids/',
     "florida": 'https://vendor.myfloridamarketplace.com/mfmp/pub/search/bids',
-    "georgia": 'https://ssl.doas.state.ga.us/gpr/eventSearch'
+    "georgia": 'https://ssl.doas.state.ga.us/gpr/eventSearch',
+    "hawaii": 'https://hiepro.ehawaii.gov/solicitation-notices.html',
+    "iowa": 'https://bidopportunities.iowa.gov/Home/DT_HostedBidsSearch'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
