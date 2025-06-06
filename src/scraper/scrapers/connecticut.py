@@ -39,7 +39,7 @@ class ConnecticutScraper(RequestsScraper):
         }
         try:
             resp = self.session.get(self.base_url, params=params, timeout=20)
-            self.logger.debug(f"GET {resp.url} → {resp.status_code}")
+            self.logger.debug(f"GET {resp.url} -> {resp.status_code}")
             resp.raise_for_status()
         except requests.exceptions.RequestException as re:
             self.logger.error(f"HTTP request failed (offset={offset}): {re}", exc_info=False)
