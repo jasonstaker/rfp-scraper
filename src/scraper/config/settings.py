@@ -7,7 +7,11 @@ STATE_RFP_URL_MAP = {
     "arizona": 'https://app.az.gov/page.aspx/en/rfp/request_browse_public',
     "california": 'https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx',
     "colorado": 'https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4',
-    "connecticut": 'https://portal.ct.gov/das/ctsource/bidboard?language=en_US'
+    "connecticut": 'https://portal.ct.gov/das/ctsource/bidboard?language=en_US',
+    "district of columbia": 'https://contracts.ocp.dc.gov/solicitations/search',
+    "delaware": 'https://mmp.delaware.gov/Bids/',
+    "florida": 'https://vendor.myfloridamarketplace.com/mfmp/pub/search/bids',
+    "georgia": 'https://ssl.doas.state.ga.us/gpr/eventSearch'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"

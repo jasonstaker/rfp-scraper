@@ -5,6 +5,10 @@ from .arizona import ArizonaScraper
 from .california import CaliforniaScraper
 from .colorado import ColoradoScraper
 from .connecticut import ConnecticutScraper
+from .dc import DCScraper
+from .delaware import DelawareScraper
+from .florida import FloridaScraper
+from .georgia import GeorgiaScraper
 
 SCRAPER_MAP = {
     "alabama": AlabamaScraper,
@@ -12,5 +16,9 @@ SCRAPER_MAP = {
     "arizona": ArizonaScraper,
     "california": CaliforniaScraper,
     "colorado": ColoradoScraper,
-    "connecticut": ConnecticutScraper
+    "connecticut": ConnecticutScraper,
+    "district of columbia": DCScraper,
+    "delaware": DelawareScraper,
+    "florida": FloridaScraper,
+    "georgia": GeorgiaScraper
 }
