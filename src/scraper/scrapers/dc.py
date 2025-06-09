@@ -74,10 +74,10 @@ class DCScraper(SeleniumScraper):
 
         except (TimeoutException, NoSuchElementException) as e:
             self.logger.error(f"search failed: {e}", exc_info=False)
-            return False
+            raise
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            return False
+            raise
 
     # requires: none
     # modifies: self.driver
@@ -168,7 +168,7 @@ class DCScraper(SeleniumScraper):
 
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: none
     # modifies: self.logger
@@ -181,7 +181,7 @@ class DCScraper(SeleniumScraper):
             # first page
             if not self.search(**kwargs):
                 self.logger.warning("Search returned no results; aborting")
-                return []
+                raise
 
             self.logger.info("Extracting data from page 1")
             all_records.extend(self.extract_data())

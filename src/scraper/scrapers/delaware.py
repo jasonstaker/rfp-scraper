@@ -38,7 +38,7 @@ class DelawareScraper(SeleniumScraper):
 
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            return False
+            raise
 
     # requires: none
     # modifies: none
@@ -91,7 +91,7 @@ class DelawareScraper(SeleniumScraper):
 
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: none
     # modifies: self.driver
@@ -103,7 +103,7 @@ class DelawareScraper(SeleniumScraper):
 
             # if the button has 'disabled' class, no more pages
             if "disabled" in btn_classes:
-                return False
+                raise
 
             # click the Next button
             self.driver.execute_script("arguments[0].click();", btn)
@@ -131,7 +131,7 @@ class DelawareScraper(SeleniumScraper):
             # load first page
             if not self.search(**kwargs):
                 self.logger.warning("Search returned no results; aborting Delaware scrape")
-                return []
+                raise
 
             self.logger.info("Extracting data from page 1")
             all_records.extend(self.extract_data())

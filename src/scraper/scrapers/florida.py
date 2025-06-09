@@ -58,35 +58,35 @@ class FloridaScraper(RequestsScraper):
             # inspect the status / content before calling .json()
             if resp.status_code != 200:
                 self.logger.error(f"search HTTP status {resp.status_code} on page={page}: {resp.text!r}")
-                return None
+                raise
 
             # if the body is empty (or not valid JSON), this will raise ValueError
             data = resp.json()
             if not isinstance(data, list):
                 self.logger.error(f"Expected JSON list but got: {data}")
-                return None
+                raise
 
             return data
 
         except requests.exceptions.RequestException as re:
             self.logger.error(f"search HTTP error (page={page}): {re}", exc_info=False)
-            return None
+            raise
 
         except ValueError as ve:
             # this happens if resp.text is empty or not-JSON
             self.logger.error(f"JSON decode failed (page={page}), response was: {resp.text!r}", exc_info=False)
-            return None
+            raise
 
         except Exception as e:
             self.logger.error(f"search failed (page={page}): {e}", exc_info=True)
-            return None
+            raise
 
     # requires: page_data is a list of dictionaries representing JSON objects
     # modifies: nothing
     # effects: transforms each JSON dict into a record with Label, Code, End date, Keyword Hits, and Link; returns a list of records
     def extract_data(self, page_data: list[dict]):
         if not page_data:
-            return []
+            raise
 
         records = []
         try:
@@ -113,7 +113,7 @@ class FloridaScraper(RequestsScraper):
 
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: nothing
     # modifies: nothing

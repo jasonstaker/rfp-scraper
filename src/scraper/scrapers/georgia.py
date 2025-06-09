@@ -41,13 +41,13 @@ class GeorgiaScraper(RequestsScraper):
             init_resp = self.session.get(index_url, headers=headers_get, timeout=15)
             if init_resp.status_code != 200:
                 self.logger.error(f"Initial GET failed: {init_resp.status_code}")
-                return None
+                raise
         except requests.exceptions.RequestException as re:
             self.logger.error(f"Initial GET HTTP error: {re}", exc_info=False)
-            return None
+            raise
         except Exception as e:
             self.logger.error(f"Initial GET failed: {e}", exc_info=True)
-            return None
+            raise
 
         # POST with full DataTables payload
         headers_post = {
@@ -138,22 +138,22 @@ class GeorgiaScraper(RequestsScraper):
             resp = self.session.post(self.base_url, data=payload, headers=headers_post, timeout=20)
             if resp.status_code != 200:
                 self.logger.error(f"search HTTP status {resp.status_code}: {resp.text!r}")
-                return None
+                raise
 
             try:
                 data = resp.json()
             except ValueError as ve:
                 self.logger.error(f"JSON decode failed: {ve}; response: {resp.text!r}", exc_info=False)
-                return None
+                raise
 
             return data
 
         except requests.exceptions.RequestException as re:
             self.logger.error(f"search HTTP error: {re}", exc_info=False)
-            return None
+            raise
         except Exception as e:
             self.logger.error(f"search() failed: {e}", exc_info=True)
-            return None
+            raise
 
     # requires: response_json is a dict containing a "data" key with a list of event records
     # modifies: nothing
@@ -161,7 +161,7 @@ class GeorgiaScraper(RequestsScraper):
     def extract_data(self, response_json: dict):
         if not response_json or "data" not in response_json:
             self.logger.error('no valid "data" field in response for extract_data')
-            return []
+            raise
 
         records = []
         try:
@@ -189,7 +189,7 @@ class GeorgiaScraper(RequestsScraper):
             return records
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: nothing
     # modifies: nothing
@@ -200,7 +200,7 @@ class GeorgiaScraper(RequestsScraper):
             response_json = self.search(**kwargs)
             if response_json is None:
                 self.logger.warning("search returned no data; aborting scrape")
-                return []
+                raise
 
             records = self.extract_data(response_json)
             df = pd.DataFrame(records)

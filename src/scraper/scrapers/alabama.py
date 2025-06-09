@@ -46,13 +46,13 @@ class AlabamaScraper(SeleniumScraper):
             return self.driver.page_source
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}", exc_info=False)
-            return None
+            raise
         except NoSuchElementException as ne:
             self.logger.error(f"search missing element: {ne}", exc_info=False)
-            return None
+            raise
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            return None
+            raise
 
     # requires: page_source is a string containing html page source
     # modifies: nothing
@@ -60,13 +60,13 @@ class AlabamaScraper(SeleniumScraper):
     def extract_data(self, page_source):
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
-            return []
+            raise
         try:
             soup = BeautifulSoup(page_source, "html.parser")
             table = soup.find("table", attrs={"name": "tblT1SO_SRCH_QRY"})
             if not table:
                 self.logger.error("table not found in extract_data")
-                return []
+                raise
             records = []
             rows = table.find_all("tr", class_=lambda c: c and "advgrid" in c.lower())
             for row in rows:
@@ -97,7 +97,7 @@ class AlabamaScraper(SeleniumScraper):
             return records
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: nothing
     # modifies: self.driver (through selenium operations)
@@ -109,7 +109,7 @@ class AlabamaScraper(SeleniumScraper):
             page = self.search(**kwargs)
             if not page:
                 self.logger.warning("Search returned no page; skipping extraction")
-                return []
+                raise
             self.logger.info("Processing page 1")
             all_records.extend(self.extract_data(page))
             page_num = 2

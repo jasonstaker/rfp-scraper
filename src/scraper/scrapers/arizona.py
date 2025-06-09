@@ -24,7 +24,14 @@ class ArizonaScraper(RequestsScraper):
         self.hidden_fields = {}
         self.previous_df = None
         self.current_df = None
-        self.page_num = 2  # next_page() starts at page 2
+        self.page_num = 2
+        
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "Referer": self.base_url,
+            "Content-Type": "application/x-www-form-urlencoded"
+        })
+
 
     # requires: html_text is a string containing html content
     # modifies: nothing
@@ -45,7 +52,7 @@ class ArizonaScraper(RequestsScraper):
         data.update({
             "hdnUserValue": ",body_x_txtRfpAwarded_1,body_x_selStatusCode_1",
             "__LASTFOCUS": "body_x_prxFilterBar_x_cmdSearchBtn",
-            "__VIEWSTATE": "WWiOsLESxYi9%2Fl27AYlyjWfYcGBwl9hk0gCWfkDbBr6HObEZkaU6TPdUyt3MosTOPDlCccuQqNMQNZNYPpwss%2F9x%2FsJWfZcotfE%2Fc4Q6XrI%3D",
+            "__VIEWSTATE": self.hidden_fields.get("__VIEWSTATE", ""),
             "__EVENTTARGET": "body:x:prxFilterBar:x:cmdSearchBtn",
             "__EVENTARGUMENT": "",
             "__VIEWSTATEGENERATOR": "7C067871",
@@ -125,50 +132,50 @@ class ArizonaScraper(RequestsScraper):
             resp = self.session.get(self.base_url, timeout=15)
             if resp.status_code != 200:
                 self.logger.error(f"GET failed: {resp.status_code}")
-                return None
+                raise
             self.hidden_fields = self._scrape_hidden_fields(resp.text)
             payload = self._build_search_payload()
             resp = self.session.post(self.base_url, data=dict(parse_qsl(payload)), timeout=15)
             if resp.status_code != 200:
                 self.logger.error(f"POST failed: {resp.status_code}")
-                return None
+                raise
             self.hidden_fields = self._scrape_hidden_fields(resp.text)
             self.current_response = resp
             self.page_num = 2
             return resp.text
         except requests.exceptions.RequestException as re:
             self.logger.error(f"search HTTP error: {re}", exc_info=False)
-            return None
+            raise
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            return None
+            raise
 
     # requires: self.current_response is set
     # modifies: self.hidden_fields, self.current_response, self.page_num
     # effects: fetches the next page via post and returns its html content, or none if no more pages
     def next_page(self):
         if not getattr(self, "current_response", None):
-            return None
+            raise
         try:
             payload = self._build_pagination_payload(self.page_num)
             resp = self.session.post(self.base_url, data=dict(parse_qsl(payload)), timeout=15)
             if resp.status_code != 200:
                 self.logger.warning(f"pagination POST failed: {resp.status_code}")
-                return None
+                raise
             new_hidden = self._scrape_hidden_fields(resp.text)
             if "__VIEWSTATE" not in new_hidden:
                 self.logger.info("no __VIEWSTATE found, ending pagination")
-                return None
+                raise
             self.hidden_fields = new_hidden
             self.current_response = resp
             self.page_num += 1
             return resp.text
         except requests.exceptions.RequestException as re:
             self.logger.error(f"next_page HTTP error: {re}", exc_info=False)
-            return None
+            raise
         except Exception as e:
             self.logger.error(f"next_page failed: {e}", exc_info=True)
-            return None
+            raise
 
     # requires: page_content is a string containing html page source
     # modifies: self.current_df
@@ -176,18 +183,18 @@ class ArizonaScraper(RequestsScraper):
     def extract_data(self, page_content):
         if not page_content:
             self.logger.error("no page_content provided to extract_data")
-            return []
+            raise
         try:
             tables = pd.read_html(StringIO(page_content))
             if len(tables) < 5:
                 self.logger.error("expected at least 5 tables, found fewer")
-                return []
+                raise
             df = tables[4]
             soup = BeautifulSoup(page_content, "html.parser")
             tbl = soup.find("table", id="body_x_grid_grd")
             if not tbl:
                 self.logger.error("results table not found in extract_data")
-                return []
+                raise
             rows = tbl.select("tbody > tr")
             links = []
             for tr in rows:
@@ -201,10 +208,10 @@ class ArizonaScraper(RequestsScraper):
             return df.to_dict("records")
         except ValueError as ve:
             self.logger.error(f"pd.read_html failed: {ve}", exc_info=False)
-            return []
+            raise
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: nothing
     # modifies: self.hidden_fields, self.current_response, self.page_num, self.previous_df, self.current_df
@@ -216,7 +223,7 @@ class ArizonaScraper(RequestsScraper):
             page = self.search(**kwargs)
             if not page:
                 self.logger.warning("search() returned no page; skipping extraction")
-                return []
+                raise
             # first-page extraction
             all_records.extend(self.extract_data(page))
             self.previous_df = self.current_df

@@ -53,16 +53,16 @@ class ColoradoScraper(SeleniumScraper):
 
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}", exc_info=False)
-            return False
+            raise
         except NoSuchElementException as ne:
             self.logger.error(f"search missing element: {ne}", exc_info=False)
-            return False
+            raise
         except WebDriverException as we:
             self.logger.error(f"search WebDriver error: {we}", exc_info=True)
-            return False
+            raise
         except Exception as e:
             self.logger.error(f"search() failed: {e}", exc_info=True)
-            return False
+            raise
 
     # requires: page_source is a string containing html page source
     # modifies: nothing
@@ -70,19 +70,19 @@ class ColoradoScraper(SeleniumScraper):
     def extract_data(self, page_source):
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
-            return []
+            raise
 
         try:
             soup = BeautifulSoup(page_source, "html.parser")
             table = soup.find("table", id="vsspageVVSSX10019gridView1group1cardGridgrid1")
             if not table:
                 self.logger.error("results table not found")
-                return []
+                raise
 
             tbody = table.find("tbody")
             if not tbody:
                 self.logger.error("no <tbody> found in table")
-                return []
+                raise
 
             records = []
             for row in tbody.find_all("tr"):
@@ -115,7 +115,7 @@ class ColoradoScraper(SeleniumScraper):
 
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: nothing
     # modifies: nothing (except through selenium's implicit state changes)
@@ -126,28 +126,33 @@ class ColoradoScraper(SeleniumScraper):
         try:
             success = self.search(**kwargs)
             if not success:
-                self.logger.warning("search() returned False; skipping scrape")
-                return []
+                self.logger.warning("search() returned False; raising exception to retry")
+                raise RuntimeError("ColoradoScraper.search() failed")
 
             page_num = 1
             while True:
                 self.logger.info(f"processing page {page_num}")
-                page_source = None
+                # Attempt to grab page_source; if it fails, raise so runner.py can retry
                 try:
                     page_source = self.driver.page_source
                 except WebDriverException as we:
                     self.logger.error(f"failed to get page_source: {we}", exc_info=False)
-                    break
+                    raise RuntimeError(f"failed to get page_source: {we}")
 
                 batch = self.extract_data(page_source)
+                # If no records were returned at all (first page), consider it a failure
+                if page_num == 1 and not batch:
+                    self.logger.error("extract_data returned no records on first page; raising exception to retry")
+                    raise RuntimeError("ColoradoScraper.extract_data() returned empty on first page")
+
                 all_records.extend(batch)
 
-                next_buttons = []
+                # Attempt to find the "Next" buttons; if that fails, raise
                 try:
                     next_buttons = self.driver.find_elements(By.CLASS_NAME, "css-1yn6b58")
                 except WebDriverException as we:
                     self.logger.error(f"failed to find next buttons: {we}", exc_info=False)
-                    break
+                    raise RuntimeError(f"failed to find next buttons: {we}")
 
                 next_btn = None
                 for btn in next_buttons:
@@ -159,20 +164,22 @@ class ColoradoScraper(SeleniumScraper):
                         continue
 
                 if not next_btn:
-                    self.logger.info("no clickable �Next� button; stopping pagination")
+                    self.logger.info("no clickable 'Next' button; stopping pagination")
                     break
 
+                # Try to remember the first row's ID (so we could detect staleness, etc.)
                 try:
                     first_row = self.driver.find_element(By.CSS_SELECTOR, "tr[id^='tableDataRow']")
                     old_row_id = first_row.get_attribute("id")
                 except NoSuchElementException:
-                    old_row_id = None
+                    old_row_id = None  # no first row yet—okay to continue
 
+                # Try to click Next; if it fails, raise
                 try:
                     next_btn.click()
                 except WebDriverException as we:
                     self.logger.error(f"failed to click next button: {we}", exc_info=False)
-                    break
+                    raise RuntimeError(f"failed to click next button: {we}")
 
                 page_num += 1
 

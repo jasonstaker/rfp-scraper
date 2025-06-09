@@ -31,10 +31,10 @@ class ArkansasScraper(RequestsScraper):
             return response.text
         except requests.exceptions.RequestException as re:
             self.logger.error(f"search HTTP error: {re}", exc_info=False)
-            return None
+            raise
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            return None
+            raise
 
     # requires: html is a string containing html page source
     # modifies: nothing
@@ -42,13 +42,13 @@ class ArkansasScraper(RequestsScraper):
     def extract_data(self, html):
         if not html:
             self.logger.error("no HTML provided to extract_data")
-            return []
+            raise
         try:
             soup = BeautifulSoup(html, "html.parser")
             table = soup.find("table", {"role": "grid"})
             if not table:
                 self.logger.error("results table not found")
-                return []
+                raise
             records = []
             for row in table.find_all("tr"):
                 cols = row.find_all("td")
@@ -74,7 +74,7 @@ class ArkansasScraper(RequestsScraper):
             return records
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: nothing
     # modifies: nothing
@@ -85,7 +85,7 @@ class ArkansasScraper(RequestsScraper):
             html = self.search(**kwargs)
             if not html:
                 self.logger.warning("Search returned no HTML; aborting scrape")
-                return []
+                raise
             self.logger.info("Processing data")
             raw_records = self.extract_data(html)
             df = pd.DataFrame(raw_records)

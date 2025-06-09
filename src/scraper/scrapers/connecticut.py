@@ -43,13 +43,13 @@ class ConnecticutScraper(RequestsScraper):
             resp.raise_for_status()
         except requests.exceptions.RequestException as re:
             self.logger.error(f"HTTP request failed (offset={offset}): {re}", exc_info=False)
-            return None
+            raise
 
         content_type = resp.headers.get("Content-Type", "")
         if "application/json" not in content_type.lower():
             snippet = resp.text[:200].replace("\n", " ")
             self.logger.error(f"Expected JSON but got: {snippet!r}")
-            return None
+            raise
 
         try:
             return resp.json()
@@ -58,7 +58,7 @@ class ConnecticutScraper(RequestsScraper):
             self.logger.error(
                 f"JSON parsing failed (offset={offset}): {e}; snippet: {snippet!r}", exc_info=False
             )
-            return None
+            raise
 
     # requires: nothing
     # modifies: nothing
@@ -70,7 +70,7 @@ class ConnecticutScraper(RequestsScraper):
             first_page = self._fetch_page(offset=0, customerid=customerid)
             if not first_page:
                 self.logger.warning("first page fetch returned no data")
-                return None, None, None
+                raise
 
             total_hits = first_page.get("hits", 0)
             page_size = len(first_page.get("records", []))
@@ -78,13 +78,13 @@ class ConnecticutScraper(RequestsScraper):
             return total_hits, page_size, first_page
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            return None, None, None
+            raise
 
     # requires: nothing
     # modifies: nothing
     # effects: not used; pagination is handled in scrape()
     def next_page(self):
-        return None
+        raise
 
     # requires: page_content is a dictionary containing json data with a "records" key
     # modifies: nothing
@@ -92,7 +92,7 @@ class ConnecticutScraper(RequestsScraper):
     def extract_data(self, page_content):
         if not page_content or "records" not in page_content:
             self.logger.error('no page_content or missing "records" key')
-            return []
+            raise
 
         output = []
         pacific = pytz.timezone("US/Pacific")
@@ -130,7 +130,7 @@ class ConnecticutScraper(RequestsScraper):
 
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            return []
+            raise
 
     # requires: nothing
     # modifies: nothing
@@ -142,7 +142,7 @@ class ConnecticutScraper(RequestsScraper):
             total_hits, page_size, first_page = self.search(**kwargs)
             if total_hits is None:
                 self.logger.warning("Search returned no total_hits; aborting scrape")
-                return []
+                raise
 
             self.logger.info("Processing page 1")
             batch = self.extract_data(first_page)
