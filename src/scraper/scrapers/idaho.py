@@ -50,7 +50,6 @@ class IdahoScraper(SeleniumScraper):
                 WebDriverWait(self.driver, 20).until(
                     EC.presence_of_element_located((By.XPATH, table_xpath))
                 )
-                time.sleep(1)
                 all_html.append(self.driver.page_source)
 
                 # check the class of the "next" button
@@ -62,7 +61,6 @@ class IdahoScraper(SeleniumScraper):
 
                 self.logger.info("Clicking next page")
                 next_button.click()
-                time.sleep(1.5)
 
             return all_html
 

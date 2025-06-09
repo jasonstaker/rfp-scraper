@@ -36,7 +36,6 @@ class CaliforniaScraper(SeleniumScraper):
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.XPATH, '//*[@id="datatable-ready"]'))
             )
-            time.sleep(2)  # give JS time to populate rows
             return self.driver.page_source
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}", exc_info=False)

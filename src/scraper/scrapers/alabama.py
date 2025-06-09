@@ -42,7 +42,6 @@ class AlabamaScraper(SeleniumScraper):
             self.driver.execute_script("arguments[0].click();", self.driver.find_element(*open_locator))
             tableLocator = (By.XPATH, '//*[@id="PageContent"]/table[4]')
             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located(tableLocator))
-            time.sleep(1)
             return self.driver.page_source
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}", exc_info=False)

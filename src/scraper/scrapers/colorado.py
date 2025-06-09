@@ -47,7 +47,6 @@ class ColoradoScraper(SeleniumScraper):
                     (By.ID, "vsspageVVSSX10019gridView1group1cardGridgrid1")
                 )
             )
-            time.sleep(1)
             self.logger.info("solicitations table loaded")
             return True
 

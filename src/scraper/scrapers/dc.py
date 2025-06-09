@@ -98,7 +98,6 @@ class DCScraper(SeleniumScraper):
                 EC.presence_of_element_located((By.XPATH, table_xpath))
             )
 
-            time.sleep(1)
             return True
 
         except (NoSuchElementException, TimeoutException):
