@@ -50,20 +50,20 @@ class IowaScraper(RequestsScraper):
             resp = self.session.get(self.base_url, params=params, headers=headers, timeout=15)
             if resp.status_code != 200:
                 self.logger.error(f"GET failed: {resp.status_code} -> {resp.text}")
-                return None
+                raise
 
             data = resp.json()
             return data
 
         except requests.exceptions.RequestException as e:
             self.logger.error(f"search HTTP error: {e}", exc_info=False)
-            return None
+            raise
         except ValueError as ve:
             self.logger.error(f"JSON decode failed: {ve}; response: {resp.text}", exc_info=False)
-            return None
+            raise
         except Exception as e:
             self.logger.error(f"search() failed: {e}", exc_info=True)
-            return None
+            raise
 
     # requires: response_json is a dict or None
     # modifies: nothing
@@ -71,7 +71,7 @@ class IowaScraper(RequestsScraper):
     def extract_data(self, response_json):
         if not response_json or 'aaData' not in response_json:
             self.logger.error("No 'aaData' found in response_json")
-            return []
+            raise
 
         raw_records = []
         for entry in response_json['aaData']:
@@ -122,7 +122,7 @@ class IowaScraper(RequestsScraper):
             response_json = self.search(**kwargs)
             if response_json is None:
                 self.logger.warning("search returned no data; aborting scrape")
-                return []
+                raise
 
             self.logger.info("Processing JSON data")
             raw_records = self.extract_data(response_json)
