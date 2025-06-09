@@ -23,7 +23,8 @@ dependencies = [
   "xlsxwriter",
   "lxml",
   "xlrd",
-  "pillow"
+  "pillow",
+  "pyqt5"
 ]
 
 [project.scripts]
