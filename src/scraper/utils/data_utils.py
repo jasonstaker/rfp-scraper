@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 # project settings
-from src.config import KEYWORDS_FILE, HIDDEN_IDS_FILE
+from src.config import KEYWORDS_FILE, HIDDEN_IDS_FILE, OUTPUT_DIR
 
 # requires: nothing
 # modifies: nothing
@@ -62,7 +62,7 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
 # modifies: the hidden ids json file
 # effects: reads the excel file, extracts hidden solicitation ids, and updates the hidden ids json file with the union of existing and new hidden ids
 def sync_hidden_from_excel(
-    excel_path: Path = Path('./output/rfp_scraping_output.xlsx'),
+    excel_path: Path = OUTPUT_DIR
 ) -> None:
     # load existing ids
     path = Path(HIDDEN_IDS_FILE)
