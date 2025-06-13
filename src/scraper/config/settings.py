@@ -16,7 +16,8 @@ STATE_RFP_URL_MAP = {
     "iowa": 'https://bidopportunities.iowa.gov/Home/DT_HostedBidsSearch',
     "idaho": 'https://sms-idaho-prd.tam.inforgov.com/fsm/SupplyManagementSupplier/list/SourcingEvent.XiOpenForBid?navigation=SourcingEvent%5BByCompany%5D%28_niu_,_niu_%29.OpenEventsNav&csk.SupplierGroup=LUMA',
     "illinois": 'https://www.bidbuy.illinois.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
-    "indiana": 'https://www.in.gov/idoa/procurement/current-business-opportunities/'
+    "indiana": 'https://www.in.gov/idoa/procurement/current-business-opportunities/',
+    "kansas": 'https://supplier.sok.ks.gov/psc/sokfsprdsup_newwin/SUPPLIER/ERP/c/SCP_PUBLIC_MENU_FL.SCP_PUB_BID_CMP_FL.GBL?&'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
