@@ -13,6 +13,7 @@ from .hawaii import HawaiiScraper
 from .iowa import IowaScraper
 from .idaho import IdahoScraper
 from .illinois import IllinoisScraper
+from .indiana import IndianaScraper
 
 SCRAPER_MAP = {
     "alabama": AlabamaScraper,
@@ -28,5 +29,6 @@ SCRAPER_MAP = {
     "hawaii": HawaiiScraper,
     "iowa": IowaScraper,
     "idaho": IdahoScraper,
-    "illinois": IllinoisScraper
+    "illinois": IllinoisScraper,
+    "indiana": IndianaScraper
 }
