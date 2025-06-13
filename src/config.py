@@ -7,9 +7,9 @@ PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 # resource directories
 ASSETS_DIR      = PROJECT_ROOT / "assets"
-OUTPUT_DIR      = PROJECT_ROOT / "output"
-CACHE_DIR       = OUTPUT_DIR / "cache"
-LOG_FILE        = OUTPUT_DIR / "scraper.log"
+OUTPUT_DIR      = Path.home() / "Desktop"
+CACHE_DIR       = PROJECT_ROOT / "output" / "cache"
+LOG_FILE        = PROJECT_ROOT / "output" / "scraper.log"
 PERSISTENCE_DIR = PROJECT_ROOT / "persistence"
 HIDDEN_IDS_FILE = PERSISTENCE_DIR / "hidden_ids.json"
 

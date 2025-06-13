@@ -47,7 +47,6 @@ def run_scraping(
         if cancel_event.is_set():
             logging.info(f"Cancellation requested before starting [{state}]. Exiting.")
             break
-
         logging.info(f"[{state}] Starting scrape...")
         records: list[dict] = []
         success = False
