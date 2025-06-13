@@ -74,7 +74,7 @@ def sync_hidden_from_excel(
     # read excel without headers
     try:
         df = pd.read_excel(excel_path, header=None)
-    except FileNotFoundError:
+    except (FileNotFoundError, PermissionError) as e:
         return
 
     # skip header row, grab hide flag (col 0) and solicitation # (col 3)
