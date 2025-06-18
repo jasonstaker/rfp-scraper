@@ -39,15 +39,4 @@ class HawaiiScraper(SeleniumScraper):
     # effects: orchestrates the scraping process: search -> extract_data -> filter; returns list of records
     def scrape(self, **kwargs):
         self.logger.info("Starting Hawaii scrape skeleton")
-        try:
-            if not self.search(**kwargs):
-                self.logger.warning("search() returned False; aborting scrape")
-                return []
-
-            page_source = self.driver.page_source
-            records = self.extract_data(page_source)
-
-            return records
-        except Exception as e:
-            self.logger.error(f"Hawaii scrape failed: {e}", exc_info=True)
-            raise
+        raise
