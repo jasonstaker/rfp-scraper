@@ -20,7 +20,7 @@ KEYWORDS_FILE      = SCRAPER_CONFIG_DIR / "keywords.txt"
 # defaults
 DEFAULT_TIMEOUT   = 30
 USER_AGENT        = "RFP-Scraper/1.0"
-SELENIUM_HEADLESS = False
+SELENIUM_HEADLESS = True
 MAX_RETRIES       = 3
 
 def ensure_dirs_exist():
