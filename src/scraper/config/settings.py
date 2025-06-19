@@ -12,7 +12,7 @@ STATE_RFP_URL_MAP = {
     "delaware": 'https://mmp.delaware.gov/Bids/',
     "florida": 'https://vendor.myfloridamarketplace.com/mfmp/pub/search/bids',
     "georgia": 'https://ssl.doas.state.ga.us/gpr/eventSearch',
-    "hawaii": 'https://hiepro.ehawaii.gov/solicitation-notices.html',
+    "hawaii": 'https://hiepro.ehawaii.gov/welcome.html',
     "iowa": 'https://bidopportunities.iowa.gov/Home/DT_HostedBidsSearch',
     "idaho": 'https://sms-idaho-prd.tam.inforgov.com/fsm/SupplyManagementSupplier/list/SourcingEvent.XiOpenForBid?navigation=SourcingEvent%5BByCompany%5D%28_niu_,_niu_%29.OpenEventsNav&csk.SupplierGroup=LUMA',
     "illinois": 'https://www.bidbuy.illinois.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
