@@ -24,7 +24,8 @@ STATE_RFP_URL_MAP = {
     "maryland": 'https://emma.maryland.gov/page.aspx/en/rfp/request_browse_public',
     "maine": 'https://www.maine.gov/dafs/bbm/procurementservices/vendors/rfps',
     "michigan": 'https://sigma.michigan.gov/PRDVSS1X1/Advantage4',
-    "minnesota": 'https://osp.admin.mn.gov/GS-auto'
+    "minnesota": 'https://osp.admin.mn.gov/GS-auto',
+    "missouri": 'https://ewqg.fa.us8.oraclecloud.com/fscmUI/redwood/negotiation-abstracts/view/abstractlisting?prcBuId=300000005255687'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
