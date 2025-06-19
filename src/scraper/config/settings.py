@@ -26,7 +26,8 @@ STATE_RFP_URL_MAP = {
     "michigan": 'https://sigma.michigan.gov/PRDVSS1X1/Advantage4',
     "minnesota": 'https://osp.admin.mn.gov/GS-auto',
     "missouri": 'https://ewqg.fa.us8.oraclecloud.com/fscmUI/redwood/negotiation-abstracts/view/abstractlisting?prcBuId=300000005255687',
-    "mississippi": 'https://www.ms.gov/dfa/contract_bid_search/Bid/BidData?AppId=1'
+    "mississippi": 'https://www.ms.gov/dfa/contract_bid_search/Bid/BidData?AppId=1',
+    "montana": 'https://bids.sciquest.com/apps/Router/PublicEvent?CustomerOrg=StateOfMontana'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
