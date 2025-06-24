@@ -25,6 +25,7 @@ from .minnesota import MinnesotaScraper
 from .missouri import MissouriScraper
 from .mississippi import MississippiScraper
 from .montana import MontanaScraper
+from .north_carolina import NorthCarolinaScraper
 
 SCRAPER_MAP = {
     "alabama": AlabamaScraper,
@@ -52,5 +53,6 @@ SCRAPER_MAP = {
     "minnesota": MinnesotaScraper,
     "missouri": MissouriScraper,
     "mississippi": MississippiScraper,
-    "montana": MontanaScraper
+    "montana": MontanaScraper,
+    "north carolina": NorthCarolinaScraper
 }
