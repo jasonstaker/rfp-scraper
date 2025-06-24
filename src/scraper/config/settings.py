@@ -28,7 +28,8 @@ STATE_RFP_URL_MAP = {
     "missouri": 'https://ewqg.fa.us8.oraclecloud.com/fscmUI/redwood/negotiation-abstracts/view/abstractlisting?prcBuId=300000005255687',
     "mississippi": 'https://www.ms.gov/dfa/contract_bid_search/Bid/BidData?AppId=1',
     "montana": 'https://bids.sciquest.com/apps/Router/PublicEvent?CustomerOrg=StateOfMontana',
-    "north carolina": 'https://evp.nc.gov/solicitations/'
+    "north carolina": 'https://evp.nc.gov/solicitations/',
+    "north dakota": "https://apps.nd.gov/csd/spo/services/bidder/searchSolicitation.do?path=%2Fbidder%2FsearchSolicitation&command=searchSearchSolicitation&selectedSolicitation=&searchDT.solNo=&searchDT.agency=&searchDT.officer=&searchDT.keyword=&"
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
