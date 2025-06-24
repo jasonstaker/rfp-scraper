@@ -29,7 +29,8 @@ STATE_RFP_URL_MAP = {
     "mississippi": 'https://www.ms.gov/dfa/contract_bid_search/Bid/BidData?AppId=1',
     "montana": 'https://bids.sciquest.com/apps/Router/PublicEvent?CustomerOrg=StateOfMontana',
     "north carolina": 'https://evp.nc.gov/solicitations/',
-    "north dakota": "https://apps.nd.gov/csd/spo/services/bidder/searchSolicitation.do?path=%2Fbidder%2FsearchSolicitation&command=searchSearchSolicitation&selectedSolicitation=&searchDT.solNo=&searchDT.agency=&searchDT.officer=&searchDT.keyword=&"
+    "north dakota": "https://apps.nd.gov/csd/spo/services/bidder/searchSolicitation.do?path=%2Fbidder%2FsearchSolicitation&command=searchSearchSolicitation&selectedSolicitation=&searchDT.solNo=&searchDT.agency=&searchDT.officer=&searchDT.keyword=&",
+    "nebraska": 'https://das.nebraska.gov/materiel/bid-opportunities.html'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
