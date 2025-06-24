@@ -67,14 +67,18 @@ class StatusPage(QWidget):
             self.error_label.setVisible(True)
         self.table.setRowCount(0)
         row_index = 0
-        for key, passed in results.items():
+        for key, payload in results.items():
             if key.startswith("_"):
                 continue
             self.table.insertRow(row_index)
             state_item = QTableWidgetItem(key.capitalize())
             state_item.setFlags(state_item.flags() ^ Qt.ItemIsEditable)
             self.table.setItem(row_index, 0, state_item)
-            status_text = "✅ Passed" if passed else "❌ Failed"
+            if hasattr(payload, "columns") and "success" in payload.columns:
+                success_flag = bool(payload["success"].iat[0])
+            else:
+                success_flag = bool(payload)
+            status_text = "✅ Passed" if success_flag else "❌ Failed"
             status_item = QTableWidgetItem(status_text)
             status_item.setFlags(status_item.flags() ^ Qt.ItemIsEditable)
             self.table.setItem(row_index, 1, status_item)

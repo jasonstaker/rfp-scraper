@@ -79,11 +79,13 @@ def run_scraping(
                 break
 
         if not success or cancel_event.is_set():
-            # either all attempts failed or cancel was requested mid-state
+            df_fail = pd.DataFrame([{"success": False}])
+            state_to_df[state] = df_fail
             continue
 
         # build DataFrame for this state
         df = pd.DataFrame(records)
+        df["success"] = True
         if df.empty:
             logging.info(f"[{state}] No records found.")
             continue
