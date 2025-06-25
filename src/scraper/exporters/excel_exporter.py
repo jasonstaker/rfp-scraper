@@ -141,6 +141,7 @@ def export_all(state_to_df_map, writer):
         'bg_color':   "#DAE9F8"
     })
     link_fmt = workbook.add_format({
+        'text_warp': True,
         'font_name':  'Aptos Narrow',
         'font_size':  11,
         'font_color': '#0563C1',
