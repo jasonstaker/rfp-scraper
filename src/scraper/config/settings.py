@@ -32,7 +32,8 @@ STATE_RFP_URL_MAP = {
     "north dakota": "https://apps.nd.gov/csd/spo/services/bidder/searchSolicitation.do?path=%2Fbidder%2FsearchSolicitation&command=searchSearchSolicitation&selectedSolicitation=&searchDT.solNo=&searchDT.agency=&searchDT.officer=&searchDT.keyword=&",
     "nebraska": 'https://das.nebraska.gov/materiel/bid-opportunities.html',
     "new hampshire": 'https://apps.das.nh.gov/bidscontracts/bids.aspx',
-    "new jersey": 'https://www.njstart.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true'
+    "new jersey": 'https://www.njstart.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
+    "new mexico": 'https://bids.sciquest.com/apps/Router/PublicEvent?CustomerOrg=StateOfNewMexico&tab=PHX_NAV_SourcingOpenForBid&tmstmp='
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
