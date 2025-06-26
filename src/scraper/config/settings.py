@@ -35,7 +35,9 @@ STATE_RFP_URL_MAP = {
     "new jersey": 'https://www.njstart.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
     "new mexico": 'https://bids.sciquest.com/apps/Router/PublicEvent?CustomerOrg=StateOfNewMexico&tab=PHX_NAV_SourcingOpenForBid&tmstmp=',
     "nevada": 'https://nevadaepro.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
-    "new york": 'https://ogs.ny.gov/procurement/bid-opportunities'
+    "new york": 'https://ogs.ny.gov/procurement/bid-opportunities',
+    "ohio": 'https://ohiobuys.ohio.gov/page.aspx/en/rfp/request_browse_public',
+    "oregon": ''
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
