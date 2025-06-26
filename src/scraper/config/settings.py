@@ -40,7 +40,8 @@ STATE_RFP_URL_MAP = {
     "oregon": 'https://oregonbuys.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
     "pennsylvania": 'https://www.emarketplace.state.pa.us/Search.aspx',
     "rhode island": 'https://webprocure.proactiscloud.com/wp-full-text-search/search/sols?customerid=46&q=*&from=0&sort=r&f=ps=Open&oids=',
-    "south carolina": 'https://scbo.sc.gov/search'
+    "south carolina": 'https://scbo.sc.gov/search',
+    "south dakota": 'https://postingboard.esmsolutions.com/api/postingBoard/3444a404-3818-494f-84c5-2a850acd7779/currentevents'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
