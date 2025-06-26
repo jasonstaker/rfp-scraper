@@ -38,7 +38,8 @@ STATE_RFP_URL_MAP = {
     "new york": 'https://ogs.ny.gov/procurement/bid-opportunities',
     "ohio": 'https://ohiobuys.ohio.gov/page.aspx/en/rfp/request_browse_public',
     "oregon": 'https://oregonbuys.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
-    "pennsylvania": 'https://www.emarketplace.state.pa.us/Search.aspx'
+    "pennsylvania": 'https://www.emarketplace.state.pa.us/Search.aspx',
+    "rhode island": 'https://webprocure.proactiscloud.com/wp-full-text-search/search/sols?customerid=46&q=*&from=0&sort=r&f=ps=Open&oids='
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
