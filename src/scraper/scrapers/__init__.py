@@ -40,6 +40,7 @@ from .rhode_island import RhodeIslandScraper
 from .south_carolina import SouthCarolinaScraper
 from .south_dakota import SouthDakotaScraper
 from .texas import TexasScraper
+from .utah import UtahScraper
 
 SCRAPER_MAP = {
     "alabama": AlabamaScraper,
@@ -82,5 +83,6 @@ SCRAPER_MAP = {
     "rhode island": RhodeIslandScraper,
     "south carolina": SouthCarolinaScraper,
     "south dakota": SouthDakotaScraper,
-    "texas": TexasScraper
+    "texas": TexasScraper,
+    "utah": UtahScraper
 }

@@ -42,7 +42,8 @@ STATE_RFP_URL_MAP = {
     "rhode island": 'https://webprocure.proactiscloud.com/wp-full-text-search/search/sols?customerid=46&q=*&from=0&sort=r&f=ps=Open&oids=',
     "south carolina": 'https://scbo.sc.gov/search',
     "south dakota": 'https://postingboard.esmsolutions.com/api/postingBoard/3444a404-3818-494f-84c5-2a850acd7779/currentevents',
-    "texas": 'https://www.txsmartbuy.gov/app/extensions/CPA/CPAMain/1.0.0/services/ESBD.Service.ss?c=852252&n=2'
+    "texas": 'https://www.txsmartbuy.gov/app/extensions/CPA/CPAMain/1.0.0/services/ESBD.Service.ss?c=852252&n=2',
+    "utah": 'https://utah.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
