@@ -45,7 +45,8 @@ STATE_RFP_URL_MAP = {
     "texas": 'https://www.txsmartbuy.gov/app/extensions/CPA/CPAMain/1.0.0/services/ESBD.Service.ss?c=852252&n=2',
     "utah": 'https://utah.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData',
     "virginia": 'https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp',
-    "vermont": 'https://www.vermontbusinessregistry.com/BidSearch.aspx?type=1'
+    "vermont": 'https://www.vermontbusinessregistry.com/BidSearch.aspx?type=1',
+    "washington": 'https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
