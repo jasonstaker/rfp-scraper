@@ -110,6 +110,7 @@ def export_all(state_to_df_map, writer):
         'font_color': 'black',
         'align':      'center',
         'valign':     'vcenter',
+        'text_wrap':  True,
         'border':     2
     })
     default_blue_fmt = workbook.add_format({
@@ -118,6 +119,7 @@ def export_all(state_to_df_map, writer):
         'font_color': 'black',
         'align':      'center',
         'valign':     'vcenter',
+        'text_wrap':  True,
         'border':     2,
         'bg_color':   "#DAE9F8"
     })
@@ -127,6 +129,7 @@ def export_all(state_to_df_map, writer):
         'font_color': 'black',
         'italic':     True,
         'align':      'center',
+        'text_wrap':  True,
         'valign':     'vcenter',
         'border':     2
     })
@@ -136,6 +139,7 @@ def export_all(state_to_df_map, writer):
         'font_color': 'black',
         'italic':     True,
         'align':      'center',
+        'text_wrap':  True,
         'valign':     'vcenter',
         'border':     2,
         'bg_color':   "#DAE9F8"
