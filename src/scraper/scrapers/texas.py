@@ -10,7 +10,7 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-# a scraper class for Texas RFP data via Requests and HTML parsing
+# a scraper for Texas RFP data using Requests
 class TexasScraper(RequestsScraper):
     # requires: STATE_RFP_URL_MAP['texas'] to be set
     # modifies: self
@@ -30,8 +30,6 @@ class TexasScraper(RequestsScraper):
             ),
         })
 
-    # requires: nothing
-    # modifies: nothing
     # effects: paginates through POST requests until duplicate internalid appears
     def search(self, **kwargs):
         url = self.base_url
@@ -105,7 +103,6 @@ class TexasScraper(RequestsScraper):
             raise
 
     # requires: response_json from search()
-    # modifies: nothing
     # effects: transforms the JSON into a list of standardized record dicts
     def extract_data(self, response_json):
         if not response_json or 'lines' not in response_json:
@@ -139,8 +136,6 @@ class TexasScraper(RequestsScraper):
 
         return records
 
-    # requires: nothing
-    # modifies: nothing
     # effects: orchestrates search -> extract_data -> filter_by_keywords; returns filtered list of dicts
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Texas")

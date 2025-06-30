@@ -13,18 +13,14 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-# a scraper class for New Mexico RFP data using Requests
+# a scraper for New Mexico RFP data using Requests
 class NewMexicoScraper(RequestsScraper):
-
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with New Mexico's PublicEvent URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get('new mexico'))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing
     # effects: requests the SciQuest PublicEvent page with a current timestamp and returns the HTML
     def search(self, **kwargs):
         ts = int(time.time() * 1000)
@@ -52,7 +48,6 @@ class NewMexicoScraper(RequestsScraper):
             raise
 
     # requires: HTML text of the events page
-    # modifies: nothing
     # effects: parses the Open events table and returns a list of raw record dicts
     def extract_data(self, html):
         if not html:
@@ -115,9 +110,7 @@ class NewMexicoScraper(RequestsScraper):
 
         return records
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates full scrape: search → extract_data → filtering; returns filtered records
+    # effects: orchestrates full scrape: search -> extract_data -> filtering; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for New Mexico")
         try:

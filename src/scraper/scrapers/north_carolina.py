@@ -1,5 +1,5 @@
 # north_carolina.py
-# URL: <will use STATE_RFP_URL_MAP["north_carolina"]>
+# url: https://evp.nc.gov/solicitations/
 
 import logging
 from urllib.parse import urljoin
@@ -16,16 +16,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-
+# a scraper for North Carolina RFP data using Selenium
 class NorthCarolinaScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes scraper with North Carolina RFP URL and configures logger
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("north carolina"))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the North Carolina portal and waits for initial table rows to load
     def search(self, **kwargs):
@@ -45,7 +43,6 @@ class NorthCarolinaScraper(SeleniumScraper):
             raise
 
     # requires: current page loaded in self.driver
-    # modifies: nothing
     # effects: parses the solicitations table and returns list of raw records
     def extract_data(self):
         try:
@@ -94,7 +91,6 @@ class NorthCarolinaScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
     # modifies: self.driver
     # effects: clicks next page if available, returns True if click succeeded
     def next_page(self):
@@ -121,9 +117,7 @@ class NorthCarolinaScraper(SeleniumScraper):
         except (TimeoutException, WebDriverException):
             return False
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates full scrape: search → extract_data & paginate → filter → return
+    # effects: orchestrates full scrape: search -> extract_data & paginate -> filter -> return
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for North Carolina")
         all_records = []

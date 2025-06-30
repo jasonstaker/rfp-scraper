@@ -13,11 +13,10 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.config.settings import FALLBACK_CSRF, STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for arizona rfp data using post requests with hidden form fields
+# a scraper for Arizona RFP data using Requests
 class ArizonaScraper(RequestsScraper):
-    # requires: nothing
     # modifies: self
-    # effects: initializes the scraper with arizona's rfp url and sets up logging and state variables
+    # effects: initializes the scraper with Arizona's RFP url and state variables
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["arizona"])
         self.logger = logging.getLogger(__name__)
@@ -25,17 +24,16 @@ class ArizonaScraper(RequestsScraper):
         self.previous_df = None
         self.current_df = None
         self.page_num = 2
-        
         self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                           " AppleWebKit/537.36 (KHTML, like Gecko)"
+                           " Chrome/126.0.0.0 Safari/537.36",
             "Referer": self.base_url,
             "Content-Type": "application/x-www-form-urlencoded"
         })
 
-
     # requires: html_text is a string containing html content
-    # modifies: nothing
-    # effects: extracts and returns a dictionary of hidden field names and values from html_text
+    # effects: returns dict of hidden field names and values
     def _scrape_hidden_fields(self, html_text):
         soup = BeautifulSoup(html_text, "html.parser")
         return {
@@ -44,9 +42,8 @@ class ArizonaScraper(RequestsScraper):
             if inp.get("name")
         }
 
-    # requires: self.hidden_fields is a dictionary
-    # modifies: nothing
-    # effects: constructs and returns the url-encoded form data for the initial search post request
+    # requires: self.hidden_fields is a dict
+    # effects: builds and returns form data for initial search POST
     def _build_search_payload(self):
         data = {**self.hidden_fields}
         data.update({
@@ -108,9 +105,8 @@ class ArizonaScraper(RequestsScraper):
         })
         return urlencode(data, safe=":/|%")
 
-    # requires: page_num is an integer greater than or equal to 2
-    # modifies: nothing
-    # effects: constructs and returns the url-encoded form data for pagination post requests
+    # requires: page_num is an integer ≥ 2
+    # effects: builds and returns form data for pagination POST
     def _build_pagination_payload(self, page_num):
         focus = page_num - 1
         prev_index = page_num - 2
@@ -124,9 +120,8 @@ class ArizonaScraper(RequestsScraper):
         }
         return urlencode(data, safe=":/|%")
 
-    # requires: nothing
     # modifies: self.hidden_fields, self.current_response, self.page_num
-    # effects: performs the initial search and returns the html content of the first page, or none if the request fails
+    # effects: performs the initial search and returns first page HTML
     def search(self, **kwargs):
         try:
             resp = self.session.get(self.base_url, timeout=15)
@@ -152,7 +147,7 @@ class ArizonaScraper(RequestsScraper):
 
     # requires: self.current_response is set
     # modifies: self.hidden_fields, self.current_response, self.page_num
-    # effects: fetches the next page via post and returns its html content, or none if no more pages
+    # effects: fetches and returns next page HTML or None if done
     def next_page(self):
         if not getattr(self, "current_response", None):
             raise
@@ -177,9 +172,9 @@ class ArizonaScraper(RequestsScraper):
             self.logger.error(f"next_page failed: {e}", exc_info=True)
             raise
 
-    # requires: page_content is a string containing html page source
+    # requires: page_content is a string containing html
     # modifies: self.current_df
-    # effects: parses the html table from page_content, extracts rfp records with links, and returns them as a list of dictionaries
+    # effects: parses HTML table and returns list of RFP record dicts
     def extract_data(self, page_content):
         if not page_content:
             self.logger.error("no page_content provided to extract_data")
@@ -213,9 +208,8 @@ class ArizonaScraper(RequestsScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
     # modifies: self.hidden_fields, self.current_response, self.page_num, self.previous_df, self.current_df
-    # effects: orchestrates the scraping process: search → extract → paginate → filter, returns filtered records, raises exception on failure
+    # effects: orchestrates search->extract->paginate->filter; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("starting Arizona scrape")
         all_records = []
@@ -224,11 +218,9 @@ class ArizonaScraper(RequestsScraper):
             if not page:
                 self.logger.warning("search() returned no page; skipping extraction")
                 raise
-            # first-page extraction
             all_records.extend(self.extract_data(page))
             self.previous_df = self.current_df
 
-            # pagination loop
             while True:
                 page = self.next_page()
                 if not page:
@@ -240,14 +232,11 @@ class ArizonaScraper(RequestsScraper):
                         break
                 self.previous_df = self.current_df
 
-            # filtering
             df = pd.DataFrame(all_records)
             self.logger.info(f"total records before filter: {len(df)}")
             filtered = filter_by_keywords(df)
             self.logger.info(f"total records after filter: {len(filtered)}")
             return filtered.to_dict("records")
-
         except Exception as e:
             self.logger.error(f"scrape failed: {e}", exc_info=True)
-            # Raise so main.py can retry
             raise

@@ -9,9 +9,8 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for Mississippi RFP data using requests and JSON
+# a scraper for Mississippi RFP data using Requests
 class MississippiScraper(RequestsScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Mississippi's BidData endpoint and sets up logging
     def __init__(self):
@@ -31,8 +30,6 @@ class MississippiScraper(RequestsScraper):
             ),
         })
 
-    # requires: nothing
-    # modifies: nothing
     # effects: issues a POST to the BidData endpoint with form parameters; returns parsed JSON dict
     def search(self, **kwargs):
         self.logger.info("Fetching Mississippi bid data via POST")
@@ -65,7 +62,6 @@ class MississippiScraper(RequestsScraper):
             raise
 
     # requires: response_data is a dict with "aaData" list
-    # modifies: nothing
     # effects: transforms each JSON record into standardized dicts, building a Details URL
     def extract_data(self, response_data):
         self.logger.info("Extracting data from Mississippi JSON")
@@ -105,9 +101,7 @@ class MississippiScraper(RequestsScraper):
         return records
 
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates search → extract_data → DataFrame → filter; returns filtered list
+    # effects: orchestrates search -> extract_data -> DataFrame -> filter; returns filtered list
     def scrape(self, **kwargs):
         self.logger.info("Starting Mississippi scrape")
         try:

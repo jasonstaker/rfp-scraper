@@ -11,18 +11,16 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for arkansas rfp data using requests
+# a scraper for Arkansas RFP data using Requests
 class ArkansasScraper(RequestsScraper):
-    # requires: nothing
     # modifies: self
-    # effects: initializes the scraper with arkansas's rfp url and sets up logging
+    # effects: initializes the scraper with Arkansas's RFP url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["arkansas"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.current_response
-    # effects: performs a get request to fetch the arkansas rfp page and returns the html content, or none if the request fails
+    # effects: performs a GET request to fetch the Arkansas RFP page and returns its HTML
     def search(self, **kwargs):
         try:
             response = self.session.get(self.base_url, timeout=15)
@@ -36,9 +34,8 @@ class ArkansasScraper(RequestsScraper):
             self.logger.error(f"search failed: {e}", exc_info=True)
             raise
 
-    # requires: html is a string containing html page source
-    # modifies: nothing
-    # effects: parses the html table from html and returns a list of raw records
+    # requires: html is a string containing HTML page source
+    # effects: parses the HTML table and returns a list of raw record dicts
     def extract_data(self, html):
         if not html:
             self.logger.error("no HTML provided to extract_data")
@@ -62,23 +59,19 @@ class ArkansasScraper(RequestsScraper):
                 label = cols[6].get_text(strip=True)
                 end = cols[7].get_text(strip=True)
                 full_link = f"https://arbuy.arkansas.gov{href}" if href.startswith("/") else href
-                records.append(
-                    {
-                        "Label": label,
-                        "Code": code,
-                        "End (UTC-7)": end,
-                        "Keyword Hits": "",
-                        "Link": full_link,
-                    }
-                )
+                records.append({
+                    "Label": label,
+                    "Code": code,
+                    "End (UTC-7)": end,
+                    "Keyword Hits": "",
+                    "Link": full_link,
+                })
             return records
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates the scraping process: search → extract → filter; returns filtered records, raises exception on failure
+    # effects: orchestrates search -> extract -> filter; returns filtered records or raises on failure
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Arkansas")
         try:
@@ -95,5 +88,4 @@ class ArkansasScraper(RequestsScraper):
             return filtered.to_dict("records")
         except Exception as e:
             self.logger.error(f"Scrape failed: {e}", exc_info=True)
-            # Raise so main.py can retry
             raise

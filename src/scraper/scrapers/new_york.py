@@ -1,5 +1,5 @@
 # new_york.py
-# URL: https://ogs.ny.gov/procurement/bid-opportunities
+# url: https://ogs.ny.gov/procurement/bid-opportunities
 
 import logging
 from urllib.parse import urljoin
@@ -12,18 +12,14 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-# a scraper class for New York RFP data using requests and pandas
+# a scraper for New York RFP data using Requests
 class NewYorkScraper(RequestsScraper):
-
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with New York bid-opportunities URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("new york"))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing
     # effects: performs GET to fetch the bid opportunities page; returns HTML text
     def search(self, **kwargs):
         self.logger.info("Fetching New York bid opportunities page")
@@ -34,7 +30,6 @@ class NewYorkScraper(RequestsScraper):
         return resp.text
 
     # requires: html is the HTML of the page containing exactly one bids table
-    # modifies: nothing
     # effects: uses pandas to locate the table, then BeautifulSoup to extract links, returns list of records
     def extract_data(self, html):
         tables = pd.read_html(html, match="Bid Calendar")
@@ -73,8 +68,6 @@ class NewYorkScraper(RequestsScraper):
 
         return records
 
-    # requires: nothing
-    # modifies: nothing
     # effects: orchestrates GET -> extract_data -> filtering; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for New York")

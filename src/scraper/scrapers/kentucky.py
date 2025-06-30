@@ -16,17 +16,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for Kentucky RFP data using selenium to handle dynamic content
+# a scraper for Kentucky RFP data using Selenium
 class KentuckyScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with kentucky's rfp url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["kentucky"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing (except through selenium's implicit state changes)
     # effects: navigates to the kentucky rfp portal, clicks 'view published solicitations', and waits for the table to load; returns true if successful, false otherwise
     def search(self, **kwargs):
         self.logger.info("navigating to Kentucky RFP portal")
@@ -64,7 +61,6 @@ class KentuckyScraper(SeleniumScraper):
             raise
 
     # requires: page_source is a string containing html page source
-    # modifies: nothing
     # effects: parses the solicitations table from page_source and returns a list of raw records
     def extract_data(self, page_source):
         if not page_source:
@@ -116,9 +112,7 @@ class KentuckyScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing (except through selenium's implicit state changes)
-    # effects: orchestrates the scraping process: search → extract/paginate → filter; returns filtered records, raises exception on failure
+    # effects: orchestrates the scraping process: search -> extract/paginate -> filter; returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
         self.logger.info("starting Kentucky scrape")
         all_records = []

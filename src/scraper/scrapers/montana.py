@@ -10,27 +10,20 @@ import pandas as pd
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import (
-    TimeoutException,
-    NoSuchElementException,
-    WebDriverException,
-    StaleElementReferenceException,
-)
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException, StaleElementReferenceException
 
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for Montana RFP data using selenium
+# a scraper for Montana RFP data using Selenium
 class MontanaScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Montana’s portal URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["montana"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the Montana portal, waits for the main search-results table to appear
     def search(self, **kwargs):
@@ -51,7 +44,6 @@ class MontanaScraper(SeleniumScraper):
             raise
 
     # requires: page_source is a string containing the HTML of one page
-    # modifies: nothing
     # effects: parses the results table into a list of record dicts
     def extract_data(self, page_source):
         self.logger.info("parsing Montana RFP table")
@@ -116,9 +108,8 @@ class MontanaScraper(SeleniumScraper):
         return records
 
 
-    # requires: nothing
     # modifies: self.driver (through pagination clicks)
-    # effects: orchestrates search → paginate → extract_data → DataFrame → filter; returns filtered records
+    # effects: orchestrates search -> paginate -> extract_data -> DataFrame -> filter; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("starting Montana scrape")
         try:

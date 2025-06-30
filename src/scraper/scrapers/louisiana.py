@@ -12,18 +12,14 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for Louisiana RFP data, parsing the 'bid' table and extracting PDFs
+# a scraper for Louisiana RFP data using Requests
 class LouisianaScraper(RequestsScraper):
-
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Louisiana's RFP URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("louisiana"))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing
     # effects: issues a GET to fetch the Louisiana RFP page; returns raw HTML or raises on failure
     def search(self, **kwargs):
         self.logger.info("Fetching Louisiana RFP page")
@@ -41,7 +37,6 @@ class LouisianaScraper(RequestsScraper):
             raise
 
     # requires: html is a string of page source
-    # modifies: nothing
     # effects: parses the <table class='bid'>, handles addenda, extracts structured records
     def extract_data(self, html):
         if not html:
@@ -99,9 +94,7 @@ class LouisianaScraper(RequestsScraper):
 
         return records
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates search → extract_data → filtering; returns filtered records or raises on failure
+    # effects: orchestrates search -> extract_data -> filtering; returns filtered records or raises on failure
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Louisiana")
         try:

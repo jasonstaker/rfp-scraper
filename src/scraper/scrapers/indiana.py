@@ -15,16 +15,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for indiana rfp data using selenium
+# a scraper for Indiana RFP data using Selenium
 class IndianaScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with indiana's rfp url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["indiana"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver (through selenium operations)
     # effects: navigates to the indiana procurement page, waits for the events table to load, returns list of page HTML
     def search(self, **kwargs):
@@ -50,7 +48,6 @@ class IndianaScraper(SeleniumScraper):
             raise
 
     # requires: page_source is a string containing html page source
-    # modifies: nothing
     # effects: parses the events table from page_source and returns a list of raw records
     def extract_data(self, page_source):
         if not page_source:
@@ -105,8 +102,6 @@ class IndianaScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing
     # effects: orchestrates the scraping process
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Indiana")

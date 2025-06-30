@@ -1,5 +1,6 @@
 # ohio.py
 # url: https://ohiobuys.ohio.gov/page.aspx/en/rfp/request_browse_public
+
 import logging
 import os
 from urllib.parse import urljoin, urlencode
@@ -15,10 +16,8 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-
-# A scraper class for fetching Ohio RFP data via ASP.NET postback and AJAX pagination
+# a scraper for Ohio RFP data using Requests
 class OhioScraper(RequestsScraper):
-
     # requires: STATE_RFP_URL_MAP contains 'ohio'
     # modifies: self.session
     # effects: initializes scraper with Ohio's RFP browse URL and sets browser-like headers
@@ -38,8 +37,6 @@ class OhioScraper(RequestsScraper):
             "?ivControlUIDsAsync=body:x:grid:upgrid&asyncmodulename=rfp&asyncpagename=request_browse_public"
         )
 
-    # requires: none
-    # modifies: none
     # effects: performs GET to load initial page and extract viewstate, generator, CSRFToken, and max page index
     def _init_form(self, html=None):
         if html is None:
@@ -55,7 +52,6 @@ class OhioScraper(RequestsScraper):
         }
 
     # requires: valid form_state dict from _init_form
-    # modifies: none
     # effects: sends AJAX POST to retrieve HTML for specified page index
     def _fetch_page(self, form_state, page):
         payload = {
@@ -79,7 +75,6 @@ class OhioScraper(RequestsScraper):
         return resp.text
 
     # requires: HTML string containing grid table
-    # modifies: none
     # effects: parses RFP rows into standardized record dicts
     def extract_data(self, html):
         soup = BeautifulSoup(html, 'html.parser')
@@ -111,8 +106,6 @@ class OhioScraper(RequestsScraper):
                 self.logger.error(f'Row parse failed: {e}', exc_info=True)
         return records
 
-    # requires: none
-    # modifies: none
     # effects: orchestrates full scrape: initial load, search POST, AJAX pagination, parsing, filtering
     def scrape(self, **kwargs):
         self.logger.info('Starting scrape for Ohio with pagination')

@@ -15,16 +15,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for kansas rfp data using selenium
+# a scraper for Kansas RFP data using Selenium
 class KansasScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Kansas’s RFP URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["kansas"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver (through selenium operations)
     # effects: navigates to the Kansas portal, waits for the 2nd table titled "Bidding Event Information", returns page source
     def search(self, **kwargs):
@@ -45,7 +43,6 @@ class KansasScraper(SeleniumScraper):
             raise
 
     # requires: page_source is a string of HTML
-    # modifies: nothing
     # effects: parses the second "Bidding Event Information" table into record dicts
     def extract_data(self, page_source):
         self.logger.info("parsing Kansas bidding tables")
@@ -91,9 +88,7 @@ class KansasScraper(SeleniumScraper):
 
         return records
 
-    # requires: nothing
-    # modifies: nothing (aside from filtering)
-    # effects: orchestrates search → extract_data → DataFrame → filter; returns filtered records
+    # effects: orchestrates search -> extract_data -> DataFrame -> filter; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("starting Kansas scrape")
         try:

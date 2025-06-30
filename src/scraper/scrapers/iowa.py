@@ -15,18 +15,14 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-# a scraper class for Iowa bid opportunities using a GET request to the hosted bids search endpoint
+# a scraper for Iowa RFP data using Requests
 class IowaScraper(RequestsScraper):
-
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Iowa's hosted bids search URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP['iowa'])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing
     # effects: issues a GET to the Iowa hosted bids search endpoint with the required query parameters and headers
     def search(self, **kwargs):
         params = {
@@ -66,7 +62,6 @@ class IowaScraper(RequestsScraper):
             raise
 
     # requires: response_json is a dict or None
-    # modifies: nothing
     # effects: transforms response_json into a list of dicts with keys
     def extract_data(self, response_json):
         if not response_json or 'aaData' not in response_json:
@@ -113,9 +108,7 @@ class IowaScraper(RequestsScraper):
 
         return raw_records
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates search → extract_data → filter_by_keywords; returns filtered records
+    # effects: orchestrates search -> extract_data -> filter_by_keywords; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Iowa")
         try:

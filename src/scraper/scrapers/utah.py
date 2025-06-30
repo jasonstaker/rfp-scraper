@@ -11,7 +11,7 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-# a scraper class for Utah RFP data via Requests and HTML parsing
+# a scraper for Utah RFP data using Requests
 class UtahScraper(RequestsScraper):
     # requires: STATE_RFP_URL_MAP['utah'] to be set
     # modifies: self
@@ -31,8 +31,6 @@ class UtahScraper(RequestsScraper):
             'Referer':          'https://utah.bonfirehub.com/'
         })
 
-    # requires: nothing
-    # modifies: nothing
     # effects: issues a GET to fetch the JSON of open projects
     def search(self, **kwargs):
         # attach cache-busting timestamp
@@ -53,7 +51,6 @@ class UtahScraper(RequestsScraper):
             raise
 
     # requires: response_json from search()
-    # modifies: nothing
     # effects: parses projects dict into a list of record dicts
     def extract_data(self, response_json):
         payload = response_json.get('payload', {})
@@ -87,8 +84,6 @@ class UtahScraper(RequestsScraper):
 
         return records
 
-    # requires: nothing
-    # modifies: nothing
     # effects: runs search -> extract_data -> DataFrame -> filter_by_keywords -> return records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Utah")

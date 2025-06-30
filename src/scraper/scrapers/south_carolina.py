@@ -1,5 +1,6 @@
 # south_carolina.py
 # url: https://scbo.sc.gov/search
+
 import logging
 from datetime import datetime
 from urllib.parse import urljoin, parse_qs, urlparse
@@ -12,9 +13,8 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for South Carolina RFP data using Requests and HTML parsing
+# a scraper for South Carolina RFP data using Requests
 class SouthCarolinaScraper(RequestsScraper):
-    # requires: none
     # modifies: self
     # effects: initializes the scraper with South Carolina Bid Board URL, configures session for HTML
     def __init__(self):
@@ -28,8 +28,6 @@ class SouthCarolinaScraper(RequestsScraper):
         self.session.verify = False
         requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
-    # requires: none
-    # modifies: none
     # effects: POSTs search criteria for current month to December and returns a DataFrame of parsed records
     def search(self, **kwargs):
         now = datetime.now()
@@ -90,8 +88,6 @@ class SouthCarolinaScraper(RequestsScraper):
         self.logger.info(f"Parsed {len(df)} South Carolina RFP records")
         return df
 
-    # requires: none
-    # modifies: nothing
     # effects: orchestrates full scrape: search -> filter -> return list of dicts
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for South Carolina")

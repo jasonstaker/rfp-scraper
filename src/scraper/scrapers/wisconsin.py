@@ -8,12 +8,7 @@ from datetime import datetime, date
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import (
-    TimeoutException,
-    NoSuchElementException,
-    WebDriverException,
-    StaleElementReferenceException,
-)
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException, StaleElementReferenceException
 
 import pandas as pd
 
@@ -21,16 +16,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-
+# a scraper for Wisconsin RFP data using Selenium
 class WisconsinScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Wisconsin’s portal URL and configures logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("wisconsin"))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the Wisconsin bids page, switches into main content iframe, and waits for the grid
     def search(self, **kwargs):
@@ -52,7 +45,6 @@ class WisconsinScraper(SeleniumScraper):
             raise
 
     # requires: iframe switched and table present
-    # modifies: nothing
     # effects: parses each row of the PSLEVEL1GRID into record dicts
     def extract_data(self, page_source=None):
         self.logger.info("Parsing Wisconsin RFP table")

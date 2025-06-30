@@ -16,7 +16,7 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-
+# a scraper for Vermont RFP data using Selenium
 class VermontScraper(SeleniumScraper):
     # requires: STATE_RFP_URL_MAP['vermont'] = search page URL
     # modifies: self
@@ -25,7 +25,6 @@ class VermontScraper(SeleniumScraper):
         super().__init__(STATE_RFP_URL_MAP['vermont'])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the search page and waits for the results table
     def search(self, **kwargs):
@@ -41,7 +40,6 @@ class VermontScraper(SeleniumScraper):
             raise
 
     # requires: current page loaded in self.driver
-    # modifies: nothing
     # effects: parses the gvResults table into a list of records
     def extract_data(self):
         soup = BeautifulSoup(self.driver.page_source, 'html.parser')
@@ -93,7 +91,6 @@ class VermontScraper(SeleniumScraper):
             })
         return records
 
-    # requires: nothing
     # modifies: self.driver
     # effects: clicks next page if available, returns True if navigated
     def next_page(self):
@@ -115,7 +112,6 @@ class VermontScraper(SeleniumScraper):
             return False
 
     # requires: search(), extract_data(), next_page()
-    # modifies: nothing
     # effects: orchestrates pagination and filtering, returns list of dicts
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Vermont")

@@ -1,5 +1,5 @@
 # new_hampshire.py
-# URL: https://das.nh.gov/purchasing/contracting-opportunities
+# url: https://das.nh.gov/purchasing/contracting-opportunities
 
 import logging
 from bs4 import BeautifulSoup
@@ -13,16 +13,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# A scraper for New Hampshire RFP data via Selenium
+# a scraper for New Hampshire RFP data using Selenium
 class NewHampshireScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes scraper with New Hampshire's RFP URL and configures the logger
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["new hampshire"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the New Hampshire RFP portal and waits for the bids table to load
     def search(self, **kwargs):
@@ -43,7 +41,6 @@ class NewHampshireScraper(SeleniumScraper):
             raise
 
     # requires: page_source in self.driver
-    # modifies: nothing
     # effects: parses bids table, extracting description, code, end date, and link
     def extract_data(self):
         self.logger.info("Parsing HTML table for New Hampshire records")
@@ -84,9 +81,7 @@ class NewHampshireScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing (except through selenium state)
-    # effects: orchestrates full scrape: search → extract_data → filter → return records
+    # effects: orchestrates full scrape: search -> extract_data -> filter -> return records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for New Hampshire")
         try:

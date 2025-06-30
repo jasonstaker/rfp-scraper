@@ -1,5 +1,5 @@
 # missouri.py
-# URL: https://ewqg.fa.us8.oraclecloud.com/fscmUI/redwood/negotiation-abstracts/view/abstractlisting?prcBuId=300000005255687
+# url: https://ewqg.fa.us8.oraclecloud.com/fscmUI/redwood/negotiation-abstracts/view/abstractlisting?prcBuId=300000005255687
 
 import logging
 import time
@@ -16,17 +16,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for Missouri bid opportunities using Selenium
+# a scraper for Missouri RFP data using Selenium
 class MissouriScraper(SeleniumScraper):
-
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Missouri’s negotiation abstracts URL and configures logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("missouri"))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the Missouri page and waits up to 20s for the UL container to appear
     def search(self, **kwargs):
@@ -63,7 +60,6 @@ class MissouriScraper(SeleniumScraper):
             time.sleep(1)
 
     # requires: items are fully loaded in the UL
-    # modifies: nothing
     # effects: parses each <li> into a record dict and returns a DataFrame
     def extract_data(self):
         self._ensure_all_loaded()
@@ -114,9 +110,7 @@ class MissouriScraper(SeleniumScraper):
 
         return pd.DataFrame(records)
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates search → extract_data → filter_by_keywords; returns list of filtered records
+    # effects: orchestrates search -> extract_data -> filter_by_keywords; returns list of filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Missouri")
         try:

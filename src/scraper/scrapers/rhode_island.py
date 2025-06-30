@@ -1,5 +1,6 @@
 # rhode_island.py
 # url: https://ridop.ri.gov/vendors/bidding-opportunities
+
 import logging
 from datetime import datetime
 import pytz
@@ -11,9 +12,8 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for Rhode Island RFP data using Requests and JSON
+# a scraper for Rhode Island RFP data using Requests
 class RhodeIslandScraper(RequestsScraper):
-    # requires: none
     # modifies: self
     # effects: initializes the scraper with Rhode Island's Proactis JSON endpoint, sets headers
     def __init__(self):
@@ -26,8 +26,6 @@ class RhodeIslandScraper(RequestsScraper):
             "X-Requested-With": "XMLHttpRequest",
         })
 
-    # requires: none
-    # modifies: none
     # effects: fetches a JSON page at given offset for customerid=46, returns JSON dict
     def _fetch_page(self, offset: int):
         params = {
@@ -57,8 +55,6 @@ class RhodeIslandScraper(RequestsScraper):
             self.logger.error(f"JSON parse error: {e}; snippet: {snippet!r}", exc_info=False)
             raise
 
-    # requires: none
-    # modifies: none
     # effects: retrieves total_hits, page_size, and first_page JSON via _fetch_page
     def search(self, **kwargs):
         self.logger.info("Fetching first page of Rhode Island solicitations...")
@@ -69,7 +65,6 @@ class RhodeIslandScraper(RequestsScraper):
         return total_hits, page_size, first_page
 
     # requires: page_content is JSON dict with "records"
-    # modifies: none
     # effects: extracts standardized records list from JSON page_content
     def extract_data(self, page_content: dict):
         if not page_content or "records" not in page_content:
@@ -104,9 +99,7 @@ class RhodeIslandScraper(RequestsScraper):
                 continue
         return records
 
-    # requires: none
-    # modifies: none
-    # effects: orchestrates search → paginate → extract → filter → return dicts
+    # effects: orchestrates search -> paginate -> extract -> filter -> return dicts
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Rhode Island")
         all_records = []

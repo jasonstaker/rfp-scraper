@@ -1,5 +1,5 @@
 # minnesota.py
-# URL: https://osp.admin.mn.gov/GS-auto
+# url: https://osp.admin.mn.gov/GS-auto
 
 import logging
 from datetime import datetime
@@ -12,9 +12,8 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for Minnesota RFP data via Requests and HTML parsing
+# a scraper for Minnesota RFP data using Requests
 class MinnesotaScraper(RequestsScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Minnesota’s RFP URL and sets up logging
     def __init__(self):
@@ -27,8 +26,6 @@ class MinnesotaScraper(RequestsScraper):
             "Accept-Language": "en-US,en;q=0.9",
         })
 
-    # requires: nothing
-    # modifies: nothing
     # effects: GETs the main page and returns a BeautifulSoup object of its HTML
     def _fetch_page(self):
         self.logger.info("Fetching Minnesota RFP HTML page")
@@ -37,7 +34,6 @@ class MinnesotaScraper(RequestsScraper):
         return BeautifulSoup(resp.text, "html.parser")
 
     # requires: soup is a BeautifulSoup object
-    # modifies: nothing
     # effects: parses the UL/LI structure into a DataFrame of standardized fields
     def extract_data(self, soup: BeautifulSoup):
         container = soup.find("div", class_="item-list")
@@ -109,8 +105,6 @@ class MinnesotaScraper(RequestsScraper):
 
 
 
-    # requires: nothing
-    # modifies: nothing
     # effects: orchestrates fetch -> extract_data -> filter; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Minnesota via HTML list")

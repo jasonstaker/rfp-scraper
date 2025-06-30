@@ -15,18 +15,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-
-# a scraper class for West Virginia RFP data using selenium to handle dynamic content
+# a scraper for West Virginia RFP data using Selenium
 class WestVirginiaScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with West Virginia's RFP url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["west virginia"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing (except through selenium state changes)
     # effects: navigates to the West Virginia RFP portal, clicks 'view published solicitations', and waits for the table
     def search(self, **kwargs):
         self.logger.info("navigating to West Virginia RFP portal")
@@ -64,7 +60,6 @@ class WestVirginiaScraper(SeleniumScraper):
             raise
 
     # requires: page_source is a string containing html
-    # modifies: nothing
     # effects: parses the solicitations table and returns a list of raw records
     def extract_data(self, page_source):
         if not page_source:
@@ -114,9 +109,7 @@ class WestVirginiaScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing (except through selenium state changes)
-    # effects: orchestrates the scraping process: search → extract → paginate → filter
+    # effects: orchestrates the scraping process: search -> extract -> paginate -> filter
     def scrape(self, **kwargs):
         self.logger.info("starting West Virginia scrape")
         all_records = []

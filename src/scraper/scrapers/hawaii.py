@@ -1,5 +1,6 @@
 # hawaii.py
 # url: https://hiepro.ehawaii.gov/solicitation-notices.html
+
 import logging
 import time
 
@@ -15,16 +16,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for Hawaii RFP data using Selenium
+# a scraper for Hawaii RFP data using Selenium
 class HawaiiScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Hawaii's RFP URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["hawaii"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the page, clicks search links/buttons to load data, and returns page source
     def search(self, **kwargs):
@@ -53,7 +52,6 @@ class HawaiiScraper(SeleniumScraper):
             self.logger.error(f"search failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
     # modifies: self.driver
     # effects: clicks 'Next' pagination button and waits for table refresh; returns True if next page exists
     def next_page(self):
@@ -79,7 +77,6 @@ class HawaiiScraper(SeleniumScraper):
 
 
     # requires: page_source containing the notices-list table
-    # modifies: nothing
     # effects: parses table rows into records
     def extract_data(self, page_source):
         self.logger.info("Parsing HTML for Hawaii records")
@@ -114,9 +111,8 @@ class HawaiiScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
     # modifies: self.driver
-    # effects: orchestrates the scrape: search → extract → paginate → filter; returns filtered records
+    # effects: orchestrates the scrape: search -> extract -> paginate -> filter; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Hawaii")
         all_records = []

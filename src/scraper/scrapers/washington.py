@@ -1,5 +1,6 @@
 # washington.py
 # url: https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx
+
 import logging
 from urllib.parse import urljoin
 
@@ -14,16 +15,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-
+# a scraper for Washington RFP data using Selenium
 class WashingtonScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes scraper with Washington RFP URL and configures logger
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("washington"))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the Washington portal, clicks search button, and waits for results table
     def search(self, **kwargs):
@@ -40,7 +39,6 @@ class WashingtonScraper(SeleniumScraper):
         return True
 
     # requires: current page loaded
-    # modifies: nothing
     # effects: parses the DataGrid1 table and returns list of standardized records
     def extract_data(self):
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
@@ -117,8 +115,6 @@ class WashingtonScraper(SeleniumScraper):
         except Exception:
             return False
 
-    # requires: nothing
-    # modifies: nothing
     # effects: orchestrates search -> extract -> paginate -> filter -> return
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Washington")

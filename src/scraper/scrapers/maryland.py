@@ -1,5 +1,5 @@
 # maryland.py
-# URL: https://mdbid.maryland.gov/page.aspx/en/bpm/process_search
+# url: https://mdbid.maryland.gov/page.aspx/en/bpm/process_search
 
 import logging
 import pandas as pd
@@ -14,16 +14,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for Maryland RFP data via Selenium
+# a scraper for Maryland RFP data using Selenium
 class MarylandScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes scraper with Maryland RFP URL and configures logger
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("maryland"))
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the Maryland portal and waits for the grid to load
     def search(self, **kwargs):
@@ -39,7 +37,6 @@ class MarylandScraper(SeleniumScraper):
             raise
 
     # requires: current page loaded
-    # modifies: nothing
     # effects: parses the grid rows into a list of standardized records
     def extract_data(self):
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
@@ -71,7 +68,6 @@ class MarylandScraper(SeleniumScraper):
                 continue
         return records
 
-    # requires: nothing
     # modifies: self.driver
     # effects: clicks next page if available, returns True if click succeeded
     def next_page(self):
@@ -92,9 +88,7 @@ class MarylandScraper(SeleniumScraper):
         except (TimeoutException, NoSuchElementException):
             return False
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates search → extract → paginate → filter → return
+    # effects: orchestrates search -> extract -> paginate -> filter -> return
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Maryland")
         all_records = []

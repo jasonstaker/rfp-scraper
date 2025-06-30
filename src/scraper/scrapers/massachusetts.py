@@ -1,5 +1,5 @@
 # massachusetts.py
-# URL: https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml
+# url: https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml
 
 import logging
 import os
@@ -10,9 +10,8 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for massachusetts rfp data using requests and CSV download
+# a scraper for Massachusetts RFP data using Requests
 class MassachusettsScraper(RequestsScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes scraper with Commbuys endpoint, sets up logging and session
     def __init__(self):
@@ -26,7 +25,6 @@ class MassachusettsScraper(RequestsScraper):
             "Referer": "https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true",
         })
 
-    # requires: nothing
     # modifies: session cookies
     # effects: performs initial GET to retrieve CSRF token, viewstate and cookies
     def _init_form(self):
@@ -38,7 +36,6 @@ class MassachusettsScraper(RequestsScraper):
         viewstate = soup.find('input', {'name': 'javax.faces.ViewState'})['value']
         return csrf, viewstate
 
-    # requires: nothing
     # modifies: file system
     # effects: POSTS form data to trigger CSV download, saves file to temp, reads into DataFrame
     def search(self, **kwargs):
@@ -77,7 +74,6 @@ class MassachusettsScraper(RequestsScraper):
         return df
 
     # requires: df is a pandas DataFrame
-    # modifies: nothing
     # effects: maps raw CSV columns to standardized records list
     def extract_data(self, df):
         if df is None or df.empty:
@@ -98,9 +94,7 @@ class MassachusettsScraper(RequestsScraper):
             })
         return output
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates scrape: download CSV → extract → filter → return
+    # effects: orchestrates scrape: download CSV -> extract -> filter -> return
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Massachusetts via CSV")
         df = self.search(**kwargs)

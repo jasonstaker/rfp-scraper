@@ -1,5 +1,5 @@
 # nebraska.py
-# URL: https://das.nebraska.gov/materiel/bid-opportunities.html
+# url: https://das.nebraska.gov/materiel/bid-opportunities.html
 
 import logging
 from urllib.parse import urljoin
@@ -12,6 +12,7 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
+# a scraper for Nebraska RFP data using Requests
 class NebraskaScraper(RequestsScraper):
     # effects: initialize with base URL and logger
     def __init__(self):

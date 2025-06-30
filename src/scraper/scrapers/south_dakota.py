@@ -1,5 +1,6 @@
 # south_dakota.py
 # url: https://postingboard.esmsolutions.com/3444a404-3818-494f-84c5-2a850acd7779/events
+
 import logging
 from datetime import datetime
 from urllib.parse import urljoin
@@ -11,9 +12,8 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for South Dakota RFP data using Requests and JSON
+# a scraper for South Dakota RFP data using Requests
 class SouthDakotaScraper(RequestsScraper):
-    # requires: none
     # modifies: self
     # effects: initializes scraper with SD posting board API URL and configures session
     def __init__(self):
@@ -23,8 +23,6 @@ class SouthDakotaScraper(RequestsScraper):
             "Accept": "application/json, text/plain, */*"
         })
 
-    # requires: none
-    # modifies: none
     # effects: fetches all events in one request by using a large recordsPerPage
     def search(self, **kwargs):
         # use a high recordsPerPage to retrieve all in one go
@@ -44,7 +42,6 @@ class SouthDakotaScraper(RequestsScraper):
             raise
 
     # requires: response_json is dict with 'data'
-    # modifies: none
     # effects: extracts event records into standardized list of dicts
     def extract_data(self, response_json):
         if not response_json or "data" not in response_json:
@@ -87,8 +84,6 @@ class SouthDakotaScraper(RequestsScraper):
                 continue
         return records
 
-    # requires: none
-    # modifies: none
     # effects: orchestrates full scrape: search -> extract_data -> filter -> return
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for South Dakota")

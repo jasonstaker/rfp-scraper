@@ -16,40 +16,30 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for colorado rfp data using selenium to handle dynamic content
+# a scraper for Colorado RFP data using Selenium
 class ColoradoScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
-    # effects: initializes the scraper with colorado's rfp url and sets up logging
+    # effects: initializes the scraper with Colorado's RFP url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["colorado"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing (except through selenium's implicit state changes)
-    # effects: navigates to the colorado rfp portal, clicks 'view published solicitations', and waits for the table to load; returns true if successful, false otherwise
+    # effects: navigates to the Colorado RFP portal, clicks to display solicitations, and returns True if successful
     def search(self, **kwargs):
         self.logger.info("navigating to Colorado RFP portal")
         try:
             self.driver.get(self.base_url)
-
-            button_locator = (
+            locator = (
                 By.XPATH,
                 "//div[@data-qa='vss.page.VAXXX03153.carouselView.carousel.solicitations']",
             )
-            WebDriverWait(self.driver, 20).until(
-                EC.element_to_be_clickable(button_locator)
-            ).click()
+            WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(locator)).click()
             self.logger.info("clicked 'View Published Solicitations'")
-
             WebDriverWait(self.driver, 20).until(
-                EC.presence_of_element_located(
-                    (By.ID, "vsspageVVSSX10019gridView1group1cardGridgrid1")
-                )
+                EC.presence_of_element_located((By.ID, "vsspageVVSSX10019gridView1group1cardGridgrid1"))
             )
             self.logger.info("solicitations table loaded")
             return True
-
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}", exc_info=False)
             raise
@@ -63,21 +53,18 @@ class ColoradoScraper(SeleniumScraper):
             self.logger.error(f"search() failed: {e}", exc_info=True)
             raise
 
-    # requires: page_source is a string containing html page source
-    # modifies: nothing
-    # effects: parses the solicitations table from page_source and returns a list of raw records
+    # requires: page_source is a string containing HTML page source
+    # effects: parses the solicitations table from page_source and returns a list of raw record dicts
     def extract_data(self, page_source):
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
             raise
-
         try:
             soup = BeautifulSoup(page_source, "html.parser")
             table = soup.find("table", id="vsspageVVSSX10019gridView1group1cardGridgrid1")
             if not table:
                 self.logger.error("results table not found")
                 raise
-
             tbody = table.find("tbody")
             if not tbody:
                 self.logger.error("no <tbody> found in table")
@@ -88,37 +75,22 @@ class ColoradoScraper(SeleniumScraper):
                 cols = row.find_all("td")
                 if len(cols) < 5:
                     continue
-
-                label = cols[1].get_text(strip=True)
                 anchor = cols[3].find("a")
                 if not anchor:
                     continue
-
-                code = anchor.get_text(strip=True)
-                link = STATE_RFP_URL_MAP["colorado"]
-
-                date_span = cols[4].find("span")
-                raw_date = date_span.get_text(strip=True) if date_span else ""
-
-                records.append(
-                    {
-                        "Label": label,
-                        "Code": code,
-                        "End (UTC-7)": raw_date,
-                        "Keyword Hits": "",
-                        "Link": link,
-                    }
-                )
-
+                records.append({
+                    "Label": cols[1].get_text(strip=True),
+                    "Code": anchor.get_text(strip=True),
+                    "End (UTC-7)": cols[4].find("span").get_text(strip=True) if cols[4].find("span") else "",
+                    "Keyword Hits": "",
+                    "Link": STATE_RFP_URL_MAP["colorado"],
+                })
             return records
-
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing (except through selenium's implicit state changes)
-    # effects: orchestrates the scraping process: search → extract/paginate → filter; returns filtered records, raises exception on failure
+    # effects: orchestrates search -> extract/paginate -> filter; returns filtered records or raises on failure
     def scrape(self, **kwargs):
         self.logger.info("starting Colorado scrape")
         all_records = []
@@ -131,7 +103,6 @@ class ColoradoScraper(SeleniumScraper):
             page_num = 1
             while True:
                 self.logger.info(f"processing page {page_num}")
-                # Attempt to grab page_source; if it fails, raise so runner.py can retry
                 try:
                     page_source = self.driver.page_source
                 except WebDriverException as we:
@@ -139,20 +110,16 @@ class ColoradoScraper(SeleniumScraper):
                     raise RuntimeError(f"failed to get page_source: {we}")
 
                 batch = self.extract_data(page_source)
-                # If no records were returned at all (first page), consider it a failure
                 if page_num == 1 and not batch:
                     self.logger.error("extract_data returned no records on first page; raising exception to retry")
                     raise RuntimeError("ColoradoScraper.extract_data() returned empty on first page")
-
                 all_records.extend(batch)
 
-                # Attempt to find the "Next" buttons; if that fails, raise
                 try:
                     next_buttons = self.driver.find_elements(By.CLASS_NAME, "css-1yn6b58")
                 except WebDriverException as we:
                     self.logger.error(f"failed to find next buttons: {we}", exc_info=False)
                     raise RuntimeError(f"failed to find next buttons: {we}")
-
                 next_btn = None
                 for btn in next_buttons:
                     try:
@@ -161,25 +128,15 @@ class ColoradoScraper(SeleniumScraper):
                             break
                     except WebDriverException:
                         continue
-
                 if not next_btn:
                     self.logger.info("no clickable 'Next' button; stopping pagination")
                     break
 
-                # Try to remember the first row's ID (so we could detect staleness, etc.)
-                try:
-                    first_row = self.driver.find_element(By.CSS_SELECTOR, "tr[id^='tableDataRow']")
-                    old_row_id = first_row.get_attribute("id")
-                except NoSuchElementException:
-                    old_row_id = None  # no first row yet—okay to continue
-
-                # Try to click Next; if it fails, raise
                 try:
                     next_btn.click()
                 except WebDriverException as we:
                     self.logger.error(f"failed to click next button: {we}", exc_info=False)
                     raise RuntimeError(f"failed to click next button: {we}")
-
                 page_num += 1
 
             self.logger.info("completed parsing")
@@ -188,8 +145,6 @@ class ColoradoScraper(SeleniumScraper):
             filtered = filter_by_keywords(df)
             self.logger.info(f"found {len(filtered)} records after filtering")
             return filtered.to_dict("records")
-
         except Exception as e:
             self.logger.error(f"scrape failed: {e}", exc_info=True)
-            # Raise so main.py can retry
             raise

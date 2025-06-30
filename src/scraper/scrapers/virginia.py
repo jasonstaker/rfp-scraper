@@ -16,7 +16,7 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-
+# a scraper for Virginia RFP data using Selenium
 class VirginiaScraper(SeleniumScraper):
     # requires: STATE_RFP_URL_MAP['virginia'] = search page URL
     # modifies: self
@@ -29,7 +29,6 @@ class VirginiaScraper(SeleniumScraper):
         )
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: load the 'Open' opportunities, then scroll to load all cards
     def search(self, **kwargs):
@@ -66,7 +65,6 @@ class VirginiaScraper(SeleniumScraper):
             raise
 
     # requires: page_source contains all opportunity cards loaded
-    # modifies: nothing
     # effects: parse the first <li> container of cards into a list of records
     def extract_data(self):
         soup = BeautifulSoup(self.driver.page_source, 'html.parser')
@@ -117,7 +115,6 @@ class VirginiaScraper(SeleniumScraper):
         return records
 
     # requires: search() and extract_data() methods
-    # modifies: nothing
     # effects: orchestrates full scrape, returning filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Virginia")

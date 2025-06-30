@@ -1,5 +1,5 @@
 # maine.py
-# URL: https://www.maine.gov/dafs/bbm/procurementservices/vendors/rfps
+# url: https://www.maine.gov/dafs/bbm/procurementservices/vendors/rfps
 
 import logging
 import pandas as pd
@@ -10,9 +10,8 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for Maine RFP data via Requests and HTML parsing
+# a scraper for Maine RFP data using Requests
 class MaineScraper(RequestsScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes scraper with Maine RFP URL and configures session headers
     def __init__(self):
@@ -25,8 +24,6 @@ class MaineScraper(RequestsScraper):
             "Accept-Language": "en-US,en;q=0.9",
         })
 
-    # requires: nothing
-    # modifies: nothing
     # effects: GETs the main page, parses the RFP table into DataFrame
     def search(self, **kwargs):
         self.logger.info("Fetching Maine RFP HTML page")
@@ -74,7 +71,6 @@ class MaineScraper(RequestsScraper):
         return df
 
     # requires: df is a pandas DataFrame
-    # modifies: nothing
     # effects: wraps search + filter_by_keywords to return final list of dicts
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Maine via HTML table")

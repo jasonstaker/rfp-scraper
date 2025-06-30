@@ -17,18 +17,16 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import BUSINESS_UNIT_DICT, STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for california rfp data using selenium
+# a scraper for California RFP data using Selenium
 class CaliforniaScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
-    # effects: initializes the scraper with california's rfp url and sets up logging
+    # effects: initializes the scraper with California's RFP url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["california"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: self.driver (through selenium operations)
-    # effects: navigates to the california rfp page, waits for the table to load, and returns the page source if successful, otherwise none
+    # modifies: self.driver
+    # effects: navigates to the California RFP page, waits for the table to load, and returns page source
     def search(self, **kwargs):
         self.logger.info("navigating to California RFP page")
         try:
@@ -48,10 +46,8 @@ class CaliforniaScraper(SeleniumScraper):
             raise
 
     # requires: page_source is a string containing html page source
-    # modifies: nothing
-    # effects: parses the html table from page_source, constructs links, and returns a list of records
+    # effects: parses the HTML table, constructs links, and returns a list of record dicts
     def extract_data(self, page_source):
-        self.logger.info("parsing HTML table for California records")
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
             raise
@@ -66,28 +62,21 @@ class CaliforniaScraper(SeleniumScraper):
             df = pd.read_html(StringIO(str(table)))[0]
             links = []
             for _, row in df.iterrows():
-                department_name = row.iloc[3]  # department column
-                event_id = row.iloc[1]         # event ID column
+                department_name = row.iloc[3]
+                event_id = row.iloc[1]
                 bu = BUSINESS_UNIT_DICT.get(department_name)
-                if bu:
-                    url = f"https://caleprocure.ca.gov/event/{bu}/{event_id}"
-                else:
-                    url = None
+                url = f"https://caleprocure.ca.gov/event/{bu}/{event_id}" if bu else None
                 links.append(url)
 
-            mapped = pd.DataFrame(
-                {
-                    "Label": df.iloc[:, 2],
-                    "Code": df.iloc[:, 1],
-                    "End (UTC-7)": df.iloc[:, 4],
-                    "Type": "RFP",
-                    "Keyword Hits": "",
-                    "Link": links,
-                }
-            )
-            mapped["Link"] = mapped["Link"].fillna(
-                "https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx"
-            )
+            mapped = pd.DataFrame({
+                "Label": df.iloc[:, 2],
+                "Code": df.iloc[:, 1],
+                "End (UTC-7)": df.iloc[:, 4],
+                "Type": "RFP",
+                "Keyword Hits": "",
+                "Link": links,
+            })
+            mapped["Link"] = mapped["Link"].fillna(self.base_url)
             return mapped.to_dict("records")
         except ValueError as ve:
             self.logger.error(f"pd.read_html failed: {ve}", exc_info=False)
@@ -96,9 +85,7 @@ class CaliforniaScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: self.driver (through selenium operations)
-    # effects: orchestrates the scraping process: search → extract → filter; returns filtered records, raises exception on failure
+    # effects: orchestrates search -> extract -> filter; returns filtered records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for California")
         try:
@@ -116,5 +103,4 @@ class CaliforniaScraper(SeleniumScraper):
             return filtered.to_dict("records")
         except Exception as e:
             self.logger.error(f"Scrape failed: {e}", exc_info=True)
-            # Raise so main.py can retry
             raise

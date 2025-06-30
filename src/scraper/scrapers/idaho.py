@@ -16,16 +16,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
-# a scraper class for idaho rfp data using selenium
+# a scraper for Idaho RFP data using Selenium
 class IdahoScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with idaho's rfp url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["idaho"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver (through selenium operations)
     # effects: navigates to the idaho rfp portal, waits for the table to load; returns page source if successful, otherwise None
     def search(self, **kwargs):
@@ -79,7 +77,6 @@ class IdahoScraper(SeleniumScraper):
 
 
     # requires: page_source is a string containing html page source
-    # modifies: nothing
     # effects: parses the solicitations table from page_source and returns a list of raw records
     def extract_data(self, page_source):
         if not page_source:
@@ -130,9 +127,8 @@ class IdahoScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
     # modifies: self.driver (through selenium operations)
-    # effects: orchestrates the scraping process: search → extract_data; returns filtered records, raises exception on failure
+    # effects: orchestrates the scraping process: search -> extract_data; returns filtered records, raises exception on failure
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Idaho")
         try:

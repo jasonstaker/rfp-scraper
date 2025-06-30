@@ -15,17 +15,14 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-# A scraper class for fetching Illinois RFP data via Selenium.
+# a scraper for Illinois RFP data using Selenium
 class IllinoisScraper(SeleniumScraper):
-
-    # requires: nothing
     # modifies: self
     # effects: initializes scraper with Illinois's RFP URL and configures the logger
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["illinois"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.driver
     # effects: navigates to the Illinois RFP portal and waits for the results table to load
     def search(self, **kwargs):
@@ -41,7 +38,6 @@ class IllinoisScraper(SeleniumScraper):
             raise
 
     # requires: current page loaded in self.driver
-    # modifies: nothing
     # effects: parses page_source to extract raw solicitation records and returns list of dicts
     def extract_data(self):
         try:
@@ -81,7 +77,6 @@ class IllinoisScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
     # modifies: self.driver
     # effects: clicks through paginated results until end; returns False when no more pages
     def next_page(self):
@@ -103,9 +98,7 @@ class IllinoisScraper(SeleniumScraper):
         )
         return True
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates full scrape: search → loop extract_data & next_page → filter and return records
+    # effects: orchestrates full scrape: search -> loop extract_data & next_page -> filter and return records
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Illinois")
         all_records = []

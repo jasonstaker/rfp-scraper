@@ -1,5 +1,5 @@
 # north_dakota.py
-# URL: https://apps.nd.gov/csd/spo/services/bidder/searchSolicitation.do
+# url: https://apps.nd.gov/csd/spo/services/bidder/searchSolicitation.do
 
 import logging
 from datetime import datetime
@@ -16,6 +16,7 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
+# a scraper for North Dakota RFP data using Selenium
 class NorthDakotaScraper(SeleniumScraper):
     # effects: initialize with base URL and logger
     def __init__(self):

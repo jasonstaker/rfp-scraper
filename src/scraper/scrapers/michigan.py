@@ -16,17 +16,14 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
-# a scraper class for Michigan RFP data using selenium to handle dynamic content
+# a scraper for Michigan RFP data using Selenium
 class MichiganScraper(SeleniumScraper):
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Michigan's RFP url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["michigan"])
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
-    # modifies: nothing (except through selenium's implicit state changes)
     # effects: navigates to the Michigan RFP portal, clicks 'View Published Solicitations', and waits for the table to load
     def search(self, **kwargs):
         self.logger.info("Navigating to Michigan RFP portal")
@@ -65,7 +62,6 @@ class MichiganScraper(SeleniumScraper):
             raise
 
     # requires: page_source is a string containing html page source
-    # modifies: nothing
     # effects: parses the solicitations table and returns a list of standardized records
     def extract_data(self, page_source):
         if not page_source:
@@ -117,9 +113,7 @@ class MichiganScraper(SeleniumScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing
-    # effects: orchestrates search → extract_data → pagination → filter → return
+    # effects: orchestrates search -> extract_data -> pagination -> filter -> return
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Michigan")
         all_records = []

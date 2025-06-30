@@ -12,11 +12,8 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
-
-# a scraper class for Georgia GPR eventSearch data, using a POST endpoint.
+# a scraper for Georgia RFP data using Requests
 class GeorgiaScraper(RequestsScraper):
-
-    # requires: nothing
     # modifies: self
     # effects: initializes the scraper with Georgia's RFP URL and sets up logging
     def __init__(self):
@@ -24,11 +21,9 @@ class GeorgiaScraper(RequestsScraper):
         super().__init__(base)
         self.logger = logging.getLogger(__name__)
 
-    # requires: nothing
     # modifies: self.session (cookies)
     # effects: performs an initial GET to establish session cookies, then issues a POST to Georgia's eventSearch endpoint; returns the parsed JSON dict or None on failure
     def search(self, **kwargs):
-        # initial GET to obtain JSESSIONID cookie
         index_url = "https://ssl.doas.state.ga.us/gpr/index?persisted=true"
         headers_get = {
             "User-Agent": (
@@ -156,7 +151,6 @@ class GeorgiaScraper(RequestsScraper):
             raise
 
     # requires: response_json is a dict containing a "data" key with a list of event records
-    # modifies: nothing
     # effects: parses the JSON "data" array into a list of standardized record dicts; returns that list
     def extract_data(self, response_json: dict):
         if not response_json or "data" not in response_json:
@@ -191,8 +185,6 @@ class GeorgiaScraper(RequestsScraper):
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
             raise
 
-    # requires: nothing
-    # modifies: nothing
     # effects: orchestrates search -> extract_data -> filter_by_keywords; returns filtered records or raises on failure
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Georgia")
