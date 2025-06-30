@@ -46,7 +46,8 @@ STATE_RFP_URL_MAP = {
     "utah": 'https://utah.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData',
     "virginia": 'https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp',
     "vermont": 'https://www.vermontbusinessregistry.com/BidSearch.aspx?type=1',
-    "washington": 'https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx'
+    "washington": 'https://pr-webs-vendor.des.wa.gov/BidCalendar.aspx',
+    "wisconsin": 'https://esupplier.wi.gov/psp/esupplier_6/SUPPLIER/ERP/c/WI_SS_SELF_SERVICE.WI_SS_BIDDER_BIDS.GBL?Page=WI_SS_BIDDER_BIDS&Action=U'
 }
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"

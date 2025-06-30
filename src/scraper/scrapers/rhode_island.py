@@ -61,7 +61,7 @@ class RhodeIslandScraper(RequestsScraper):
     # modifies: none
     # effects: retrieves total_hits, page_size, and first_page JSON via _fetch_page
     def search(self, **kwargs):
-        self.logger.info("Fetching first page of Rhode Island solicitations…")
+        self.logger.info("Fetching first page of Rhode Island solicitations...")
         first_page = self._fetch_page(offset=0)
         total_hits = first_page.get("hits", 0)
         page_size = len(first_page.get("records", []))
@@ -118,7 +118,7 @@ class RhodeIslandScraper(RequestsScraper):
         offset = page_size
         page = 2
         while offset < total_hits:
-            self.logger.info(f"Fetching page {page} (offset={offset})…")
+            self.logger.info(f"Fetching page {page} (offset={offset})...")
             page_json = self._fetch_page(offset=offset)
             batch = self.extract_data(page_json)
             all_records.extend(batch)
