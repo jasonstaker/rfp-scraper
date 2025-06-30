@@ -45,6 +45,7 @@ from .virginia import VirginiaScraper
 from .vermont import VermontScraper
 from .washington import WashingtonScraper
 from .wisconsin import WisconsinScraper
+from .west_virginia import WestVirginiaScraper
 
 SCRAPER_MAP = {
     "alabama": AlabamaScraper,
@@ -92,5 +93,6 @@ SCRAPER_MAP = {
     "virginia": VirginiaScraper,
     "vermont": VermontScraper,
     "washington": WashingtonScraper,
-    "wisconsin": WisconsinScraper
+    "wisconsin": WisconsinScraper,
+    "west virginia": WestVirginiaScraper
 }
