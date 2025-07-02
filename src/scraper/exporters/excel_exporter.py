@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 # effects: returns a new DataFrame formatted for Excel with specified columns
 def get_final_excel(original_df, state_name):
     state_title = state_name.capitalize()
-
     return pd.DataFrame({
         '': '',  # placeholder for checkbox
         'Proposal title': original_df['Label'],

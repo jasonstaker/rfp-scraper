@@ -11,14 +11,14 @@ from scraper.exporters.excel_exporter import export_all
 from scraper.utils.data_utils import sync_hidden_from_excel
 from src.config import CACHE_DIR, DEFAULT_TIMEOUT, KEYWORDS_FILE
 
-# requires: states is a list of state names to scrape, keywords is a list of keywords for filtering, cancel_event is an optional threading.event to signal cancellation
+# requires: states is a list of state names to scrape, keywords is a list of keywords for filtering, cancel_event is an optional threading.Event to signal cancellation
 # modifies: writes to KEYWORDS_FILE, modifies CACHE_DIR by deleting old excel files and writing a new excel file
-# effects: writes keywords to KEYWORDS_FILE, runs scrapers for each state, collects and filters records, writes results to a timestamped excel file in CACHE_DIR, and returns the file path; raises RuntimeError if scraping is canceled or no records are scraped
+# effects: writes keywords to KEYWORDS_FILE, runs scrapers for each state, collects and filters records, writes results to a timestamped excel file in CACHE_DIR, and returns both the state→DataFrame map and the file path; raises RuntimeError if scraping is canceled or no records are scraped
 def run_scraping(
     states: list[str],
     keywords: list[str],
     cancel_event: threading.Event | None = None
-) -> Path:
+) -> tuple[dict[str, pd.DataFrame], Path]:
     """
     Writes the given keywords to keywords.txt, then runs each state's scraper.
     """
@@ -67,7 +67,7 @@ def run_scraping(
             except Exception as e:
                 logging.error(f"[{state}] attempt {attempt} failed: {e}")
                 if attempt < 3:
-                    logging.info(f"[{state}] Retrying (attempt {attempt + 1})…")
+                    logging.info(f"[{state}] Retrying (attempt {attempt + 1})...")
                 else:
                     logging.error(f"[{state}] All 3 attempts failed.")
             finally:
@@ -78,17 +78,38 @@ def run_scraping(
                 logging.info(f"Cancellation requested just after [{state}] attempt {attempt}.")
                 break
 
-        if not success or cancel_event.is_set():
-            df_fail = pd.DataFrame([{"success": False}])
+        # after retries, if still no success, record a failure row
+        if not success:
+            df_fail = pd.DataFrame([{
+                'Label':       None,
+                'Code':        None,
+                'End (UTC-7)': None,
+                'Keyword Hits': None,
+                'Link':        None,
+                'success':     False
+            }])
             state_to_df[state] = df_fail
             continue
 
+        # if cancel_event was set mid-scrape, bail out now
+        if cancel_event.is_set():
+            logging.info(f"Cancellation requested; stopping before building DataFrame for {state}.")
+            break
+
         # build DataFrame for this state
         df = pd.DataFrame(records)
-        df["success"] = True
         if df.empty:
-            logging.info(f"[{state}] No records found.")
-            continue
+            logging.info(f"[{state}] No records found; marking as failure.")
+            df = pd.DataFrame([{
+                'Label':       None,
+                'Code':        None,
+                'End (UTC-7)': None,
+                'Keyword Hits': None,
+                'Link':        None,
+                'success':     False
+            }])
+        else:
+            df["success"] = True
 
         logging.info(f"[{state}] Scraped {len(df)} records.")
         state_to_df[state] = df
@@ -125,4 +146,5 @@ def run_scraping(
         export_all(state_to_df, writer)
 
     logging.info(f"Saved new cache file: {cache_path.name}")
-    return cache_path
+    # return both the map of DataFrames and the file path
+    return state_to_df, cache_path

@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QMessageBox,
 )
+import pandas as pd
 
 from src.config import ensure_dirs_exist, LOG_FILE, ASSETS_DIR
 from scraper.logging_config import configure_logging
@@ -42,26 +43,30 @@ class ScrapeWorker(QThread):
     # effects: executes scraping, emits progress and results
     def run(self):
         try:
-            cache_path = run_scraping(
+            # now returns (state_to_df, cache_path)
+            state_to_df, cache_path = run_scraping(
                 self.states,
                 self.keywords,
                 cancel_event=self._cancel_event
             )
-            results = {state: True for state in self.states}
-            results["_output_file"] = cache_path
+            # attach output file path
+            state_to_df["_output_file"] = cache_path
+
             self.log_line.emit(f"✅ saved output to: {cache_path.name}")
-            self.finished.emit({"success": True, "results": results})
+            # emit real DataFrame map
+            self.finished.emit({"success": True, "results": state_to_df})
         except RuntimeError as cancel_or_nodata:
             msg = str(cancel_or_nodata)
             self.log_line.emit(msg)
-            results = {state: False for state in self.states}
+            # on cancellation or no-data, build minimal failure map
+            results = {state: pd.DataFrame([{"success": False}]) for state in self.states}
             results["_error"] = msg
             self.finished.emit({"success": False, "results": results})
         except Exception as exc:
             tb = traceback.format_exc()
             self.log_line.emit(f"unexpected error: {exc}")
             self.log_line.emit(tb)
-            results = {state: False for state in self.states}
+            results = {state: pd.DataFrame([{"success": False}]) for state in self.states}
             results["_error"] = f"{exc}"
             self.finished.emit({"success": False, "results": results})
 
