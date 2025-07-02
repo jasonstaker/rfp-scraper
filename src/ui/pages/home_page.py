@@ -156,7 +156,7 @@ class HomePage(QWidget):
         self.kw_label = QLabel("Enter keywords (one per line):")
         self.kw_label.setStyleSheet("color: white;")
         header_layout.addWidget(self.kw_label, 2, alignment=Qt.AlignVCenter)
-        self.state_label = QLabel("Select states:")
+        self.state_label = QLabel("Select:")
         self.state_label.setObjectName("state_label")
         self.state_label.setStyleSheet("color: white;")
         header_layout.addWidget(self.state_label, 1, alignment=Qt.AlignVCenter)
@@ -186,7 +186,18 @@ class HomePage(QWidget):
         self.state_list = QListWidget()
         self.state_list.setObjectName("state_list")
         for state in AVAILABLE_STATES:
-            item = QListWidgetItem(state.capitalize())
+            parts = state.split()
+            if len(parts) == 2:
+                # two-word states: capitalize both
+                label = " ".join(p.capitalize() for p in parts)
+            elif len(parts) == 3:
+                # three-word states: only first and third
+                label = f"{parts[0].capitalize()} {parts[1].lower()} {parts[2].capitalize()}"
+            else:
+                # single-word or others
+                label = state.capitalize()
+
+            item = QListWidgetItem(label)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Unchecked)
             self.state_list.addItem(item)
