@@ -27,6 +27,7 @@ class SeleniumScraper(BaseScraper):
         self.options = webdriver.ChromeOptions()
         if SELENIUM_HEADLESS:
             self.options.add_argument("--headless=new")
+            self.options.add_argument("window-size=1920,1080")
         self.options.add_argument(
             "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "

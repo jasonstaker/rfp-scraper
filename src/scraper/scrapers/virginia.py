@@ -36,26 +36,26 @@ class VirginiaScraper(SeleniumScraper):
             self.logger.info("Navigating to Virginia portal and filtering Open opportunities")
             self.driver.get(self.base_url)
             WebDriverWait(self.driver, 20).until(
-                EC.presence_of_element_located((By.ID, 'selectedstatusListDiv'))
+                EC.presence_of_element_located((By.XPATH, '/html/body/div[3]/div/div[2]/div/ul/li[1]/div/ul/li[1]'))
             )
-            for li in self.driver.find_elements(By.CSS_SELECTOR, '#selectedstatusListDiv li'):
-                if li.text.strip().startswith('Open'):
-                    li.click()
-                    break
+            li = self.driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div/ul/li[1]/div/ul/li[1]')
+            li.click()
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'li.fetch-by-cursor'))
             )
-            # trigger lazy-loading
             self.driver.execute_script("window.scrollBy(0, window.innerHeight);")
             time.sleep(0.5)
             self.driver.execute_script("window.scrollBy(0, -100);")
             time.sleep(0.5)
-            # scroll until 'Loading more...' sentinel disappears
+            count = 1;
             while True:
                 try:
+                    count += 1
                     sentinel = self.driver.find_element(By.CSS_SELECTOR, 'li.fetch-by-cursor')
-                    self.driver.execute_script("arguments[0].scrollIntoView(true);", sentinel)
-                    time.sleep(0.5)
+                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", sentinel)
+                    time.sleep(0.2)
+                    if(count >= 120): 
+                        break
                 except NoSuchElementException:
                     self.logger.info("All items loaded; sentinel gone.")
                     break
