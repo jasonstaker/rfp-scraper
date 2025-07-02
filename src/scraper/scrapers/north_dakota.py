@@ -32,9 +32,6 @@ class NorthDakotaScraper(SeleniumScraper):
         search_url = f"{self.base_url}searchDT.startDate={start}&searchDT.stopDate={stop}"
 
         self.driver.get(self.base_url.rstrip("&"))
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Search All Solicitations"))
-        ).click()
         self.logger.info(f"Loading search URL: {search_url}")
         self.driver.get(search_url)
         WebDriverWait(self.driver, 20).until(
@@ -64,6 +61,7 @@ class NorthDakotaScraper(SeleniumScraper):
                 "Keyword Hits": "",
                 "Link": self.driver.current_url,
             })
+        
         return records
 
     # effects: orchestrate search, extract, filter, return
