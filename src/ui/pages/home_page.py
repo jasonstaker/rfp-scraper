@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
 )
 
 from scraper.config.settings import AVAILABLE_STATES
-from src.config import ASSETS_DIR, KEYWORDS_FILE
+from src.config import KEYWORDS_FILE
 
 # line number display for code editor
 class LineNumberArea(QWidget):

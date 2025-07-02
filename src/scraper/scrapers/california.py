@@ -2,7 +2,6 @@
 # url: https://caleprocure.ca.gov/pages/Events-BS3/event-search.aspx
 
 import logging
-import time
 from io import StringIO
 
 from bs4 import BeautifulSoup

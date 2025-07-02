@@ -7,7 +7,6 @@ from urllib.parse import urljoin, urlencode
 
 import pandas as pd
 from bs4 import BeautifulSoup
-import requests
 from zoneinfo import ZoneInfo
 from datetime import datetime
 

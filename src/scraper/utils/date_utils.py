@@ -31,7 +31,7 @@ def parse_date_generic(date_str: str) -> str:
 
     # 3) Try to parse with pandas (infer common formats)
     try:
-        dt = pd.to_datetime(date_part, infer_datetime_format=True, errors="raise")
+        dt = pd.to_datetime(date_part, errors="raise")
         return dt.date().isoformat()
     except Exception:
         # 4) Fallback: return the raw date part

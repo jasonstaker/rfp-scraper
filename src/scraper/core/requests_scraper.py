@@ -1,6 +1,5 @@
 # requests_scraper.py
 import requests
-from bs4 import BeautifulSoup
 from .base_scraper import BaseScraper
 
 class RequestsScraper(BaseScraper):

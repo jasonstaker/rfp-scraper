@@ -14,7 +14,6 @@ from bs4 import BeautifulSoup
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
-from scraper.utils.date_utils import parse_date_generic
 
 # a scraper for Vermont RFP data using Selenium
 class VermontScraper(SeleniumScraper):

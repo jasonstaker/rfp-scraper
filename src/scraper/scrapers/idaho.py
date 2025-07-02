@@ -2,7 +2,6 @@
 # url: https://sms-idaho-prd.tam.inforgov.com/fsm/SupplyManagementSupplier/list/SourcingEvent.XiOpenForBid?navigation=SourcingEvent%5BByCompany%5D%28_niu_,_niu_%29.OpenEventsNav&csk.SupplierGroup=LUMA
 
 import logging
-import time
 
 from bs4 import BeautifulSoup
 import pandas as pd

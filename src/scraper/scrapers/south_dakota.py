@@ -6,7 +6,6 @@ from datetime import datetime
 from urllib.parse import urljoin
 
 import pandas as pd
-import requests
 
 from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords

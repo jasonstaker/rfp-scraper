@@ -2,7 +2,6 @@
 # url: https://ssl.doas.state.ga.us/gpr/index
 
 import logging
-import time
 
 import pandas as pd
 import requests

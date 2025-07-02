@@ -3,7 +3,6 @@
 
 import logging
 import pandas as pd
-import requests
 from bs4 import BeautifulSoup
 
 from scraper.core.requests_scraper import RequestsScraper

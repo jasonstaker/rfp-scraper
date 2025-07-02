@@ -2,7 +2,6 @@
 # url: https://contracts.ocp.dc.gov/solicitations/search
 
 import logging
-import time
 from urllib.parse import urlparse, parse_qs
 
 import pandas as pd
