@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
 )
 import pandas as pd
 
-from src.config import ensure_dirs_exist, LOG_FILE, ASSETS_DIR
+from src.config import ensure_dirs_exist, LOG_FILE, ASSETS_DIR, OUTPUT_DIR
 from scraper.logging_config import configure_logging
 from scraper.runner import run_scraping
 from ui.pages.home_page import HomePage
@@ -153,16 +153,15 @@ class MainWindow(QMainWindow):
         results = payload.get("results", {})
         self.status_page.display_results(results)
         self.stack.setCurrentWidget(self.status_page)
-        output_path = results.get("_output_file")
-        if output_path and Path(output_path).exists():
-            import os
-            import platform
+        import os, platform
+        desktop_path = OUTPUT_DIR / "rfp_scraping_output.xlsx"
+        if desktop_path.exists():
             if platform.system() == "Windows":
-                os.startfile(output_path)
+                os.startfile(desktop_path)
             elif platform.system() == "Darwin":
-                os.system(f"open \"{output_path}\"")
+                os.system(f"open \"{desktop_path}\"")
             else:
-                os.system(f"xdg-open \"{output_path}\"")
+                os.system(f"xdg-open \"{desktop_path}\"")
         self._worker = None
 
     # requires: none

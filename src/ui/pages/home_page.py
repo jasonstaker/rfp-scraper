@@ -260,7 +260,7 @@ class HomePage(QWidget):
     def _on_state_item_changed(self, item: QListWidgetItem):
         if item.checkState() == Qt.Checked:
             item.setBackground(QColor("#FFD486"))
-            item.setForeground(QColor("#000000"))
+            item.setForeground(QColor("#1A429A"))
         else:
             item.setBackground(QColor("#FFFFFF"))
             item.setForeground(QColor("#1A429A"))

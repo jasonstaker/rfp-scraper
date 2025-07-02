@@ -9,7 +9,7 @@ import threading
 from scraper.scrapers import SCRAPER_MAP
 from scraper.exporters.excel_exporter import export_all
 from scraper.utils.data_utils import sync_hidden_from_excel
-from src.config import CACHE_DIR, DEFAULT_TIMEOUT, KEYWORDS_FILE
+from src.config import CACHE_DIR, DEFAULT_TIMEOUT, KEYWORDS_FILE, OUTPUT_DIR
 
 # requires: states is a list of state names to scrape, keywords is a list of keywords for filtering, cancel_event is an optional threading.Event to signal cancellation
 # modifies: writes to KEYWORDS_FILE, modifies CACHE_DIR by deleting old excel files and writing a new excel file
@@ -144,7 +144,16 @@ def run_scraping(
 
     with pd.ExcelWriter(cache_path, engine="xlsxwriter") as writer:
         export_all(state_to_df, writer)
-
     logging.info(f"Saved new cache file: {cache_path.name}")
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    desktop_filename = "rfp_scraping_output.xlsx"
+    desktop_path = OUTPUT_DIR / desktop_filename
+
+    # Option A: re‑write directly
+    with pd.ExcelWriter(desktop_path, engine="xlsxwriter") as writer:
+        export_all(state_to_df, writer)
+    logging.info(f"Saved new desktop file: {desktop_path.name}")
+
     # return both the map of DataFrames and the file path
     return state_to_df, cache_path
