@@ -7,10 +7,35 @@ from datetime import datetime
 # modifies: nothing
 # effects: returns only the date portion of the input, stripping off any time or timezone
 def parse_date_generic(date_str: str) -> str:
-    if not isinstance(date_str, str) or not date_str.strip():
+    """
+    Normalize a date/time string by stripping off the time and returning
+    an ISO-formatted date (YYYY-MM-DD). Supports:
+      - 'Jul 31, 2025 @ 03:00 PM'
+      - '7/15/2025 4:00:00 PM'
+      - plain 'YYYY-MM-DD' or other common date tokens
+    Falls back to the raw date part if parsing fails.
+    """
+    if not isinstance(date_str, str):
         return date_str
-    # split on whitespace and keep only the first token (the date)
-    return date_str.strip().split()[0]
+    s = date_str.strip()
+    if not s:
+        return s
+
+    # 1) Drop anything after '@' (e.g. time in 'Jul 31, 2025 @ 03:00 PM')
+    if '@' in s:
+        date_part = s.split('@', 1)[0].strip()
+    else:
+        # 2) For numeric date-times like '7/15/2025 4:00:00 PM',
+        #    split on whitespace and take only the date token
+        date_part = s.split()[0]
+
+    # 3) Try to parse with pandas (infer common formats)
+    try:
+        dt = pd.to_datetime(date_part, infer_datetime_format=True, errors="raise")
+        return dt.date().isoformat()
+    except Exception:
+        # 4) Fallback: return the raw date part
+        return date_part
 
 
 # requires: date_str is a string, ideally in MM/DD/YYYY or MM/DD/YY format, possibly with time
