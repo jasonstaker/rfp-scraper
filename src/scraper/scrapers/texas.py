@@ -113,7 +113,7 @@ class TexasScraper(RequestsScraper):
         for entry in response_json['lines']:
             try:
                 code = entry.get("solicitationId", "").strip()
-                label = entry.get("title", "").strip()
+                title = entry.get("title", "").strip()
 
                 raw_date = entry.get("responseDue", "").strip()
                 raw_time = entry.get("responseTime", "").strip()
@@ -124,10 +124,10 @@ class TexasScraper(RequestsScraper):
 
                 link = f"https://www.txsmartbuy.gov/esbd/{code}"
                 records.append({
-                    "Label":       label,
-                    "Code":        code,
-                    "End (UTC-7)": end_str,
-                    "Link":        link,
+                    "title":       title,
+                    "code":        code,
+                    "end_date": end_str,
+                    "link":        link,
                 })
 
             except Exception as e:

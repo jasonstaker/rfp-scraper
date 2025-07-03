@@ -73,7 +73,7 @@ class IowaScraper(RequestsScraper):
             try:
                 code = entry.get('BidNumber', '').strip()
 
-                label = entry.get('Solicitation', '').strip()
+                title = entry.get('Solicitation', '').strip()
 
                 raw_date = entry.get('ExpirationDate', '').strip()
                 if raw_date:
@@ -96,10 +96,10 @@ class IowaScraper(RequestsScraper):
                 link = f"{base_link}?bidId={bid_id}" if bid_id else ""
 
                 raw_records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_str,
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_str,
+                    "link": link,
                 })
 
             except Exception as e:

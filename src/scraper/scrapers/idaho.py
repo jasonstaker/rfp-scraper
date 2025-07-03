@@ -103,7 +103,7 @@ class IdahoScraper(SeleniumScraper):
                 card_spans = cols[0].find_all("span", class_="lm-card-field")
                 if len(card_spans) < 2:
                     continue
-                label = card_spans[0].get_text(strip=True)
+                title = card_spans[0].get_text(strip=True)
                 code = card_spans[1].get_text(strip=True)
 
                 raw_date = cols[5].get_text(strip=True)
@@ -112,11 +112,10 @@ class IdahoScraper(SeleniumScraper):
 
                 records.append(
                     {
-                        "Label": label,
-                        "Code": code,
-                        "End (UTC-7)": raw_date,
-                        "Keyword Hits": "",
-                        "Link": link,
+                        "title": title,
+                        "code": code,
+                        "end_date": raw_date,
+                        "link": link,
                     }
                 )
 

@@ -89,11 +89,10 @@ class IndianaScraper(SeleniumScraper):
                 raw_due = cols[4].get_text(strip=True)
 
                 records.append({
-                    "Label": title,
-                    "Code": code,
-                    "End (UTC-7)": raw_due,
-                    "Keyword Hits": "",
-                    "Link": download_link,
+                    "title": title,
+                    "code": code,
+                    "end_date": raw_due,
+                    "link": download_link,
                 })
 
             return records

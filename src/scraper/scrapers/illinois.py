@@ -57,19 +57,18 @@ class IllinoisScraper(SeleniumScraper):
                 link = a.get("href") if a else None
                 full_link = f"https://www.bidbuy.illinois.gov{link}" if link else self.base_url
 
-                # Column 7: Label/Title
-                label = cols[6].get_text(strip=True).removeprefix("Description")
+                # Column 7: title/Title
+                title = cols[6].get_text(strip=True).removeprefix("Description")
 
                 # Column 8: End Date
                 raw_date = cols[7].get_text(strip=True).removeprefix("Bid Opening Date")
                 end_date = parse_date_generic(raw_date)
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_date,
-                    "Keyword Hits": "",
-                    "Link": full_link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_date,
+                    "link": full_link,
                 })
 
             return records

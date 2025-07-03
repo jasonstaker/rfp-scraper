@@ -63,11 +63,11 @@ class LouisianaScraper(RequestsScraper):
             # Determine if row is an addendum
             if "Addendum" in desc:
                 code = last_code
-                label = desc
+                title = desc
             else:
                 code = cells[0].get_text(strip=True)
                 last_code = code
-                label = desc
+                title = desc
 
             # Extract end datetime by AM/PM pattern
             end_dt = ""
@@ -85,11 +85,10 @@ class LouisianaScraper(RequestsScraper):
                 link = STATE_RFP_URL_MAP.get("louisiana")
 
             records.append({
-                "Label": label,
-                "Code": code,
-                "End (UTC-7)": end_dt,
-                "Keyword Hits": "",
-                "Link": link,
+                "title": title,
+                "code": code,
+                "end_date": end_dt,
+                "link": link,
             })
 
         return records

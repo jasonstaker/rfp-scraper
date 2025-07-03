@@ -57,7 +57,7 @@ class WisconsinScraper(SeleniumScraper):
                     if len(cols) < 7:
                         continue
 
-                    label = cols[3].text.strip()
+                    title = cols[3].text.strip()
                     code = cols[1].text.strip()
                     end_raw = cols[6].text.strip()
                     end_str = end_raw.rsplit(' ', 1)[0]
@@ -67,11 +67,10 @@ class WisconsinScraper(SeleniumScraper):
                     link = href if href and not href.startswith('javascript:') else self.base_url
 
                     records.append({
-                        "Label": label,
-                        "Code": code,
-                        "End (UTC-7)": end_str,
-                        "Keyword Hits": "",
-                        "Link": link,
+                        "title": title,
+                        "code": code,
+                        "end_date": end_str,
+                        "link": link,
                     })
                 except Exception as e:
                     snippet = row.get_attribute("outerHTML")[:200].replace("\n", " ")
@@ -101,7 +100,7 @@ class WisconsinScraper(SeleniumScraper):
                     break
 
                 try:
-                    first_dt = datetime.strptime(batch[0]["End (UTC-7)"], "%m/%d/%Y %I:%M%p").date()
+                    first_dt = datetime.strptime(batch[0]["end_date"], "%m/%d/%Y %I:%M%p").date()
                     if first_dt < today:
                         self.logger.info("Encountered record before today; stopping pagination")
                         break

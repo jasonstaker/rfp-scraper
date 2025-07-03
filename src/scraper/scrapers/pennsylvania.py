@@ -64,17 +64,16 @@ class PennsylvaniaScraper(SeleniumScraper):
                     href = anchor.get("href")
                     link = urljoin(self.base_url, href)
 
-                    label = cols[2].get_text(strip=True)
+                    title = cols[2].get_text(strip=True)
 
                     raw_date = cols[8].get_text(strip=True)
                     end_date = parse_date_generic(raw_date)
 
                     records.append({
-                        "Label": label,
-                        "Code": code,
-                        "End (UTC-7)": end_date,
-                        "Keyword Hits": "",
-                        "Link": link,
+                        "title": title,
+                        "code": code,
+                        "end_date": end_date,
+                        "link": link,
                     })
                 except Exception as row_ex:
                     self.logger.error(f"Failed processing row: {row_ex}")

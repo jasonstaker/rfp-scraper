@@ -55,11 +55,10 @@ class NorthDakotaScraper(SeleniumScraper):
             code = cols[1].get_text(strip=True)
             title = cols[2].get_text(strip=True)
             records.append({
-                "Label": title,
-                "Code": code,
-                "End (UTC-7)": date,
-                "Keyword Hits": "",
-                "Link": self.driver.current_url,
+                "title": title,
+                "code": code,
+                "end_date": date,
+                "link": self.driver.current_url,
             })
         
         return records

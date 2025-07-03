@@ -32,10 +32,10 @@ def parse_date_generic(date_str: str) -> str:
     # 3) Try to parse with pandas (infer common formats)
     try:
         dt = pd.to_datetime(date_part, errors="raise")
-        return dt.date().isoformat()
+        return dt.date().isoformat().strip()
     except Exception:
         # 4) Fallback: return the raw date part
-        return date_part
+        return date_str
 
 
 # requires: date_str is a string, ideally in MM/DD/YYYY or MM/DD/YY format, possibly with time
@@ -61,7 +61,14 @@ def parse_date_simple(date_str: str) -> str:
 # effects: filters to keep only rows whose date (parsed via parse_date_generic) is today or later
 def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
     today = datetime.now().date()
-    # extract date strings, parse to date objects
-    dates = df["Due Date"].astype(str).apply(parse_date_generic)
-    parsed = pd.to_datetime(dates, errors="coerce").dt.date
-    return df[parsed >= today].copy().reset_index(drop=True)
+
+    if len(df) == 1:
+        row = df.iloc[0]
+        others = row.drop(labels=['State'], errors='ignore')
+        if others.isna().all() or all((pd.isna(v) or v == '' for v in others)):
+            return df.iloc[0:0].copy()
+
+    parsed = pd.to_datetime(df["Due Date"].astype(str), errors="coerce").dt.date
+
+    mask = parsed.notna() & (parsed >= today)
+    return df.loc[mask].reset_index(drop=True)

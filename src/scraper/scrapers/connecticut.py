@@ -82,7 +82,7 @@ class ConnecticutScraper(RequestsScraper):
         pacific = pytz.timezone("US/Pacific")
         try:
             for rec in page_content["records"]:
-                label = rec.get("title", "").strip()
+                title = rec.get("title", "").strip()
                 code = rec.get("bidNumber", "").strip()
                 end_ts = rec.get("openDate")
                 if end_ts is not None:
@@ -96,11 +96,10 @@ class ConnecticutScraper(RequestsScraper):
                     end_str = ""
                 link = STATE_RFP_URL_MAP['connecticut']
                 output.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_str,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_str,
+                    "link": link,
                 })
             return output
         except Exception as e:

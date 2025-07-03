@@ -96,15 +96,14 @@ class HawaiiScraper(SeleniumScraper):
                 code = code_tag.text.strip()
                 href = code_tag['href']
                 link = href if href.startswith('http') else f"https://hiepro.ehawaii.gov/{href}"
-                label = cols[2].get_text(strip=True)
+                title = cols[2].get_text(strip=True)
                 end_datetime = cols[8].get_text(strip=True)
 
                 records.append({
-                    'Label': label,
-                    'Code': code,
-                    'End (UTC-7)': end_datetime,
-                    'Keyword Hits': '',
-                    'Link': link,
+                    'title': title,
+                    'code': code,
+                    'end_date': end_datetime,
+                    'link': link,
                 })
             return records
         except Exception as e:

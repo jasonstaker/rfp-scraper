@@ -56,11 +56,10 @@ class NewYorkScraper(RequestsScraper):
                 end_date = parse_date_generic(raw_date)
 
                 records.append({
-                    "Label": desc,
-                    "Code": code,
-                    "End (UTC-7)": end_date,
-                    "Keyword Hits": "",
-                    "Link": full_link,
+                    "title": desc,
+                    "code": code,
+                    "end_date": end_date,
+                    "link": full_link,
                 })
             except Exception as e:
                 self.logger.error(f"extract_data entry parsing failed: {e}", exc_info=True)

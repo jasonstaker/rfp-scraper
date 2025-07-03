@@ -57,7 +57,7 @@ class SouthDakotaScraper(RequestsScraper):
 
         for rec in response_json["data"]:
             try:
-                label = rec.get("eventName", "").strip()
+                title = rec.get("eventName", "").strip()
                 code = rec.get("id", "").strip()
                 
                 end_str = rec.get("eventDueDate", "").strip()
@@ -72,11 +72,10 @@ class SouthDakotaScraper(RequestsScraper):
                 link = urljoin(base_detail, eventId)
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_fmt,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_fmt,
+                    "link": link,
                 })
             except Exception as e:
                 self.logger.error(f"Error parsing record: {e}", exc_info=False)

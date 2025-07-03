@@ -22,8 +22,8 @@ def load_hidden_ids() -> set[str]:
 def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     # drop rows with code in hidden ids
     hidden = load_hidden_ids()
-    if 'Code' in df.columns and hidden:
-        df = df[~df['Code'].astype(str).isin(hidden)]
+    if 'code' in df.columns and hidden:
+        df = df[~df['code'].astype(str).isin(hidden)]
 
     # load keywords
     try:
@@ -44,8 +44,8 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
 
     # collect keyword hit counts
     hits = []
-    for idx, row in df[df['Label'].notna()].iterrows():
-        text = row['Label'].lower()
+    for idx, row in df[df['title'].notna()].iterrows():
+        text = row['title'].lower()
         count = sum(text.count(kw) for kw in keywords)
         if count:
             hits.append((idx, count))

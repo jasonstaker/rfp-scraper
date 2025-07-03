@@ -83,14 +83,10 @@ class WashingtonScraper(SeleniumScraper):
             description = desc_cell.get_text(strip=True) if desc_cell else ""
 
             records.append({
-                "Label": title,
-                "Code": code,
-                "End (UTC-7)": date,
-                "Amendment (UTC-7)": amendment,
-                "Contact": contact,
-                "Description": description,
-                "Keyword Hits": "",
-                "Link": link,
+                "title": title,
+                "code": code,
+                "end_date": date,
+                "link": link,
             })
 
         return records

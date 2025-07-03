@@ -78,11 +78,10 @@ class ColoradoScraper(SeleniumScraper):
                 if not anchor:
                     continue
                 records.append({
-                    "Label": cols[1].get_text(strip=True),
-                    "Code": anchor.get_text(strip=True),
-                    "End (UTC-7)": cols[4].find("span").get_text(strip=True) if cols[4].find("span") else "",
-                    "Keyword Hits": "",
-                    "Link": STATE_RFP_URL_MAP["colorado"],
+                    "title": cols[1].get_text(strip=True),
+                    "code": anchor.get_text(strip=True),
+                    "end_date": cols[4].find("span").get_text(strip=True) if cols[4].find("span") else "",
+                    "link": STATE_RFP_URL_MAP["colorado"],
                 })
             return records
         except Exception as e:

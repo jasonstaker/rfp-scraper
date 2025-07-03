@@ -86,7 +86,7 @@ class OhioScraper(RequestsScraper):
             try:
                 tds = tr.find_all('td', recursive=False)
                 code = tds[1].get_text(strip=True)
-                label = tds[2].get_text(strip=True)
+                title = tds[2].get_text(strip=True)
                 end_str = tds[5].get_text(strip=True)
                 dt_et = datetime.strptime(end_str, '%m/%d/%Y %I:%M:%S %p').replace(
                     tzinfo=ZoneInfo('America/New_York')
@@ -95,11 +95,10 @@ class OhioScraper(RequestsScraper):
                 a = tr.find('a', href=True)
                 link = urljoin(self.base_url, a['href'].strip())
                 records.append({
-                    'Label': label,
-                    'Code': code,
-                    'End (UTC-7)': end_norm,
-                    'Keyword Hits': '',
-                    'Link': link,
+                    'title': title,
+                    'code': code,
+                    'end_date': end_norm,
+                    'link': link,
                 })
             except Exception as e:
                 self.logger.error(f'Row parse failed: {e}', exc_info=True)

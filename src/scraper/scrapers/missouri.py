@@ -76,7 +76,7 @@ class MissouriScraper(SeleniumScraper):
                 span = li.find_element(By.CSS_SELECTOR, "oj-highlight-text span")
                 raw = span.text.strip()
                 head, _, title = raw.partition(": ")
-                label = title or raw
+                title = title or raw
 
                 m = re.search(r"\b[A-Z][A-Z ]*-FY\d{2}-\d{4}-SL\b", head)
                 code = m.group(0) if m else ""
@@ -96,11 +96,10 @@ class MissouriScraper(SeleniumScraper):
                 link = self.base_url
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_str,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_str,
+                    "link": link,
                 })
 
             except Exception as e:

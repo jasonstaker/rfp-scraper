@@ -56,15 +56,14 @@ class ArkansasScraper(RequestsScraper):
                     continue
                 code = link_tag.text.strip()
                 href = link_tag["href"]
-                label = cols[6].get_text(strip=True)
+                title = cols[6].get_text(strip=True)
                 end = cols[7].get_text(strip=True)
                 full_link = f"https://arbuy.arkansas.gov{href}" if href.startswith("/") else href
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end,
-                    "Keyword Hits": "",
-                    "Link": full_link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end,
+                    "link": full_link,
                 })
             return records
         except Exception as e:

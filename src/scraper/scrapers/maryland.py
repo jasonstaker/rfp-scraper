@@ -51,17 +51,16 @@ class MarylandScraper(SeleniumScraper):
                 cells = row.find_all("td")
                 code = cells[1].get_text(strip=True)
                 a_tag = cells[2].find("a", href=True)
-                label = a_tag.get_text(strip=True) if a_tag else ""
+                title = a_tag.get_text(strip=True) if a_tag else ""
                 link = f"https://emma.maryland.gov/{a_tag['href']}" if a_tag else self.base_url
                 # End date is in fifth cell (zero-indexed cell 4)
                 end_dt = cells[4].get_text(strip=True)
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_dt,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_dt,
+                    "link": link,
                 })
             except Exception as e:
                 self.logger.warning(f"Failed to parse row: {e}")

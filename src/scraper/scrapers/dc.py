@@ -106,7 +106,7 @@ class DCScraper(SeleniumScraper):
                         f"{table_xpath}/tbody/tr[@role='listitem'][{i}]"
                     )
                     code = row_el.find_element(By.XPATH, "./td[1]").text.strip()
-                    label = row_el.find_element(By.XPATH, "./td[2]").text.strip()
+                    title = row_el.find_element(By.XPATH, "./td[2]").text.strip()
                     closing = row_el.find_element(By.XPATH, "./td[5]").text.strip()
                     if self.hash_token:
                         link = (
@@ -116,11 +116,10 @@ class DCScraper(SeleniumScraper):
                     else:
                         link = STATE_RFP_URL_MAP["district of columbia"]
                     records.append({
-                        "Label": label,
-                        "Code": code,
-                        "End (UTC-7)": closing,
-                        "Keyword Hits": "",
-                        "Link": link,
+                        "title": title,
+                        "code": code,
+                        "end_date": closing,
+                        "link": link,
                     })
                 except Exception as e:
                     self.logger.error(f"Failed processing row {i}: {e}", exc_info=False)

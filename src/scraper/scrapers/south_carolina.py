@@ -63,7 +63,7 @@ class SouthCarolinaScraper(RequestsScraper):
                 if len(cols) < 6:
                     continue
 
-                label = cols[0].get_text(strip=True).replace('Title:', '', 1).strip()
+                title = cols[0].get_text(strip=True).replace('Title:', '', 1).strip()
                 # other fields can be extracted similarly if needed
                 end_date = cols[4].get_text(strip=True).replace('End Date:', '', 1).strip()
 
@@ -74,11 +74,10 @@ class SouthCarolinaScraper(RequestsScraper):
                 code = parsed.get('s', [''])[0]
 
                 records.append({
-                    'Label': label,
-                    'Code': code,
-                    'End (UTC-7)': end_date,
-                    'Keyword Hits': '',
-                    'Link': link,
+                    'title': title,
+                    'code': code,
+                    'end_date': end_date,
+                    'link': link,
                 })
             except Exception as row_ex:
                 self.logger.error(f"Failed processing SCBO row: {row_ex}")

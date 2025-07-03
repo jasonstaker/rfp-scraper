@@ -87,11 +87,10 @@ class MississippiScraper(RequestsScraper):
                 detail_url = f"https://www.ms.gov/dfa/contract_bid_search/Bid/Details/{bid_id}?AppId=1"
 
                 records.append({
-                    "Label":       desc,
-                    "Code":        bid_num,
-                    "End (UTC-7)": end_str,
-                    "Keyword Hits":"",
-                    "Link":        detail_url,
+                    "title":       desc,
+                    "code":        bid_num,
+                    "end_date": end_str,
+                    "link":        detail_url,
                 })
 
             except Exception as e:

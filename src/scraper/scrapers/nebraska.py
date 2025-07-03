@@ -36,9 +36,9 @@ class NebraskaScraper(RequestsScraper):
             cols = row.find_all("td")
             if len(cols) < 8:
                 continue
-            # Description link and label
+            # Description link and title
             a = cols[1].find("a", href=True)
-            label = a.get_text(strip=True) if a else cols[1].get_text(strip=True)
+            title = a.get_text(strip=True) if a else cols[1].get_text(strip=True)
             link = urljoin(self.base_url, a["href"]) if a else self.base_url
             # Solicitation Number
             code = cols[6].get_text(strip=True)
@@ -46,11 +46,10 @@ class NebraskaScraper(RequestsScraper):
             end_date = cols[3].get_text(strip=True)
 
             records.append({
-                "Label": label,
-                "Code": code,
-                "End (UTC-7)": end_date,
-                "Keyword Hits": "",
-                "Link": link,
+                "title": title,
+                "code": code,
+                "end_date": end_date,
+                "link": link,
             })
 
         df = pd.DataFrame(records)

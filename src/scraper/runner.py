@@ -81,11 +81,11 @@ def run_scraping(
         # after retries, if still no success, record a failure row
         if not success:
             df_fail = pd.DataFrame([{
-                'Label':       None,
-                'Code':        None,
-                'End (UTC-7)': None,
+                'title':       None,
+                'code':        None,
+                'end_date': None,
                 'Keyword Hits': None,
-                'Link':        None,
+                'link':        None,
                 'success':     False
             }])
             state_to_df[state] = df_fail
@@ -101,11 +101,11 @@ def run_scraping(
         if df.empty:
             logging.info(f"[{state}] No records found; marking as failure.")
             df = pd.DataFrame([{
-                'Label':       None,
-                'Code':        None,
-                'End (UTC-7)': None,
+                'title':       None,
+                'code':        None,
+                'end_date': None,
                 'Keyword Hits': None,
-                'Link':        None,
+                'link':        None,
                 'success':     False
             }])
         else:
@@ -117,6 +117,12 @@ def run_scraping(
     # if the user hit “Cancel” at any point, stop here
     if cancel_event.is_set():
         raise RuntimeError("Scrape was canceled by user.")
+    
+    all_failed = True
+    for df in state_to_df.values():
+        if 'success' in df.columns and df['success'].any():
+            all_failed = False
+            break
 
     if not state_to_df:
         raise RuntimeError("No records scraped for any state.")
@@ -146,14 +152,13 @@ def run_scraping(
         export_all(state_to_df, writer)
     logging.info(f"Saved new cache file: {cache_path.name}")
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    desktop_filename = "rfp_scraping_output.xlsx"
-    desktop_path = OUTPUT_DIR / desktop_filename
+    if (all_failed):
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        desktop_filename = "rfp_scraping_output.xlsx"
+        desktop_path = OUTPUT_DIR / desktop_filename
+    
+        with pd.ExcelWriter(desktop_path, engine="xlsxwriter") as writer:
+            export_all(state_to_df, writer)
+        logging.info(f"Saved new desktop file: {desktop_path.name}")
 
-    # Option A: re‑write directly
-    with pd.ExcelWriter(desktop_path, engine="xlsxwriter") as writer:
-        export_all(state_to_df, writer)
-    logging.info(f"Saved new desktop file: {desktop_path.name}")
-
-    # return both the map of DataFrames and the file path
     return state_to_df, cache_path

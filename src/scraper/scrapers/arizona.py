@@ -12,6 +12,7 @@ import requests
 from scraper.core.requests_scraper import RequestsScraper
 from scraper.config.settings import FALLBACK_CSRF, STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
+from scraper.utils.date_utils import parse_date_generic
 
 # a scraper for Arizona RFP data using Requests
 class ArizonaScraper(RequestsScraper):
@@ -185,6 +186,7 @@ class ArizonaScraper(RequestsScraper):
                 self.logger.error("expected at least 5 tables, found fewer")
                 raise
             df = tables[4]
+
             soup = BeautifulSoup(page_content, "html.parser")
             tbl = soup.find("table", id="body_x_grid_grd")
             if not tbl:
@@ -198,7 +200,12 @@ class ArizonaScraper(RequestsScraper):
                 if href and not href.startswith("http"):
                     href = urljoin(self.base_url, href)
                 links.append(href)
-            df["Link"] = links
+            df["link"] = links
+
+            df = df.rename(columns={'Label': 'title', 'Code': 'code', 'End (UTC-7)': 'end_date'})
+            df['end_date'] = df['end_date'].apply(lambda x: parse_date_generic(x) if pd.notna(x) else x)
+            df = df[['title', 'code', 'end_date', 'link']]
+
             self.current_df = df
             return df.to_dict("records")
         except ValueError as ve:
@@ -213,30 +220,48 @@ class ArizonaScraper(RequestsScraper):
     def scrape(self, **kwargs):
         self.logger.info("starting Arizona scrape")
         all_records = []
+
+        # Attempt initial search, return empty list on failure or no results
         try:
             page = self.search(**kwargs)
-            if not page:
-                self.logger.warning("search() returned no page; skipping extraction")
-                raise
+        except Exception as e:
+            self.logger.warning(f"search failed: {e}")
+            return []
+        if not page:
+            self.logger.warning("search() returned no page; aborting Arizona scrape")
+            return []
+
+        # Extract data from the first page, skip on failure
+        try:
             all_records.extend(self.extract_data(page))
+        except Exception as e:
+            self.logger.warning(f"extract_data failed on first page: {e}")
+        self.previous_df = self.current_df
+
+        # Paginate through subsequent pages
+        while True:
+            try:
+                page = self.next_page()
+            except Exception as e:
+                self.logger.warning(f"next_page failed: {e}")
+                break
+            if not page:
+                break
+            try:
+                all_records.extend(self.extract_data(page))
+            except Exception as e:
+                self.logger.warning(f"extract_data failed on page {self.page_num - 1}: {e}")
+
+            # Stop if the page is identical to the previous
+            if self.current_df is not None and self.previous_df is not None and self.current_df.equals(self.previous_df):
+                self.logger.info("identical page detected, stopping pagination")
+                break
             self.previous_df = self.current_df
 
-            while True:
-                page = self.next_page()
-                if not page:
-                    break
-                all_records.extend(self.extract_data(page))
-                if self.current_df is not None and self.previous_df is not None:
-                    if self.current_df.equals(self.previous_df):
-                        self.logger.info("identical page detected, stopping pagination")
-                        break
-                self.previous_df = self.current_df
+        # Filter and return
+        df = pd.DataFrame(all_records)
+        self.logger.info(f"total records before filter: {len(df)}")
+        filtered = filter_by_keywords(df)
+        self.logger.info(f"total records after filter: {len(filtered)}")
+        return filtered.to_dict("records")
 
-            df = pd.DataFrame(all_records)
-            self.logger.info(f"total records before filter: {len(df)}")
-            filtered = filter_by_keywords(df)
-            self.logger.info(f"total records after filter: {len(filtered)}")
-            return filtered.to_dict("records")
-        except Exception as e:
-            self.logger.error(f"scrape failed: {e}", exc_info=True)
-            raise

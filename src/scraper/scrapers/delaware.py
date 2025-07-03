@@ -59,7 +59,7 @@ class DelawareScraper(SeleniumScraper):
                 try:
                     bid_id = (cols[0].get_attribute('title') or cols[0].text).strip()
                     code = (cols[1].get_attribute('title') or cols[1].text).strip()
-                    label = (cols[2].get_attribute('title') or cols[2].text).strip()
+                    title = (cols[2].get_attribute('title') or cols[2].text).strip()
                     closing_date = (cols[4].get_attribute('title') or cols[4].text).strip()
 
                     if not bid_id:
@@ -68,11 +68,10 @@ class DelawareScraper(SeleniumScraper):
 
                     link = f"https://mmp.delaware.gov/Bids/Details/{bid_id}"
                     records.append({
-                        'Label': label,
-                        'Code': code,
-                        'End (UTC-7)': closing_date,
-                        'Keyword Hits': '',
-                        'Link': link,
+                        'title': title,
+                        'code': code,
+                        'end_date': closing_date,
+                        'link': link,
                     })
                 except Exception as e:
                     self.logger.error(f"[Row {idx}] Error parsing row: {e}")

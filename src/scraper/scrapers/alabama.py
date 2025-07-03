@@ -85,21 +85,20 @@ class AlabamaScraper(SeleniumScraper):
                 cols = row.find_all("td", valign="top")
                 if len(cols) < 4:
                     continue
-                label_block = cols[0]
+                title_block = cols[0]
                 items = [
                     td.get_text(strip=True)
-                    for td in label_block.find_all("td", style=lambda s: s and "border-bottom" in s)
+                    for td in title_block.find_all("td", style=lambda s: s and "border-bottom" in s)
                 ]
-                label = items[0] if items else ""
+                title = items[0] if items else ""
                 code = items[1] if len(items) > 1 else ""
                 end_td = cols[2].find("td", style=lambda s: s and "color:red" in s)
                 end_text = end_td.get_text(strip=True) if end_td else ""
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_text,
-                    "Keyword Hits": "",
-                    "Link": STATE_RFP_URL_MAP["alabama"],
+                    "title": title,
+                    "code": code,
+                    "end_date": end_text,
+                    "link": STATE_RFP_URL_MAP["alabama"],
                 })
             self.logger.info(f"extracted {len(records)} Alabama records")
             return records

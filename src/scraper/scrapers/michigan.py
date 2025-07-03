@@ -86,8 +86,8 @@ class MichiganScraper(SeleniumScraper):
                 if len(cols) < 5:
                     continue
 
-                # Column 2: Label
-                label = cols[1].get_text(strip=True)
+                # Column 2: title
+                title = cols[1].get_text(strip=True)
                 # Column 4: Code and link
                 anchor = cols[3].find("a")
                 if not anchor:
@@ -100,11 +100,10 @@ class MichiganScraper(SeleniumScraper):
                 raw_date = date_span.get_text(strip=True) if date_span else ""
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": raw_date,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": raw_date,
+                    "link": link,
                 })
 
             return records

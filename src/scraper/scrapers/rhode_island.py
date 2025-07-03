@@ -75,7 +75,7 @@ class RhodeIslandScraper(RequestsScraper):
         pacific = pytz.timezone("US/Pacific")
         for rec in page_content["records"]:
             try:
-                label = rec.get("title", "").strip()
+                title = rec.get("title", "").strip()
                 code = rec.get("bidNumber", "").strip()
                 
                 ts = rec.get("openDate") or rec.get("statusDate")
@@ -88,11 +88,10 @@ class RhodeIslandScraper(RequestsScraper):
                 link = STATE_RFP_URL_MAP.get('rhode_island', self.base_url)
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_str,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_str,
+                    "link": link,
                 })
             except Exception as e:
                 self.logger.error(f"Error parsing record: {e}")

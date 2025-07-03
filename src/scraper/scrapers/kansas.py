@@ -78,12 +78,10 @@ class KansasScraper(SeleniumScraper):
             end_date = cols[5].get_text(strip=True)
 
             records.append({
-                "Label": name,
-                "Code": code,
-                "End (UTC-7)": end_date,
-                "Type": "RFP",
-                "Keyword Hits": "",
-                "Link": STATE_RFP_URL_MAP["kansas"],
+                "title": name,
+                "code": code,
+                "end_date": end_date,
+                "link": STATE_RFP_URL_MAP["kansas"],
             })
 
         return records

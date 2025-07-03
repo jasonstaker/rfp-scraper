@@ -62,9 +62,9 @@ class WyomingScraper(SeleniumScraper):
                 code = code_match.group(1) if code_match else ""
 
                 if code:
-                    label = re.sub(rf"#\s*{re.escape(code)}\s*-\s*", "", full_text).strip()
+                    title = re.sub(rf"#\s*{re.escape(code)}\s*-\s*", "", full_text).strip()
                 else:
-                    label = full_text
+                    title = full_text
 
                 link = anchor.get_attribute("href")
 
@@ -78,11 +78,10 @@ class WyomingScraper(SeleniumScraper):
                     end_date = date_str
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_date,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_date,
+                    "link": link,
                 })
 
             except Exception as e:

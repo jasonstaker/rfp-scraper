@@ -77,15 +77,14 @@ class FloridaScraper(RequestsScraper):
                 if ad_id is None:
                     continue
                 code = "AD-" + str(ad_id)
-                label = item.get("title", "").strip()
+                title = item.get("title", "").strip()
                 close_iso = item.get("closeDate", "").strip()
                 detail_link = f"https://vendor.myfloridamarketplace.com/search/bids/detail/{ad_id}"
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": close_iso,
-                    "Keyword Hits": "",
-                    "Link": detail_link,
+                    "title": title,
+                    "code": code,
+                    "end_date": close_iso,
+                    "link": detail_link,
                 })
             return records
         except Exception as e:

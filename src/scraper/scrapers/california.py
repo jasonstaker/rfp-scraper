@@ -68,14 +68,12 @@ class CaliforniaScraper(SeleniumScraper):
                 links.append(url)
 
             mapped = pd.DataFrame({
-                "Label": df.iloc[:, 2],
-                "Code": df.iloc[:, 1],
-                "End (UTC-7)": df.iloc[:, 4],
-                "Type": "RFP",
-                "Keyword Hits": "",
-                "Link": links,
+                "title": df.iloc[:, 2],
+                "code": df.iloc[:, 1],
+                "end_date": df.iloc[:, 4],
+                "link": links,
             })
-            mapped["Link"] = mapped["Link"].fillna(self.base_url)
+            mapped["link"] = mapped["link"].fillna(self.base_url)
             return mapped.to_dict("records")
         except ValueError as ve:
             self.logger.error(f"pd.read_html failed: {ve}", exc_info=False)

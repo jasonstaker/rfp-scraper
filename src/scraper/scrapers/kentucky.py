@@ -84,7 +84,7 @@ class KentuckyScraper(SeleniumScraper):
                 if len(cols) < 5:
                     continue
 
-                label = cols[1].get_text(strip=True)
+                title = cols[1].get_text(strip=True)
                 anchor = cols[3].find("a")
                 if not anchor:
                     continue
@@ -97,11 +97,10 @@ class KentuckyScraper(SeleniumScraper):
 
                 records.append(
                     {
-                        "Label": label,
-                        "Code": code,
-                        "End (UTC-7)": raw_date,
-                        "Keyword Hits": "",
-                        "Link": link,
+                        "title": title,
+                        "code": code,
+                        "end_date": raw_date,
+                        "link": link,
                     }
                 )
 

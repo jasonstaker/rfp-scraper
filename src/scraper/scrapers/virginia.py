@@ -84,7 +84,7 @@ class VirginiaScraper(SeleniumScraper):
         records = []
         for card in first_li.find_all('div', class_='card text-center'):
             try:
-                label = card.select_one('h5.card-title').get_text(strip=True)
+                title = card.select_one('h5.card-title').get_text(strip=True)
                 code_text = card.select_one('h6.card-title').get_text(strip=True)
                 parts = code_text.split()
                 if len(parts) < 2:
@@ -103,10 +103,10 @@ class VirginiaScraper(SeleniumScraper):
                     raw = closing_p.get_text(strip=True).replace('Closing On:', '').strip()
                     end_str = parse_date_generic(raw)
                 records.append({
-                    'Label':       label,
-                    'Code':        code_text,
-                    'End (UTC-7)': end_str,
-                    'Link':        link,
+                    'title':       title,
+                    'code':        code_text,
+                    'end_date': end_str,
+                    'link':        link,
                 })
             except Exception as e:
                 self.logger.error(f"Error parsing card: {e}", exc_info=True)

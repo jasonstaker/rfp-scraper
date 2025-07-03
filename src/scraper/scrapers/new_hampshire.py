@@ -59,7 +59,7 @@ class NewHampshireScraper(SeleniumScraper):
                     continue
 
                 desc_span = cols[0].find("span")
-                label = desc_span.get_text(strip=True) if desc_span else cols[0].get_text(strip=True)
+                title = desc_span.get_text(strip=True) if desc_span else cols[0].get_text(strip=True)
 
                 bid_anchor = cols[1].find("a")
                 code = bid_anchor.get_text(strip=True) if bid_anchor else ""
@@ -68,12 +68,10 @@ class NewHampshireScraper(SeleniumScraper):
                 end_date = cols[4].get_text(strip=True)
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_date,
-                    "Type": "RFP",
-                    "Keyword Hits": "",
-                    "Link": link or self.base_url,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_date,
+                    "link": link or self.base_url,
                 })
 
             return records

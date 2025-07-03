@@ -72,13 +72,13 @@ class NewMexicoScraper(RequestsScraper):
                 a = row.find('a', class_=re.compile(r'btn-link-header'))
                 if not a:
                     continue
-                label = a.get_text(strip=True)
+                title = a.get_text(strip=True)
                 link = a['href']
 
                 code = ''
-                num_label = row.find('div', id=re.compile(r'.*_LABEL_NUMBER'))
-                if num_label:
-                    tr_layout = num_label.find_parent('div', class_='phx table-row-layout')
+                num_title = row.find('div', id=re.compile(r'.*_title_NUMBER'))
+                if num_title:
+                    tr_layout = num_title.find_parent('div', class_='phx table-row-layout')
                     if tr_layout:
                         cells_layout = tr_layout.find_all('div', class_='phx table-cell-layout')
                         if len(cells_layout) >= 2:
@@ -86,9 +86,9 @@ class NewMexicoScraper(RequestsScraper):
                             code = content.get_text(strip=True) if content else ''
 
                 end_date = ''
-                close_label = row.find('div', id=re.compile(r'.*_LABEL_CLOSE'))
-                if close_label:
-                    tr_layout = close_label.find_parent('div', class_='phx table-row-layout')
+                close_title = row.find('div', id=re.compile(r'.*_title_CLOSE'))
+                if close_title:
+                    tr_layout = close_title.find_parent('div', class_='phx table-row-layout')
                     if tr_layout:
                         cells_layout = tr_layout.find_all('div', class_='phx table-cell-layout')
                         if len(cells_layout) >= 2:
@@ -97,11 +97,10 @@ class NewMexicoScraper(RequestsScraper):
                             end_date = parse_date_generic(raw)
 
                 records.append({
-                    'Label': label,
-                    'Code': code,
-                    'End (UTC-7)': end_date,
-                    'Keyword Hits': '',
-                    'Link': link,
+                    'title': title,
+                    'code': code,
+                    'end_date': end_date,
+                    'link': link,
                 })
 
             except Exception as e:

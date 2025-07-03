@@ -64,7 +64,7 @@ class UtahScraper(RequestsScraper):
             try:
                 project_id = proj.get('ProjectID', '').strip()
                 code = proj.get('ReferenceID', '').strip()
-                label = proj.get('ProjectName', '').strip()
+                title = proj.get('ProjectName', '').strip()
 
                 raw_date = proj.get('DateClose', '').strip()
                 end_str = parse_date_generic(raw_date) if raw_date else ''
@@ -72,10 +72,10 @@ class UtahScraper(RequestsScraper):
                 link = f"https://utah.bonfirehub.com/opportunities/{project_id}" if project_id else ''
 
                 records.append({
-                    'Label':       label,
-                    'Code':        code,
-                    'End (UTC-7)': end_str,
-                    'Link':        link,
+                    'title':       title,
+                    'code':        code,
+                    'end_date': end_str,
+                    'link':        link,
                 })
 
             except Exception as e:

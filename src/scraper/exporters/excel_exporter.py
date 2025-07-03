@@ -18,12 +18,12 @@ def get_final_excel(original_df, state_name):
     state_title = state_name.capitalize()
     return pd.DataFrame({
         '': '',  # placeholder for checkbox
-        'Proposal title': original_df['Label'],
+        'Proposal title': original_df['title'],
         'State': state_title,
-        'Solicitation #': original_df['Code'],
-        'Due Date': original_df['End (UTC-7)'].apply(parse_date_generic),
+        'Solicitation #': original_df['code'],
+        'Due Date': original_df['end_date'].apply(parse_date_generic),
         'Keyword Hits': original_df['Keyword Hits'],
-        'Link': original_df['Link']
+        'Link': original_df['link']
     })
 
 # requires: state_to_df_map is a dictionary mapping state names to DataFrames, writer is an ExcelWriter object

@@ -66,10 +66,10 @@ class MinnesotaScraper(RequestsScraper):
                 title_span = li.find("span", class_="views-field-title")
                 if not title_span:
                     raise ValueError("no title_span found")
-                label_span = title_span.find("span", class_="field-content")
-                if not label_span:
+                title_span = title_span.find("span", class_="field-content")
+                if not title_span:
                     raise ValueError("title_span without .field-content")
-                label = label_span.get_text(strip=True)
+                title = title_span.get_text(strip=True)
 
                 due_container = li.find("span", class_="views-field-field-due-date")
                 end_str = ""
@@ -84,11 +84,10 @@ class MinnesotaScraper(RequestsScraper):
                 link = STATE_RFP_URL_MAP['minnesota']
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": end_str,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_str,
+                    "link": link,
                 })
 
             except Exception as e:

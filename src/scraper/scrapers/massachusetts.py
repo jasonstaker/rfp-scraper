@@ -81,16 +81,15 @@ class MassachusettsScraper(RequestsScraper):
             return []
         output = []
         for _, row in df.iterrows():
-            label = row.get("Description", "").strip()
+            title = row.get("Description", "").strip()
             code = row.get("Bid Solicitation #", "").strip()
             end_date = row.get("Bid Opening Date", "").strip()
             link = STATE_RFP_URL_MAP.get("massachusetts")
             output.append({
-                "Label": label,
-                "Code": code,
-                "End (UTC-7)": end_date,
-                "Keyword Hits": "",
-                "Link": link,
+                "title": title,
+                "code": code,
+                "end_date": end_date,
+                "link": link,
             })
         return output
 

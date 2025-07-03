@@ -172,11 +172,10 @@ class GeorgiaScraper(RequestsScraper):
                 )
 
                 records.append({
-                    "Label": title,
-                    "Code": code,
-                    "End (UTC-7)": closing_date_str,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": closing_date_str,
+                    "link": link,
                 })
 
             return records

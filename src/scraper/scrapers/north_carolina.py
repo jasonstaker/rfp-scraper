@@ -79,11 +79,10 @@ class NorthCarolinaScraper(SeleniumScraper):
                 end_date = time_tag.get_text(strip=True) if time_tag else cols[3].get_text(strip=True)
 
                 records.append({
-                    "Label": title,
-                    "Code": code,
-                    "End (UTC-7)": end_date,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": end_date,
+                    "link": link,
                 })
 
             return records

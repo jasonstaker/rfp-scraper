@@ -46,7 +46,7 @@ class MaineScraper(RequestsScraper):
                     continue
                 # Title and link
                 a = cols[0].find("a", href=True)
-                label = a.get_text(strip=True) if a else ""
+                title = a.get_text(strip=True) if a else ""
                 link = f"https://www.maine.gov{a['href']}" if a else self.base_url
                 # Code
                 code = cols[1].get_text(strip=True)
@@ -55,11 +55,10 @@ class MaineScraper(RequestsScraper):
                 due_date = due_date_tag.get_text(strip=True) if due_date_tag else cols[5].get_text(strip=True)
 
                 records.append({
-                    "Label": label,
-                    "Code": code,
-                    "End (UTC-7)": due_date,
-                    "Keyword Hits": "",
-                    "Link": link,
+                    "title": title,
+                    "code": code,
+                    "end_date": due_date,
+                    "link": link,
                 })
             except Exception as e:
                 self.logger.warning(f"Failed to parse row: {e}")

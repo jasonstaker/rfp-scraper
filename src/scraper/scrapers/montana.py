@@ -51,7 +51,7 @@ class MontanaScraper(SeleniumScraper):
             raise ValueError("empty page_source")
 
         soup = BeautifulSoup(page_source, "html.parser")
-        tables = soup.find_all("table", attrs={"aria-label": "Search Results"})
+        tables = soup.find_all("table", attrs={"aria-title": "Search Results"})
         if not tables:
             self.logger.error("no Search Results table found")
             raise RuntimeError("table not found")
@@ -73,7 +73,7 @@ class MontanaScraper(SeleniumScraper):
             link_a = details_td.select_one("a.btn.btn-link")
             if not link_a:
                 continue
-            label = link_a.get_text(strip=True)
+            title = link_a.get_text(strip=True)
             link  = link_a["href"]
 
             data_rows = details_td.select("div.phx.table-row-layout")
@@ -92,17 +92,15 @@ class MontanaScraper(SeleniumScraper):
                 return ""
 
             # only remove timezone from the Close date
-            end_str = _find_value("LABEL_CLOSE", strip_tz=True)
-            type_   = _find_value("LABEL_TYPE")
-            code    = _find_value("LABEL_NUMBER")
+            end_str = _find_value("title_CLOSE", strip_tz=True)
+            type_   = _find_value("title_TYPE")
+            code    = _find_value("title_NUMBER")
 
             records.append({
-                "Label":        label,
-                "Code":         code,
-                "End (UTC-7)":  end_str,
-                "Type":         type_,
-                "Keyword Hits": "",
-                "Link":         link,
+                "title":        title,
+                "code":         code,
+                "end_date":  end_str,
+                "link":         link,
             })
 
         return records
@@ -121,7 +119,7 @@ class MontanaScraper(SeleniumScraper):
                 batch = self.extract_data(html)
                 all_records.extend(batch)
 
-                next_btn = self.driver.find_element(By.XPATH, "//button[@aria-label='Next page']")
+                next_btn = self.driver.find_element(By.XPATH, "//button[@aria-title='Next page']")
                 if next_btn.get_attribute("disabled"):
                     break
 

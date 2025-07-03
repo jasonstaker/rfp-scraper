@@ -68,7 +68,7 @@ class VermontScraper(SeleniumScraper):
             # extract BidID
             m = re.search(r"BidID=(\d+)", a['href'])
             code = m.group(1) if m else ''
-            label = a.get_text(strip=True)
+            title = a.get_text(strip=True)
             # extract close date
             close_span = inner_table.find('span', id='lblCloseDate')
             if close_span:
@@ -83,10 +83,10 @@ class VermontScraper(SeleniumScraper):
             link = f"{base}/{preview_path}"
 
             records.append({
-                'Label':       label,
-                'Code':        code,
-                'End (UTC-7)': end_str,
-                'Link':        link,
+                'title':       title,
+                'code':        code,
+                'end_date': end_str,
+                'link':        link,
             })
         return records
 
