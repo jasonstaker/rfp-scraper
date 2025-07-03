@@ -1,5 +1,5 @@
 # kentucky.py
-# url: https://prd.co.cgiadvantage.com/PRDVSS1X1/Advantage4
+# url: https://vss.ky.gov/vssprod-ext/Advantage4
 
 import logging
 

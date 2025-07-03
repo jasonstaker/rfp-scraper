@@ -79,7 +79,14 @@ class MissouriScraper(SeleniumScraper):
                 title = title or raw
 
                 m = re.search(r"\b[A-Z][A-Z ]*-FY\d{2}-\d{4}-SL\b", head)
-                code = m.group(0) if m else ""
+                code = None
+                try:
+                    colon_index = raw.index(':')
+                    before_colon = raw[:colon_index]
+                    last_paren_index = before_colon.rindex(')')
+                    code = before_colon[last_paren_index + 1:].strip()
+                except ValueError:
+                    pass
 
                 try:
                     dt_elem = li.find_element(

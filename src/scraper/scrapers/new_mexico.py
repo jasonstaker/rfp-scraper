@@ -65,47 +65,42 @@ class NewMexicoScraper(RequestsScraper):
 
         records = []
         for row in body_rows:
-            cells = row.find_all('td')
-            if len(cells) < 2:
+            cols = row.find_all("td")
+            if len(cols) < 2:
                 continue
-            try:
-                a = row.find('a', class_=re.compile(r'btn-link-header'))
-                if not a:
-                    continue
-                title = a.get_text(strip=True)
-                link = a['href']
 
-                code = ''
-                num_title = row.find('div', id=re.compile(r'.*_title_NUMBER'))
-                if num_title:
-                    tr_layout = num_title.find_parent('div', class_='phx table-row-layout')
-                    if tr_layout:
-                        cells_layout = tr_layout.find_all('div', class_='phx table-cell-layout')
-                        if len(cells_layout) >= 2:
-                            content = cells_layout[1].find('div', class_='phx data-row-content')
-                            code = content.get_text(strip=True) if content else ''
-
-                end_date = ''
-                close_title = row.find('div', id=re.compile(r'.*_title_CLOSE'))
-                if close_title:
-                    tr_layout = close_title.find_parent('div', class_='phx table-row-layout')
-                    if tr_layout:
-                        cells_layout = tr_layout.find_all('div', class_='phx table-cell-layout')
-                        if len(cells_layout) >= 2:
-                            content = cells_layout[1].find('div', class_='phx data-row-content')
-                            raw = content.get_text(strip=True) if content else ''
-                            end_date = parse_date_generic(raw)
-
-                records.append({
-                    'title': title,
-                    'code': code,
-                    'end_date': end_date,
-                    'link': link,
-                })
-
-            except Exception as e:
-                self.logger.error(f"extract_data entry parsing failed: {e}", exc_info=True)
+            details_td = cols[1]
+            link_a = details_td.select_one("a.btn.btn-link")
+            if not link_a:
                 continue
+            title = link_a.get_text(strip=True)
+            link  = link_a["href"]
+
+            data_rows = details_td.select("div.phx.table-row-layout")
+
+            def _find_value(suffix, strip_tz=False):
+                for dr in data_rows:
+                    id_div = dr.find("div", id=lambda i: i and suffix in i)
+                    if id_div:
+                        content = dr.select_one("div.phx.data-row-content")
+                        if content:
+                            text = content.get_text(strip=True)
+                            if strip_tz:
+                                # only strip trailing timezone token
+                                return text.rsplit(" ", 1)[0]
+                            return text
+                return ""
+
+            # only remove timezone from the Close date
+            end_str = _find_value("LABEL_CLOSE")
+            code    = _find_value("LABEL_NUMBER")
+
+            records.append({
+                "title":        title,
+                "code":         code,
+                "end_date":  end_str,
+                "link":         link,
+            })
 
         return records
 

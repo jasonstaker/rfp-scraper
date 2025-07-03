@@ -1,5 +1,5 @@
 # maryland.py
-# url: https://mdbid.maryland.gov/page.aspx/en/bpm/process_search
+# url: https://emma.maryland.gov/page.aspx/en/rfp/request_browse_public
 
 import logging
 import pandas as pd

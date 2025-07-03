@@ -1,5 +1,5 @@
 # mississippi.py
-# url: https://www.ms.gov/dfa/contract_bid_search/Bid/BidData?AppId=1
+# url: https://www.ms.gov/dfa/contract_bid_search/Bid?autoloadGrid=true
 
 import logging
 import requests

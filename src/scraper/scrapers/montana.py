@@ -51,7 +51,10 @@ class MontanaScraper(SeleniumScraper):
             raise ValueError("empty page_source")
 
         soup = BeautifulSoup(page_source, "html.parser")
-        tables = soup.find_all("table", attrs={"aria-title": "Search Results"})
+        tables = soup.find_all("table", attrs={"aria-label": "Search Results"})
+        if not tables:
+            tables = soup.find_all("table", attrs={"aria-title": "Search Results"})
+
         if not tables:
             self.logger.error("no Search Results table found")
             raise RuntimeError("table not found")
@@ -92,9 +95,8 @@ class MontanaScraper(SeleniumScraper):
                 return ""
 
             # only remove timezone from the Close date
-            end_str = _find_value("title_CLOSE", strip_tz=True)
-            type_   = _find_value("title_TYPE")
-            code    = _find_value("title_NUMBER")
+            end_str = _find_value("LABEL_CLOSE")
+            code    = _find_value("LABEL_NUMBER")
 
             records.append({
                 "title":        title,
@@ -119,7 +121,7 @@ class MontanaScraper(SeleniumScraper):
                 batch = self.extract_data(html)
                 all_records.extend(batch)
 
-                next_btn = self.driver.find_element(By.XPATH, "//button[@aria-title='Next page']")
+                next_btn = self.driver.find_element(By.XPATH, "//button[@aria-label='Next page']")
                 if next_btn.get_attribute("disabled"):
                     break
 

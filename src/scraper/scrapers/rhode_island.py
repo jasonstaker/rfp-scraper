@@ -85,7 +85,7 @@ class RhodeIslandScraper(RequestsScraper):
                     end_str = dt_pst.strftime("%Y-%m-%d %H:%M:%S %Z")
                 else:
                     end_str = ""
-                link = STATE_RFP_URL_MAP.get('rhode_island', self.base_url)
+                link = 'https://ridop.ri.gov/vendors/bidding-opportunities'
 
                 records.append({
                     "title": title,

@@ -1,5 +1,5 @@
 # utah.py
-# url: https://utah.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData
+# url: https://utah.bonfirehub.com/portal/?tab=openOpportunities
 
 import logging
 import time

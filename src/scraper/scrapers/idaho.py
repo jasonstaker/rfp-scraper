@@ -44,20 +44,31 @@ class IdahoScraper(SeleniumScraper):
             all_html = []
 
             while True:
-                WebDriverWait(self.driver, 20).until(
+                table_elem = WebDriverWait(self.driver, 30).until(
                     EC.presence_of_element_located((By.XPATH, table_xpath))
+                )
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_all_elements_located((By.XPATH, table_xpath + "/tbody/tr[@role='row']"))
                 )
                 all_html.append(self.driver.page_source)
 
-                # check the class of the "next" button
-                next_button = self.driver.find_element(By.XPATH, next_button_xpath)
+                next_button = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, next_button_xpath))
+                )
                 class_attr = next_button.get_attribute("class")
+                self.logger.debug(f"Next‑button class: {class_attr}")
                 if "pager-next is-disabled" in class_attr:
                     self.logger.info("Last page reached, stopping pagination")
                     break
 
                 self.logger.info("Clicking next page")
                 next_button.click()
+                WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, table_xpath)))
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, table_xpath + "/tbody/tr[@role='row']")
+                    )
+                )
 
             return all_html
 
@@ -149,4 +160,3 @@ class IdahoScraper(SeleniumScraper):
         except Exception as e:
             self.logger.error(f"Idaho scrape failed: {e}", exc_info=True)
             raise
-

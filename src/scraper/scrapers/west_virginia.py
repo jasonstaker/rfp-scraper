@@ -85,6 +85,7 @@ class WestVirginiaScraper(SeleniumScraper):
                     continue
 
                 title = cols[1].get_text(strip=True)
+                print(title)
                 anchor = cols[3].find("a")
                 if not anchor:
                     continue
@@ -134,10 +135,18 @@ class WestVirginiaScraper(SeleniumScraper):
                 all_records.extend(batch)
 
                 try:
-                    next_buttons = self.driver.find_elements(By.CLASS_NAME, "css-1yn6b58")
+                    next_buttons = WebDriverWait(self.driver, 5).until(
+                        lambda d: [
+                            btn for btn in d.find_elements(By.CLASS_NAME, "css-1yn6b58")
+                            if all(
+                                child.is_displayed() and child.is_enabled()
+                                for child in btn.find_elements(By.XPATH, ".//*")
+                            )
+                        ] or False
+                    )
                 except WebDriverException as we:
                     self.logger.error(f"failed to find next buttons: {we}", exc_info=False)
-                    raise RuntimeError(f"failed to find next buttons: {we}")
+                    break
 
                 next_btn = None
                 for btn in next_buttons:

@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
+from selenium.common.exceptions import TimeoutException
 
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
@@ -49,6 +49,8 @@ class PennsylvaniaScraper(SeleniumScraper):
 
             tbody = table.find("tbody")
             rows = tbody.find_all("tr", class_="GridItem") if tbody else []
+            other_rows = tbody.find_all("tr", class_="GridAltItem") if tbody else []
+            rows = rows + other_rows
             records = []
 
             for row in rows:
@@ -67,7 +69,7 @@ class PennsylvaniaScraper(SeleniumScraper):
                     title = cols[2].get_text(strip=True)
 
                     raw_date = cols[8].get_text(strip=True)
-                    end_date = parse_date_generic(raw_date)
+                    end_date = parse_date_generic(parse_date_generic(raw_date.strip()))
 
                     records.append({
                         "title": title,
@@ -75,6 +77,7 @@ class PennsylvaniaScraper(SeleniumScraper):
                         "end_date": end_date,
                         "link": link,
                     })
+
                 except Exception as row_ex:
                     self.logger.error(f"Failed processing row: {row_ex}")
                     continue

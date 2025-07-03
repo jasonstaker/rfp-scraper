@@ -112,6 +112,8 @@ class AlabamaScraper(SeleniumScraper):
     def scrape(self, **kwargs):
         self.logger.info("starting Alabama scrape")
         all_records = []
+        seen = set()
+
         try:
             page = self.search(**kwargs)
             if not page:
@@ -119,7 +121,10 @@ class AlabamaScraper(SeleniumScraper):
                 raise
 
             self.logger.info("processing page 1")
-            all_records.extend(self.extract_data(page))
+            first = self.extract_data(page)
+            all_records.extend(first)
+            seen.update(r["code"] for r in first)
+            
             page_num = 2
 
             while True:
@@ -133,7 +138,12 @@ class AlabamaScraper(SeleniumScraper):
                         EC.presence_of_element_located((By.XPATH, '//*[@id="PageContent"]/table[4]'))
                     )
                     self.logger.info(f"processing page {page_num}")
-                    all_records.extend(self.extract_data(self.driver.page_source))
+                    new = self.extract_data(self.driver.page_source)
+                    if any(rec["code"] in seen for rec in new):
+                        self.logger.info("duplicate records detected, stopping pagination")
+                        break
+                    all_records.extend(new)
+                    seen.update(r["code"] for r in new)
                     page_num += 1
                 except TimeoutException:
                     self.logger.info("no more Alabama pages")

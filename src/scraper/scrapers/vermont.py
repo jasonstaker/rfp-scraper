@@ -41,22 +41,20 @@ class VermontScraper(SeleniumScraper):
     # requires: current page loaded in self.driver
     # effects: parses the gvResults table into a list of records
     def extract_data(self):
-        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+        soup  = BeautifulSoup(self.driver.page_source, 'html.parser')
         table = soup.find('table', id='gvResults')
         if not table:
             self.logger.error("Results table not found")
             return []
 
-        tbody = table.find('tbody') or table
+        tbody = table.find('tbody', recursive=False) or table
         rows = tbody.find_all('tr', recursive=False)
+        print(len(rows))
         records = []
         for tr in rows:
             inner_table = tr.find('table', recursive=True)
 
             if not inner_table:
-                continue
-            # skip date header segments
-            if inner_table.find('span', id='lblRowBreakTitle'):
                 continue
             # find row with link
             link_cell = inner_table.find('td', class_='copyReg')

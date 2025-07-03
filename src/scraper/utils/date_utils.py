@@ -1,5 +1,6 @@
 # date_utils.py
 
+import re
 import pandas as pd
 from datetime import datetime
 
@@ -7,35 +8,33 @@ from datetime import datetime
 # modifies: nothing
 # effects: returns only the date portion of the input, stripping off any time or timezone
 def parse_date_generic(date_str: str) -> str:
-    """
-    Normalize a date/time string by stripping off the time and returning
-    an ISO-formatted date (YYYY-MM-DD). Supports:
-      - 'Jul 31, 2025 @ 03:00 PM'
-      - '7/15/2025 4:00:00 PM'
-      - plain 'YYYY-MM-DD' or other common date tokens
-    Falls back to the raw date part if parsing fails.
-    """
+    if date_str == "12/31/9999":
+        return "9999-12-31"
     if not isinstance(date_str, str):
         return date_str
     s = date_str.strip()
     if not s:
         return s
 
-    # 1) Drop anything after '@' (e.g. time in 'Jul 31, 2025 @ 03:00 PM')
     if '@' in s:
-        date_part = s.split('@', 1)[0].strip()
-    else:
-        # 2) For numeric date-times like '7/15/2025 4:00:00 PM',
-        #    split on whitespace and take only the date token
-        date_part = s.split()[0]
+        s = s.split('@', 1)[0].strip()
 
-    # 3) Try to parse with pandas (infer common formats)
+    m = re.match(r'^(\d{1,2}/\d{1,2}/\d{4})', s)
+    if m:
+        date_part = m.group(1)
+
+    else:
+        m2 = re.match(r'^([A-Za-z]+ \d{1,2}, \s*\d{4})', s)
+        if m2:
+            date_part = m2.group(1)
+        else:
+            date_part = s.split()[0]
+
     try:
         dt = pd.to_datetime(date_part, errors="raise")
-        return dt.date().isoformat().strip()
+        return dt.date().isoformat()
     except Exception:
-        # 4) Fallback: return the raw date part
-        return date_str
+        return date_part
 
 
 # requires: date_str is a string, ideally in MM/DD/YYYY or MM/DD/YY format, possibly with time
@@ -59,6 +58,9 @@ def parse_date_simple(date_str: str) -> str:
 # requires: df is a pandas DataFrame with a 'Due Date' column
 # modifies: nothing
 # effects: filters to keep only rows whose date (parsed via parse_date_generic) is today or later
+import pandas as pd
+from datetime import datetime
+
 def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
     today = datetime.now().date()
 
@@ -68,7 +70,12 @@ def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
         if others.isna().all() or all((pd.isna(v) or v == '' for v in others)):
             return df.iloc[0:0].copy()
 
-    parsed = pd.to_datetime(df["Due Date"].astype(str), errors="coerce").dt.date
+    due_str = df["Due Date"].astype(str)
+    parsed = pd.to_datetime(due_str, errors="coerce").dt.date
 
     mask = parsed.notna() & (parsed >= today)
+
+    rescue = parsed.isna() & (due_str == "9999-12-31")
+    mask = mask | rescue
+
     return df.loc[mask].reset_index(drop=True)

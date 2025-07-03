@@ -28,6 +28,10 @@ class SeleniumScraper(BaseScraper):
             self.options.add_argument("--headless=new")
             self.options.add_argument("window-size=1920,1080")
             self.options.add_argument("--log-level=3")
+            self.options.add_argument("--disable-gpu")
+            self.options.add_argument("--no-sandbox")
+            self.options.add_argument("--disable-dev-shm-usage")
+
         self.options.add_argument(
             "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "

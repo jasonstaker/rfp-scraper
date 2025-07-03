@@ -1,5 +1,5 @@
 # illinois.py
-# URL: https://www.bidbuy.illinois.gov/Home/BidOpportunities
+# URL: https://www.bidbuy.illinois.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true
 
 import logging
 import pandas as pd
