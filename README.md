@@ -12,6 +12,7 @@
 6. [GUI Overview](#gui-overview)
 
    * [Main Window](#main-window)
+   * [Home Page](#home-page)
    * [Run Page](#run-page)
    * [Status Page](#status-page)
 7. [Configuration](#configuration)
@@ -25,167 +26,145 @@
 
 ## Introduction
 
-RFP Scraper is a cross-platform desktop application designed to automate the process of fetching current Request for Proposals (RFPs) from multiple state procurement websites. It features:
-
-* A clean PyQt-based GUI for selecting states, entering keywords, and monitoring progress.
-* Automated background scraping with retry logic and caching of results.
-* Export to Excel of all scraped RFP records.
-* A status page showing which state scrapers succeeded or failed.
+RFP Scraper is a cross-platform desktop application that automates fetching current Requests for Proposals (RFPs) from all U.S. state procurement websites (including Washington, D.C.). Its clean PyQt5 GUI lets you select states, enter keywords, track progress, and export results—all with robust retry logic, caching, and rotating logs.
 
 ## Features
 
 * **Keyword-driven Searches**
-  Enter one keyword per line; the scraper uses those terms to query each state’s RFP portal.
+  Enter one keyword per line; the scraper runs each term against every selected portal.
+
+* **Comprehensive State Coverage**
+  Support for all 50 states plus D.C., with scrapers kept in sync and uniformly styled.
 
 * **Multi-State Selection**
-  Pick any combination of supported states from a checkable list, or click “Select All” to run them all.
+  Check any combination from a scrollable list or “Select All” to process every jurisdiction.
 
-* **Background Scraping with Cancel**
-  The scraper runs in a separate thread so the UI remains responsive. Click “Cancel” at any time to stop.
+* **Background Scraping & Cancel**
+  Runs in a separate thread so the UI remains responsive. Hit **Cancel** at any time.
 
-* **Real-time Log Output**
-  View live progress and errors in the Run page as each state is processed.
+* **Real-time Log Tailing**
+  Watch live progress and detailed errors in the Run page; logs now rotate via a `RotatingFileHandler` to keep file size bounded.
+
+* **Normalized Export DataFrame**
+  Every scraper’s output DataFrame is standardized; Excel exports apply consistent formatting and text wrapping.
 
 * **Results Status Page**
-  After scraping completes, see a table indicating “Passed” or “Failed” for each state.
+  Final table shows ✅ Passed or ❌ Failed per state (fail system finalized on Jul 2, 2025), with any run-level error shown at top.
 
 * **Excel Export & Caching**
-  All successful RFP results are written to a timestamped Excel file (keeping only the latest five). The most recent export can be opened automatically.
+  Saves to `output/cache/` (latest five only), opens the most recent automatically, and retains hidden-ID persistence.
 
-* **Persistent Keywords**
-  Keywords load from and write to a local `keywords.txt` file so your list is always up to date.
+* **Persistent Keywords & Hidden IDs**
+  Keywords in `keywords.txt`; hidden-IDs sync bug fixed so your manual hides persist across runs.
+
+* **Robust Date Parsing**
+  `parse_date_generic` corrected for inconsistent formats (Florida, capitalization fixes on the Home page, Virginia headless window sizing adjusted).
 
 ## Screenshots
 
 1. **Home Page**
    ![Home Page Screenshot](assets/screenshots/home_page.png)
-   *Enter keywords on the left, select states in the middle, and click “Run” on the right.*
+   *Enter keywords (left), select states (center), click **Run** (right).*
 
 2. **Run Page**
    ![Run Page Screenshot](assets/screenshots/run_page.png)
-   *Live log output streams as each state’s scraper runs. Click “Cancel” to stop.*
+   *Live log output streams as each scraper runs; click **Cancel** to abort.*
 
 3. **Status Page**
    ![Status Page Screenshot](assets/screenshots/status_page.png)
-   *After completion, see which scrapers passed (✅) or failed (❌), and return to filters.*
+   *✅ Passed or ❌ Failed per state. “Back to Filters” returns you to Home without clearing keywords.*
 
-4. **Output Example**
+4. **Excel Output Example**
    ![Output Example Screenshot](assets/screenshots/output_example.png)
-   *After the program finishes, this is what could be displayed.*
+   *Standardized columns, text wrapping, and formatted dates.*
 
 ## Installation
 
 ### Prerequisites
 
 * **Python 3.8+**
-* **Platform support:** Windows 10/11, macOS 10.15+, Linux (Ubuntu 20.04+).
+* **OS Support:** Windows 10/11, macOS 10.15+, Linux (Ubuntu 20.04+)
 
 ### Step-by-Step
 
-1. **Clone the repository**
+```bash
+git clone https://github.com/jasonstaker/rfp-scraper.git
+cd rfp-scraper
+python3 -m venv venv
 
-   ```bash
-   git clone https://github.com/jasonstaker/rfp-scraper.git
-   cd rfp-scraper
-   ```
+# macOS/Linux:
+source venv/bin/activate
+# Windows PowerShell:
+# .\venv\Scripts\Activate.ps1
 
-2. **Create and activate a virtual environment**
+pip install -e .
+```
 
-   ```bash
-   python3 -m venv venv
-   # macOS/Linux:
-   source venv/bin/activate
-   # Windows PowerShell:
-   # .\venv\Scripts\Activate.ps1
-   ```
+To launch:
 
-3. **Install dependencies**
+```bash
+rfp-scraper
+```
 
-   ```bash
-   pip install -e .
-   ```
+—or—
 
-4. **Run the Application**
-
-   ```bash
-   rfp-scraper
-   ```
-
-   Or click the icon.
+```bash
+python scripts/main.py
+```
 
 ## Usage
 
-1. **Launch the app** (double-click icon or run `python main.py`).
-2. On the **Home Page**:
+1. **Launch** the app (double-click icon or run `python main.py`).
+2. On **Home Page**:
 
-   * Enter one keyword per line (e.g., “grants”, “IT services”).
-   * Check one or more states from the list (or click “Select All”).
+   * Enter one keyword per line.
+   * Select your states (or **Select All**).
    * Click **Run**.
-3. The **Run Page** appears:
+3. **Run Page**:
 
-   * Watch live log entries as each state is scraped.
-   * Click **Cancel** to abort at any time.
-4. When scraping completes, the **Status Page** shows:
+   * Watch live, rotating logs tail into the UI.
+   * Click **Cancel** anytime to stop and return home.
+4. **Status Page**:
 
-   * A table of each selected state with ✅ Passed or ❌ Failed.
-   * A “Back to Filters” button to return to Home and adjust keywords/states.
-5. The latest Excel file is saved in `output/cache/` and opened automatically on success.
+   * View ✅ Passed / ❌ Failed statuses.
+   * Click **Back to Filters** to adjust without clearing keywords.
+5. The latest Excel export (standardized DataFrame) lives in `output/cache/` and auto-opens on success.
 
 ## GUI Overview
 
 ### Main Window
 
-* **Navigation via QStackedWidget:**
-
-  * Home → Run → Status pages in a single window.
-* **Half-screen sizing:**
-
-  * Window resizes to half of your monitor’s width and height.
+* **QStackedWidget** for seamless Home → Run → Status navigation.
+* Opens at half your monitor’s width × height.
 
 ### Home Page
 
-* **Keyword Editor (left):**
-
-  * A multi-line `CodeEditor` with line numbers.
-  * Pre-loads from `keywords.txt`.
-* **State Selection (center):**
-
-  * A scrollable, checkable `QListWidget`.
-  * “Select All” toggles all states at once.
-* **Run Button (right):**
-
-  * Click to begin scraping with entered keywords and selected states.
+* **Keyword Editor:** Multi-line `CodeEditor` (loads/saves `keywords.txt`).
+* **State List:** Scrollable `QListWidget` with “Select All” toggle.
+* **Run Button:** Starts the background scrape worker.
 
 ### Run Page
 
-* **Log Output:**
-
-  * A read-only `QPlainTextEdit` that tails `scraper.log` for new lines only.
-* **Cancel Button:**
-
-  * Stops the background worker and returns to Home immediately.
+* **Log Output:** Tails `output/scraper.log` (now managed by a rotating handler).
+* **Cancel Button:** Aborts worker and returns to Home.
 
 ### Status Page
 
-* **Results Table:**
-
-  * Two columns: **State** and **Status** (✅ Passed / ❌ Failed).
-  * Displays any run-level error message at the top.
-* **Back to Filters Button:**
-
-  * Returns to Home Page without clearing the keyword box.
+* **Results Table:** Two columns—**State** & **Status** with icons.
+* **Error Display:** Show any scraper-level exception at top.
+* **Back to Filters:** Returns to Home preserving keyword list.
 
 ## Configuration
 
-* **`src/config.py`** contains paths and defaults:
+* **`src/config.py`**
 
-  * `KEYWORDS_FILE`: where keywords are read/written.
-  * `CACHE_DIR`: where the last five Excel exports are stored.
-  * `LOG_FILE`: path to `output/scraper.log`.
-* **`scraper/config/settings.py`** defines:
+  * `KEYWORDS_FILE`: path to `keywords.txt`
+  * `CACHE_DIR`: holds last five Excel exports
+  * `LOG_FILE`: path to rotating `scraper.log`
+* **`scraper/config/settings.py`**
 
-  * `STATE_RFP_URL_MAP`: mapping of state names to RFP URLs.
-  * `AVAILABLE_STATES`: list of state keys used by the UI.
+  * `STATE_RFP_URL_MAP`: state⇒portal URL mapping
+  * `AVAILABLE_STATES`: ordered list for the UI
 
 ## Project Structure
 
@@ -194,66 +173,67 @@ rfp-scraper/
 ├── README.md
 ├── LICENSE
 ├── scripts/
-│   └── main.py               # CLI entry point
+│   └── main.py
 ├── assets/
-│   ├── hotb_logo.jpg
-│   ├── hotb_logo_square.png
-│   └── output_example.png
+│   └── screenshots/
 ├── output/
-│   ├── cache/                # Latest 5 Excel outputs
-│   └── scraper.log
+│   ├── cache/                # Latest 5 Excel exports
+│   └── scraper.log           # RotatingFileHandler
 ├── persistence/
-│   └── hidden_ids.json       # For what the user wants to hide
+│   └── hidden_ids.json
 ├── src/
-│   ├── config.py             # Paths & defaults
+│   ├── config.py
 │   ├── ui/
 │   │   ├── main_window.py
 │   │   └── pages/
-│   │       ├── home_page.py
-│   │       ├── run_page.py
-│   │       └── status_page.py
-│   └── scraper/
-│       ├── config/
-│       │   ├── keywords.txt  # (auto-written by runner)
-│       │   └── settings.py   
-│       ├── core/
-│       ├── exporters/
-│       ├── scrapers/         # Where all the state scrapers live
-│       ├── utils/
-│       ├── logging_config.py
-│       └── runner.py
-└── tests/                    # Unit tests (e.g., test_core.py, test_util.py)
+│   ├── scraper/
+│   │   ├── config/
+│   │   ├── core/
+│   │   ├── exporters/
+│   │   ├── scrapers/         # 50 states + DC, uniformly formatted
+│   │   └── utils/
+│   └── runner.py
+└── tests/
+    └── test_*.py
 ```
+
+## Dependencies
+
+* requests
+* selenium
+* pandas
+* beautifulsoup4
+* webdriver-manager
+* openpyxl
+* xlsxwriter
+* lxml
+* xlrd
+* pillow
+* pyqt5
 
 ## Testing
 
 ```bash
-# Run all tests with pytest:
 pytest
 ```
 
-* **Unit tests** are under `tests/`.
-* Tests cover core scraper logic and utility functions.
-* GUI behavior can be manually verified (no automated GUI tests included yet).
+Covers core logic, utilities, and basic runner integration. GUI behavior remains manual for now.
 
 ## Roadmap
 
-* **Add multi-thread progress bar** for each state’s scraping progress.
-* **Support more states** by extending `STATE_RFP_URL_MAP`.
-* **Implement keyword “suggestions”** based on past scrapes (auto-complete).
-* **Option to export report in CSV or PDF** in addition to Excel.
-* **Various Improvments in GUI** based on feedback
+* **Progress bars** per state scraping
+* **Auto-complete keyword suggestions**
+* **CSV/PDF export** alongside Excel
+* **Extended GUI improvements** based on feedback
 
 ## Contributing
 
-We are currently not accepting all changes from everybody. If you have an idea for the project please send me an email below.
+We’re currently accepting focused, high-quality contributions—please email ideas or PRs.
 
 ## License
 
-This project is licensed under the **MIT License**—see the [LICENSE](LICENSE) file for details.
+MIT License — see [LICENSE](LICENSE).
 
 ## Contact / Support
 
-* **Author:** Jason Staker (`jason.staker@yahoo.com`)
-
-Feel free to send me an email if you need help or want to contribute.
+**Author:** Jason Staker ([jason.staker@yahoo.com](mailto:jason.staker@yahoo.com))
