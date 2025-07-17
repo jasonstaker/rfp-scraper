@@ -92,8 +92,8 @@ class MainWindow(QMainWindow):
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         self.setWindowTitle("RFP Scraper")
         self.setWindowIcon(QIcon(str(Path(ASSETS_DIR) / "hotb_logo_square.png")))
-        screen_geom = QApplication.primaryScreen().availableGeometry()
-        self.resize(screen_geom.width() // 2, screen_geom.height() // 2)
+        from src.ui.ui_scale import px
+        self.resize(px(1440), px(900))
         self.stack = QStackedWidget()
         self.stack.setObjectName("main_stack")
         self.setCentralWidget(self.stack)

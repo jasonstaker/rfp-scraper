@@ -1,125 +1,103 @@
-/* base widget styling */
 QWidget {
     background-color: #FFFFFF;
     color: #1A429A;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 25px;
+    font-size: ${font_size_base};
 }
 
-/* text color for standard widgets */
 QLabel, QPushButton, QListWidget, QTableWidget, QPlainTextEdit {
     color: #1A429A;
 }
 
-/* removes focus outline on buttons */
 QPushButton:focus {
     outline: none;
 }
 
-/* header bar appearance */
 #header_bar {
     background-color: #1A429A;
     border-bottom: 2px solid #8388C1;
-    padding: 8px 12px;
+    padding: ${padding_header};
 }
 
-/* header label styling */
 #header_bar QLabel {
     color: #FFFFFF;
     font-weight: bold;
     letter-spacing: 1px;
 }
 
-/* button default styling */
 QPushButton {
     background-color: #1A429A;
     color: #FFFFFF;
     border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    min-height: 50px;
-    font-size: 22px;
+    border-radius: ${border_radius};
+    padding: ${padding_button_v} ${padding_button_h};
+    min-height: ${min_button_height};
+    font-size: ${font_size_button};
     font-weight: 600;
 }
 
-/* button hover effect */
 QPushButton:hover {
     background-color: #8388C1;
 }
-
-/* button pressed effect */
 QPushButton:pressed {
     background-color: #FFD486;
     color: #1A429A;
 }
-
-/* disabled button appearance */
 QPushButton:disabled {
     background-color: #CCCCCC;
     color: #777777;
 }
 
-/* code editor styling */
 #code_editor {
     background-color: #F5F5F5;
     border: 2px solid #8388C1;
-    border-radius: 8px;
-    padding: 10px;
+    border-radius: ${border_radius};
+    padding: ${padding_code};
     selection-background-color: #FFD486;
     selection-color: #1A429A;
     qproperty-frameShadow: Raised;
 }
 
-/* line number area styling */
 LineNumberArea {
     background-color: #1A429A;
     color: #FFFFFF;
-    padding-right: 6px;
+    padding-right: ${padding_button_h};
 }
 
-/* current line highlight */
 #code_editor QPlainTextEdit::ExtraSelection {
     background-color: #FFF7E0;
 }
 
-/* state list styling */
 #state_list {
     background-color: #FFFFFF;
     border: 2px solid #8388C1;
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: ${border_radius};
+    padding: ${padding_code};
 }
 
-/* state list item styling */
 #state_list::item {
-    padding: 8px 12px;
+    padding: ${padding_button_v} ${padding_button_h};
     margin: 2px 0;
     border-radius: 4px;
 }
-
-/* state list hover effect */
 #state_list::item:hover {
     background-color: #E0E0E0;
 }
-
-/* state list selected item styling */
 #state_list::item:selected {
     background-color: #FFD486;
     color: #1A429A;
 }
 
-/* vertical scrollbar styling */
 QScrollBar:vertical {
     background: #F5F5F5;
-    width: 18px;
-    margin: 0px;
+    width: ${scrollbar_width};
+    border-radius: ${border_radius_scroll};
     border: none;
-    border-radius: 9px;
 }
 QScrollBar::handle:vertical {
     background: #8388C1;
-    min-height: 40px;
-    border-radius: 9px;
+    min-height: ${scrollbar_minlen};
+    border-radius: ${border_radius_scroll};
 }
 QScrollBar::handle:vertical:hover {
     background: #6B6FA8;
@@ -129,18 +107,16 @@ QScrollBar::sub-line:vertical {
     height: 0px;
 }
 
-/* horizontal scrollbar styling */
 QScrollBar:horizontal {
     background: #F5F5F5;
-    height: 18px;
-    margin: 0px;
+    height: ${scrollbar_width};
+    border-radius: ${border_radius_scroll};
     border: none;
-    border-radius: 9px;
 }
 QScrollBar::handle:horizontal {
     background: #8388C1;
-    min-width: 40px;
-    border-radius: 9px;
+    min-width: ${scrollbar_minlen};
+    border-radius: ${border_radius_scroll};
 }
 QScrollBar::handle:horizontal:hover {
     background: #6B6FA8;
@@ -150,91 +126,80 @@ QScrollBar::sub-line:horizontal {
     width: 0px;
 }
 
-/* results table styling */
 #status_table {
     background-color: #FFFFFF;
     border: 2px solid #8388C1;
-    border-radius: 8px;
+    border-radius: ${border_radius};
     gridline-color: #E0E0E0;
 }
 
-/* table corner styling */
 QTableCornerButton {
     background-color: #1A429A;
     border: none;
 }
 
-/* table header styling */
 #status_table QHeaderView::section {
     background-color: #1A429A;
     color: #FFFFFF;
     border: none;
-    padding: 12px;
+    padding: ${padding_table};
     font-weight: bold;
-    font-size: 22px;
+    font-size: ${font_size_table_head};
     text-transform: uppercase;
     letter-spacing: 1px;
     qproperty-alignment: 'AlignHCenter';
 }
 
-/* alternate row styling */
 #status_table::item:!selected:alternate {
     background-color: #F9F9FB;
 }
 
-/* table cell styling */
 #status_table::item {
-    padding: 10px 14px;
-    font-size: 22px;
+    padding: ${padding_button_v} ${padding_cell};
+    font-size: ${font_size_cell};
     qproperty-textAlignment: 'AlignHCenter';
 }
 
-/* selected table cell styling */
 #status_table::item:selected {
     background-color: #FFD486;
     color: #1A429A;
 }
 
-/* log output styling */
 #log_output {
     background-color: #F5F5F5;
     border: 2px solid #8388C1;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 22px;
+    border-radius: ${border_radius};
+    padding: ${padding_code};
+    font-size: ${font_size_cell};
     selection-background-color: #FFD486;
     selection-color: #1A429A;
     qproperty-frameShadow: Raised;
 }
 
-/* status header label styling */
 #status_header_label {
-    font-size: 32px;
+    font-size: ${font_size_header};
     font-weight: 700;
     color: #1A429A;
-    margin: 16px 0;
+    margin: ${padding_cell} 0;
     qproperty-alignment: 'AlignHCenter';
 }
 
-/* run info label styling */
 #run_info_label {
-    font-size: 28px;
+    font-size: ${font_size_subheader};
     font-style: italic;
     color: #1A429A;
-    margin: 12px 0;
+    margin: ${padding_code} 0;
     qproperty-alignment: 'AlignHCenter';
 }
 
-/* error label styling */
 #status_error_label {
     color: red;
-    font-size: 24px;
-    margin-bottom: 12px;
+    font-size: ${font_size_error};
+    margin-bottom: ${padding_code};
     qproperty-alignment: 'AlignHCenter';
 }
 
-/* focus outline styling */
 QWidget:focus {
-    outline: 4px solid #FFD486;
-    outline-offset: 2px;
+    outline: ${outline_width} solid #FFD486;
+    outline-offset: ${outline_offset};
 }

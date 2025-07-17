@@ -21,12 +21,15 @@ class StatusPage(QWidget):
     # effects: initializes ui with results table
     def __init__(self):
         super().__init__()
+        from src.ui.ui_scale import px
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(px(12), px(12), px(12), px(12))
+        main_layout.setSpacing(px(8))
         self.setLayout(main_layout)
         header_label = QLabel("Scrape results")
         header_label.setObjectName("status_header_label")
         header_label.setAlignment(Qt.AlignCenter)
-        header_label.setStyleSheet("font-weight: bold; font-size: 24px;")
+        header_label.setStyleSheet(f"font-weight: bold; font-size: {px(24)}px;")
         main_layout.addWidget(header_label)
         self.error_label = QLabel("")
         self.error_label.setObjectName("status_error_label")
@@ -50,7 +53,7 @@ class StatusPage(QWidget):
         button_layout.addStretch()
         self.back_button = QPushButton("Back to filters")
         self.back_button.setObjectName("back_button")
-        self.back_button.setMinimumWidth(120)
+        self.back_button.setMinimumWidth(px(120))
         button_layout.addWidget(self.back_button)
         button_layout.addStretch()
         main_layout.addWidget(button_container)

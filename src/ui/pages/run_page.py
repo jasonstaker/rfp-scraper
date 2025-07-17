@@ -30,6 +30,9 @@ class RunPage(QWidget):
         self._log_file_pos = 0
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
+        from src.ui.ui_scale import px
+        main_layout.setContentsMargins(px(12), px(12), px(12), px(12))
+        main_layout.setSpacing(px(8))
         info_label = QLabel("Scraper is running…")
         info_label.setObjectName("run_info_label")
         info_label.setAlignment(Qt.AlignCenter)
@@ -46,7 +49,7 @@ class RunPage(QWidget):
         button_layout.addStretch()
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.setObjectName("cancel_button")
-        self.cancel_button.setMinimumWidth(100)
+        self.cancel_button.setMinimumWidth(px(100))
         button_layout.addWidget(self.cancel_button)
         button_layout.addStretch()
         main_layout.addWidget(button_container)

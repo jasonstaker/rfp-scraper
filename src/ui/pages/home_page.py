@@ -144,14 +144,15 @@ class HomePage(QWidget):
     def __init__(self):
         super().__init__()
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 8, 0, 0)
+        from src.ui.ui_scale import px
+        main_layout.setContentsMargins(px(0), px(8), px(0), px(0))
         main_layout.setSpacing(0)
         self.setLayout(main_layout)
         self.header_bar = QWidget()
         self.header_bar.setObjectName("header_bar")
         self.header_bar.setStyleSheet("background-color: #1A429A;")
         header_layout = QHBoxLayout(self.header_bar)
-        header_layout.setContentsMargins(12, 4, 12, 4)
+        header_layout.setContentsMargins(px(12), px(4), px(12), px(4))
         header_layout.setSpacing(0)
         self.kw_label = QLabel("Enter keywords (one per line):")
         self.kw_label.setStyleSheet("color: white;")
@@ -162,8 +163,8 @@ class HomePage(QWidget):
         header_layout.addWidget(self.state_label, 1, alignment=Qt.AlignVCenter)
         main_layout.addWidget(self.header_bar)
         row_layout = QHBoxLayout()
-        row_layout.setContentsMargins(12, 0, 12, 12)
-        row_layout.setSpacing(12)
+        row_layout.setContentsMargins(px(12), px(0), px(12), px(12))
+        row_layout.setSpacing(px(12))
         main_layout.addLayout(row_layout)
         self.code_editor = CodeEditor()
         self.code_editor.setObjectName("code_editor")
@@ -181,7 +182,7 @@ class HomePage(QWidget):
         center_container.setObjectName("center_container")
         center_layout = QVBoxLayout()
         center_layout.setContentsMargins(0, 0, 0, 0)
-        center_layout.setSpacing(8)
+        center_layout.setSpacing(px(8))
         center_container.setLayout(center_layout)
         self.state_list = QListWidget()
         self.state_list.setObjectName("state_list")
@@ -213,13 +214,29 @@ class HomePage(QWidget):
         right_container.setObjectName("right_container")
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(8)
+        right_layout.setSpacing(px(8))
         right_container.setLayout(right_layout)
+        self.estimated_time_label = QLabel("Estimated time:")
+        self.estimated_time_label.setAlignment(Qt.AlignHCenter)
+        self.estimated_time_label.setStyleSheet("font-weight: bold;")
+
+        self.estimated_time_value = QLabel("~0 min")
+        self.estimated_time_value.setAlignment(Qt.AlignHCenter)
+        self.set_estimated_time(5, 40)
+
+        right_layout.addWidget(self.estimated_time_label)
+        right_layout.addWidget(self.estimated_time_value)
+
+        # Spacer to push the run button into vertical center
         right_layout.addStretch()
+
+        # Run button
         self.run_button = QPushButton("Run")
         self.run_button.setObjectName("run_button")
-        self.run_button.setMinimumWidth(100)
+        self.run_button.setMinimumWidth(px(100))
         right_layout.addWidget(self.run_button, alignment=Qt.AlignHCenter)
+
+        # Spacer below
         right_layout.addStretch()
         row_layout.addWidget(right_container)
         self.run_button.clicked.connect(self.on_run_clicked)
@@ -234,6 +251,18 @@ class HomePage(QWidget):
         for i in range(self.state_list.count()):
             self.state_list.item(i).setCheckState(new_state)
         self.select_all_btn.setText("Unselect all" if new_state == Qt.Checked else "Select all")
+
+    # requires: none
+    # modifies: self.state_list, self.select_all_btn
+    # effects: toggles all state selections
+    def set_estimated_time(self, minutes: int, seconds: int):
+        parts = []
+        if minutes > 0:
+            parts.append(f"{minutes} min")
+        if seconds > 0 or not parts:
+            parts.append(f"{seconds} sec")
+        formatted = "~" + " ".join(parts)
+        self.estimated_time_value.setText(formatted)
 
     # requires: none
     # modifies: start_run signal
