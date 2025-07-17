@@ -22,6 +22,7 @@ from scraper.runner import run_scraping
 from ui.pages.home_page import HomePage
 from ui.pages.run_page import RunPage
 from ui.pages.status_page import StatusPage
+from persistence.average_time_manager import load_averages, update_averages as persist_update_averages
 
 
 # worker thread for running scraping tasks
@@ -44,7 +45,7 @@ class ScrapeWorker(QThread):
     def run(self):
         try:
             # now returns (state_to_df, cache_path)
-            state_to_df, cache_path = run_scraping(
+            state_to_df, cache_path, state_durations = run_scraping(
                 self.states,
                 self.keywords,
                 cancel_event=self._cancel_event
@@ -54,7 +55,11 @@ class ScrapeWorker(QThread):
 
             self.log_line.emit(f"✅ saved output to: {cache_path.name}")
             # emit real DataFrame map
-            self.finished.emit({"success": True, "results": state_to_df})
+            self.finished.emit({
+                "success": True,
+                "results": state_to_df,
+                "timings": state_durations,
+            })
         except RuntimeError as cancel_or_nodata:
             msg = str(cancel_or_nodata)
             self.log_line.emit(msg)
@@ -151,6 +156,10 @@ class MainWindow(QMainWindow):
             self.stack.setCurrentWidget(self.home_page)
             return
         results = payload.get("results", {})
+        state_timings = payload.get("timings", {})
+        if state_timings:
+            avg_data = load_averages()
+            persist_update_averages(avg_data, state_timings)
         self.status_page.display_results(results)
         self.stack.setCurrentWidget(self.status_page)
         import os, platform

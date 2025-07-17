@@ -31,4 +31,4 @@ rfp-scraper = "scripts.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src", "."]
-include = ["scraper*", "ui*", "scripts*", "src*"]
+include = ["scraper*", "ui*", "scripts*", "src*", "persistence*"]

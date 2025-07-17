@@ -5,6 +5,7 @@ import datetime
 from pathlib import Path
 import pandas as pd
 import threading
+import time
 
 from scraper.scrapers import SCRAPER_MAP
 from scraper.exporters.excel_exporter import export_all
@@ -18,7 +19,7 @@ def run_scraping(
     states: list[str],
     keywords: list[str],
     cancel_event: threading.Event | None = None
-) -> tuple[dict[str, pd.DataFrame], Path]:
+) -> tuple[dict[str, pd.DataFrame], Path, dict[str, float]]:
     """
     Writes the given keywords to keywords.txt, then runs each state's scraper.
     """
@@ -40,9 +41,12 @@ def run_scraping(
     # sync any “hidden” RFPs
     sync_hidden_from_excel()
 
+    state_durations: dict[str, float] = {}
+
     # run each scraper
     state_to_df: dict[str, pd.DataFrame] = {}
     for state in states:
+        start_time = time.perf_counter()
         # Check for cancellation before starting this state
         if cancel_event.is_set():
             logging.info(f"Cancellation requested before starting [{state}]. Exiting.")
@@ -89,6 +93,8 @@ def run_scraping(
                 'success':     False
             }])
             state_to_df[state] = df_fail
+            elapsed = time.perf_counter() - start_time
+            state_durations[state] = elapsed
             continue
 
         # if cancel_event was set mid-scrape, bail out now
@@ -113,6 +119,9 @@ def run_scraping(
 
         logging.info(f"[{state}] Scraped {len(df)} records.")
         state_to_df[state] = df
+        
+        elapsed = time.perf_counter() - start_time
+        state_durations[state] = elapsed
 
     # if the user hit “Cancel” at any point, stop here
     if cancel_event.is_set():
@@ -154,4 +163,4 @@ def run_scraping(
         export_all(state_to_df, writer)
     logging.info(f"Saved new desktop file: {desktop_path.name}")
 
-    return state_to_df, cache_path
+    return state_to_df, cache_path, state_durations

@@ -1,0 +1,58 @@
+{
+  "alabama": {
+    "count": 1,
+    "average_seconds": 20.65360319998581
+  },
+  "arkansas": {
+    "count": 3,
+    "average_seconds": 0.7616637666166449
+  },
+  "california": {
+    "count": 2,
+    "average_seconds": 12.345387850014959
+  },
+  "colorado": {
+    "count": 2,
+    "average_seconds": 15.28358579997439
+  },
+  "connecticut": {
+    "count": 1,
+    "average_seconds": 4.5022054999135435
+  },
+  "delaware": {
+    "count": 1,
+    "average_seconds": 13.159910199930891
+  },
+  "illinois": {
+    "count": 1,
+    "average_seconds": 42.71045120002236
+  },
+  "maryland": {
+    "count": 1,
+    "average_seconds": 38.50283589994069
+  },
+  "nebraska": {
+    "count": 1,
+    "average_seconds": 0.9136049000080675
+  },
+  "rhode island": {
+    "count": 1,
+    "average_seconds": 1.38984800002072
+  },
+  "south dakota": {
+    "count": 1,
+    "average_seconds": 0.9460343999089673
+  },
+  "utah": {
+    "count": 3,
+    "average_seconds": 0.4092317666703214
+  },
+  "wyoming": {
+    "count": 1,
+    "average_seconds": 7.156172699993476
+  },
+  "arizona": {
+    "count": 1,
+    "average_seconds": 3.4657368999905884
+  }
+}

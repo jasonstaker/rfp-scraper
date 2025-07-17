@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
 )
 
+from persistence.average_time_manager import load_averages, estimate_total_time, update_averages
 from scraper.config.settings import AVAILABLE_STATES
 from src.config import KEYWORDS_FILE
 
@@ -209,6 +210,7 @@ class HomePage(QWidget):
         center_layout.addWidget(self.select_all_btn)
         self.select_all_btn.clicked.connect(self.on_select_all_toggled)
         self.state_list.itemChanged.connect(self._on_state_item_changed)
+        QTimer.singleShot(0, self.recalc_estimated_time)
         row_layout.addWidget(center_container, 1)
         right_container = QWidget()
         right_container.setObjectName("right_container")
@@ -251,6 +253,7 @@ class HomePage(QWidget):
         for i in range(self.state_list.count()):
             self.state_list.item(i).setCheckState(new_state)
         self.select_all_btn.setText("Unselect all" if new_state == Qt.Checked else "Select all")
+        self.recalc_estimated_time()
 
     # requires: none
     # modifies: self.state_list, self.select_all_btn
@@ -293,6 +296,7 @@ class HomePage(QWidget):
         else:
             item.setBackground(QColor("#FFFFFF"))
             item.setForeground(QColor("#1A429A"))
+        self.recalc_estimated_time()
 
     # requires: event is a QResizeEvent
     # modifies: self.state_label
@@ -310,3 +314,14 @@ class HomePage(QWidget):
         new_x = header_local.x()
         current_y = self.state_label.y()
         self.state_label.move(new_x, current_y)
+
+    def recalc_estimated_time(self):
+        averages = load_averages()
+        
+        selected = [
+            self.state_list.item(i).text().lower()
+            for i in range(self.state_list.count())
+            if self.state_list.item(i).checkState() == Qt.Checked
+        ]
+        mins, secs = estimate_total_time(averages, selected)
+        self.set_estimated_time(mins, secs)
