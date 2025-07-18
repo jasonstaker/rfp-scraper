@@ -1,5 +1,6 @@
 # data_utils.py
 
+import zipfile
 import pandas as pd
 import json
 from pathlib import Path
@@ -20,11 +21,6 @@ def load_hidden_ids() -> set[str]:
 # modifies: nothing
 # effects: filters the DataFrame based on hidden ids and keyword hits, returns a new DataFrame with filtered and sorted records
 def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
-    # drop rows with code in hidden ids
-    hidden = load_hidden_ids()
-    if 'code' in df.columns and hidden:
-        df = df[~df['code'].astype(str).isin(hidden)]
-
     # load keywords
     try:
         with open(KEYWORDS_FILE, 'r', encoding='utf-8') as f:
@@ -73,8 +69,8 @@ def sync_hidden_from_excel(
 
     # read excel without headers
     try:
-        df = pd.read_excel(excel_path, header=None)
-    except (FileNotFoundError, PermissionError) as e:
+        df = pd.read_excel(excel_path, header=None, sheet_name=0, engine="openpyxl")
+    except (FileNotFoundError, PermissionError):
         return
 
     # skip header row, grab hide flag (col 0) and solicitation # (col 3)
@@ -90,3 +86,36 @@ def sync_hidden_from_excel(
     # merge and persist
     all_ids = sorted(existing.union(newly))
     path.write_text(json.dumps(all_ids, indent=2), encoding='utf-8')
+
+# requires: df is a pandas DataFrame
+# modifies: nothing
+# effects: returns a tuple of (visible, hidden) DataFrames
+#   visible: rows matching filter_by_keywords AND not manually hidden
+#   hidden: all other rows (manually hidden or no keyword hits)
+def split_by_keywords(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    # 1) run keyword filter to get all rows with hits
+    kw_visible = filter_by_keywords(df)
+
+    # 2) load manual hidden IDs
+    hidden_ids = load_hidden_ids()
+
+    # 3) keep only those not manually hidden
+    code_col = 'Solicitation #'
+    visible = kw_visible.loc[
+        ~kw_visible[code_col].astype(str).isin(hidden_ids)
+    ].reset_index(drop=True)
+
+    # 4) manual hidden mask
+    manual_mask = df[code_col].astype(str).isin(hidden_ids)
+
+    # 5) dropped-by-keyword mask
+    dropped_idx = df.index.difference(kw_visible.index)
+
+    # 6) combine to form hidden mask
+    hidden_mask = manual_mask.copy()
+    hidden_mask.loc[dropped_idx] = True
+
+    # 7) build hidden DataFrame
+    hidden = df.loc[hidden_mask].reset_index(drop=True)
+
+    return visible, hidden

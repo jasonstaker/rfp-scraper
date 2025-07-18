@@ -87,12 +87,22 @@ class StatusPage(QWidget):
                 success_flag = bool(df["success"].iat[0])
 
                 data_cols = [c for c in df.columns if c != "success"]
-                if success_flag and df[data_cols].isnull().all(axis=None):
-                    status_text = "🔶 No records"
+                is_placeholder = (
+                    df.shape[0] == 1
+                    and success_flag
+                    and df[data_cols].isna().all(axis=None)
+                )
+
+                if not success_flag:
+                    status_text = "❌ Failed"
+                elif is_placeholder:
+                    status_text = "🔶 0 Found"
                 else:
-                    status_text = "✅ Passed" if success_flag else "❌ Failed"
+                    count = len(df)
+                    status_text = f"✅ {count} Found"
             else:
-                status_text = "✅ Passed" if bool(payload) else "❌ Failed"
+                # Fallback: treat as failure
+                status_text = "❌ Failed"
 
             status_item = QTableWidgetItem(status_text)
             status_item.setFlags(status_item.flags() ^ Qt.ItemIsEditable)
