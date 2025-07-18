@@ -105,14 +105,14 @@ def run_scraping(
         # build DataFrame for this state
         df = pd.DataFrame(records)
         if df.empty:
-            logging.info(f"[{state}] No records found; marking as failure.")
+            logging.info(f"[{state}] No records found")
             df = pd.DataFrame([{
                 'title':       None,
                 'code':        None,
                 'end_date': None,
                 'Keyword Hits': None,
                 'link':        None,
-                'success':     False
+                'success':     True
             }])
         else:
             df["success"] = True
@@ -151,16 +151,26 @@ def run_scraping(
     filename = f"rfp_scraping_output_{ts}.xlsx"
     cache_path = cache_dir / filename
 
-    with pd.ExcelWriter(cache_path, engine="xlsxwriter") as writer:
-        export_all(state_to_df, writer)
-    logging.info(f"Saved new cache file: {cache_path.name}")
+    export_map = {}
+    for state, df in state_to_df.items():
+        if hasattr(df, 'columns') and 'success' in df.columns:
+            if df.shape[0] == 1 and df['success'].iat[0] and df.drop(columns=['success']).isna().all(axis=None):
+                logging.info(f"Skipping Excel export for empty results of [{state}]")
+                continue
+        export_map[state] = df
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    desktop_filename = "rfp_scraping_output.xlsx"
-    desktop_path = OUTPUT_DIR / desktop_filename
+    if len(export_map) != 0:
+        with pd.ExcelWriter(cache_path, engine="xlsxwriter") as writer:
+            export_all(export_map, writer)
+        logging.info(f"Saved new cache file: {cache_path.name}")
 
-    with pd.ExcelWriter(desktop_path, engine="xlsxwriter") as writer:
-        export_all(state_to_df, writer)
-    logging.info(f"Saved new desktop file: {desktop_path.name}")
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        desktop_filename = "rfp_scraping_output.xlsx"
+        desktop_path = OUTPUT_DIR / desktop_filename
+
+        # same for desktop_path
+        with pd.ExcelWriter(desktop_path, engine="xlsxwriter") as writer:
+            export_all(export_map, writer)
+        logging.info(f"Saved new desktop file: {desktop_path.name}")
 
     return state_to_df, cache_path, state_durations
