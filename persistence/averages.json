@@ -8,12 +8,12 @@
     "average_seconds": 0.7616637666166449
   },
   "california": {
-    "count": 2,
-    "average_seconds": 12.345387850014959
+    "count": 3,
+    "average_seconds": 11.85172520003592
   },
   "colorado": {
-    "count": 2,
-    "average_seconds": 15.28358579997439
+    "count": 3,
+    "average_seconds": 13.426640866634747
   },
   "connecticut": {
     "count": 1,
@@ -52,7 +52,7 @@
     "average_seconds": 7.156172699993476
   },
   "arizona": {
-    "count": 1,
-    "average_seconds": 3.4657368999905884
+    "count": 2,
+    "average_seconds": 2.976350349956192
   }
 }

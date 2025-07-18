@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
             return
         keyword_list = [line.strip() for line in keywords.splitlines() if line.strip()]
         self._canceled = False
-        self.run_page.start_tailing()
+        self.run_page.start_scraper(keywords, states)
         self.stack.setCurrentWidget(self.run_page)
         self._worker = ScrapeWorker(states, keyword_list)
         self._worker.log_line.connect(self.run_page.append_log)
