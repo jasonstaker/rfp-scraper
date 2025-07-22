@@ -203,3 +203,4 @@ QWidget:focus {
     outline: ${outline_width} solid #FFD486;
     outline-offset: ${outline_offset};
 }
+

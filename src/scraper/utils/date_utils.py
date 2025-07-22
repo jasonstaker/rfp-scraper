@@ -58,9 +58,6 @@ def parse_date_simple(date_str: str) -> str:
 # requires: df is a pandas DataFrame with a 'Due Date' column
 # modifies: nothing
 # effects: filters to keep only rows whose date (parsed via parse_date_generic) is today or later
-import pandas as pd
-from datetime import datetime
-
 def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
     today = datetime.now().date()
 

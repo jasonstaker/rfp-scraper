@@ -100,7 +100,7 @@ def split_by_keywords(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     hidden_ids = load_hidden_ids()
 
     # 3) keep only those not manually hidden
-    code_col = 'Solicitation #'
+    code_col = 'code'
     visible = kw_visible.loc[
         ~kw_visible[code_col].astype(str).isin(hidden_ids)
     ].reset_index(drop=True)

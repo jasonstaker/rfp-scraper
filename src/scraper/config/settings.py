@@ -51,7 +51,14 @@ STATE_RFP_URL_MAP = {
     "west virginia": 'https://prd311.wvoasis.gov/PRDVSS1X1ERP/Advantage4',
     "wyoming": 'https://www.publicpurchase.com/gems/wyominggsd,wy/buyer/public/publicInfo'
 }
+
+COUNTY_RFP_URL_MAP = {
+    "los angeles": ''
+}
+
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
+AVAILABLE_COUNTIES = list(COUNTY_RFP_URL_MAP.keys())
+
 FALLBACK_CSRF = "4b9qnD7UgwevuI79WCsBUAv2VtsgEvdqW8gdWmgRSO0%3D"
 KEYWORD_FILE = './scraper/config/keywords.txt'
 HIDDEN_IDS_FILE: Path = Path(__file__).resolve().parent.parent.parent / "persistence" / "hidden_ids.json"

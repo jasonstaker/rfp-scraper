@@ -6,6 +6,7 @@ from PIL import Image
 
 from scraper.utils.data_utils import split_by_keywords
 from scraper.utils.date_utils import filter_by_dates, parse_date_generic
+from scraper.utils.text_utils import sanitize
 from src.config import ASSETS_DIR
 
 # initialize logger
@@ -222,9 +223,9 @@ def export_all(state_to_df_map, writer):
                     fmt = default_fmt
 
                 if col_idx == 6:
-                    worksheet.write_url(row_idx, col_idx, cell_val or "", fmt)
+                    worksheet.write_url(row_idx, col_idx, sanitize(cell_val) or "", fmt)
                 else:
-                    worksheet.write(row_idx, col_idx, cell_val, fmt)
+                    worksheet.write(row_idx, col_idx, sanitize(cell_val), fmt)
 
             lines = math.ceil(len(str(row[1])) / 41)
             height = max(lines * 15, 40)

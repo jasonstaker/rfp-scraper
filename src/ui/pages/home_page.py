@@ -1,5 +1,3 @@
-# home_page.py
-
 from PyQt5.QtCore import Qt, pyqtSignal, QRect, QSize, QTimer, QPoint
 from PyQt5.QtGui import QColor, QPainter, QFont, QTextCharFormat, QTextFormat
 from PyQt5.QtWidgets import (
@@ -9,15 +7,17 @@ from PyQt5.QtWidgets import (
     QLabel,
     QPushButton,
     QPlainTextEdit,
-    QTextEdit,
     QListWidget,
     QListWidgetItem,
     QSizePolicy,
+    QTabWidget,
+    QTextEdit,
 )
 
 from persistence.average_time_manager import load_averages, estimate_total_time, update_averages
-from scraper.config.settings import AVAILABLE_STATES
+from scraper.config.settings import AVAILABLE_STATES, AVAILABLE_COUNTIES
 from src.config import KEYWORDS_FILE
+
 
 # line number display for code editor
 class LineNumberArea(QWidget):
@@ -135,13 +135,14 @@ class CodeEditor(QPlainTextEdit):
             block_number += 1
 
 
-# page for keyword and state input
+# page for keyword, state, and county input
 class HomePage(QWidget):
-    start_run = pyqtSignal(str, list)
+    # Added counties dict to signal
+    start_run = pyqtSignal(str, list, dict)
 
     # requires: none
-    # modifies: self.code_editor, self.state_list, self.select_all_btn
-    # effects: initializes ui for keyword and state selection
+    # modifies: self.code_editor, self.tab_widget, self.select_buttons, self.counties
+    # effects: initializes ui for keyword, state, and county selection with tabs
     def __init__(self):
         super().__init__()
         main_layout = QVBoxLayout()
@@ -149,175 +150,129 @@ class HomePage(QWidget):
         main_layout.setContentsMargins(px(0), px(8), px(0), px(0))
         main_layout.setSpacing(0)
         self.setLayout(main_layout)
+
+        # Header bar
         self.header_bar = QWidget()
         self.header_bar.setObjectName("header_bar")
         self.header_bar.setStyleSheet("background-color: #1A429A;")
         header_layout = QHBoxLayout(self.header_bar)
         header_layout.setContentsMargins(px(12), px(4), px(12), px(4))
         header_layout.setSpacing(0)
+
         self.kw_label = QLabel("Enter keywords (one per line):")
         self.kw_label.setStyleSheet("color: white;")
         header_layout.addWidget(self.kw_label, 2, alignment=Qt.AlignVCenter)
-        self.state_label = QLabel("Select:")
-        self.state_label.setObjectName("state_label")
-        self.state_label.setStyleSheet("color: white;")
-        header_layout.addWidget(self.state_label, 1, alignment=Qt.AlignVCenter)
+
         main_layout.addWidget(self.header_bar)
+
+        # Content row
         row_layout = QHBoxLayout()
         row_layout.setContentsMargins(px(12), px(0), px(12), px(12))
         row_layout.setSpacing(px(12))
         main_layout.addLayout(row_layout)
+
+        # Keyword editor
         self.code_editor = CodeEditor()
         self.code_editor.setObjectName("code_editor")
-        self.code_editor.setPlaceholderText("e.g.\ngrant management\ncase management\nhome energy\n...")
+        self.code_editor.setPlaceholderText("e.g.\ngrant management\n...")
         self.code_editor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         row_layout.addWidget(self.code_editor, 2)
-        try:
-            if KEYWORDS_FILE.exists():
-                with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
-                    contents = f.read()
-                self.code_editor.setPlainText(contents)
-        except Exception:
-            pass
-        center_container = QWidget()
-        center_container.setObjectName("center_container")
-        center_layout = QVBoxLayout()
-        center_layout.setContentsMargins(0, 0, 0, 0)
-        center_layout.setSpacing(px(8))
-        center_container.setLayout(center_layout)
+
+        # Tabs for States and Counties
+        self.tab_widget = QTabWidget()
+        # States tab
+        state_page = QWidget()
+        sp_layout = QVBoxLayout(state_page)
+        sp_layout.setContentsMargins(0, 0, 0, 0)
+        sp_layout.setSpacing(px(8))
         self.state_list = QListWidget()
         self.state_list.setObjectName("state_list")
         for state in AVAILABLE_STATES:
-            parts = state.split()
-            if len(parts) == 2:
-                # two-word states: capitalize both
-                label = " ".join(p.capitalize() for p in parts)
-            elif len(parts) == 3:
-                # three-word states: only first and third
-                label = f"{parts[0].capitalize()} {parts[1].lower()} {parts[2].capitalize()}"
-            else:
-                # single-word or others
-                label = state.capitalize()
-
-            item = QListWidgetItem(label)
+            item = QListWidgetItem(" ".join(p.capitalize() for p in state.split()))
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Unchecked)
             self.state_list.addItem(item)
-        self.state_list.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        center_layout.addWidget(self.state_list)
-        self.select_all_btn = QPushButton("Select all")
-        self.select_all_btn.setObjectName("select_all_btn")
-        center_layout.addWidget(self.select_all_btn)
-        self.select_all_btn.clicked.connect(self.on_select_all_toggled)
-        self.state_list.itemChanged.connect(self._on_state_item_changed)
-        QTimer.singleShot(0, self.recalc_estimated_time)
-        row_layout.addWidget(center_container, 1)
+        sp_layout.addWidget(self.state_list)
+        self.state_select_all = QPushButton("Select all")
+        self.state_select_all.setObjectName("select_all_btn")
+        self.state_select_all.clicked.connect(lambda: self._toggle(self.state_list, self.state_select_all))
+        sp_layout.addWidget(self.state_select_all)
+        self.tab_widget.addTab(state_page, "States")
+
+        # Counties tab
+        county_page = QWidget()
+        cp_layout = QVBoxLayout(county_page)
+        cp_layout.setContentsMargins(0, 0, 0, 0)
+        cp_layout.setSpacing(px(8))
+        self.county_list = QListWidget()
+        self.county_list.setObjectName("state_list")  # reuse same QSS ID
+        for county in AVAILABLE_COUNTIES:
+            item = QListWidgetItem(" ".join(p.capitalize() for p in county.split()))
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(Qt.Unchecked)
+            self.county_list.addItem(item)
+        cp_layout.addWidget(self.county_list)
+        self.county_select_all = QPushButton("Select all")
+        self.county_select_all.setObjectName("select_all_btn")
+        self.county_select_all.clicked.connect(lambda: self._toggle(self.county_list, self.county_select_all))
+        cp_layout.addWidget(self.county_select_all)
+        self.tab_widget.addTab(county_page, "Counties")
+
+        row_layout.addWidget(self.tab_widget, 1)
+
+        # Placeholder for county selections
+        self.counties = {}
+
+        # Time estimate & Run button
         right_container = QWidget()
         right_container.setObjectName("right_container")
-        right_layout = QVBoxLayout()
+        right_layout = QVBoxLayout(right_container)
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(px(8))
-        right_container.setLayout(right_layout)
+
         self.estimated_time_label = QLabel("Estimated time:")
         self.estimated_time_label.setAlignment(Qt.AlignHCenter)
         self.estimated_time_label.setStyleSheet("font-weight: bold;")
+        right_layout.addWidget(self.estimated_time_label)
 
         self.estimated_time_value = QLabel("~0 min")
         self.estimated_time_value.setAlignment(Qt.AlignHCenter)
-        self.set_estimated_time(5, 40)
-
-        right_layout.addWidget(self.estimated_time_label)
+        self.set_estimated_time(0, 0)
         right_layout.addWidget(self.estimated_time_value)
 
-        # Spacer to push the run button into vertical center
         right_layout.addStretch()
-
-        # Run button
         self.run_button = QPushButton("Run")
         self.run_button.setObjectName("run_button")
         self.run_button.setMinimumWidth(px(100))
         right_layout.addWidget(self.run_button, alignment=Qt.AlignHCenter)
-
-        # Spacer below
         right_layout.addStretch()
         row_layout.addWidget(right_container)
+
+        # Connections
         self.run_button.clicked.connect(self.on_run_clicked)
-        QTimer.singleShot(0, self._align_select_states_label)
+        self.tab_widget.currentChanged.connect(self.recalc_estimated_time)
+        self.state_list.itemChanged.connect(self.recalc_estimated_time)
+        self.county_list.itemChanged.connect(self.recalc_estimated_time)
+        QTimer.singleShot(0, self.recalc_estimated_time)
 
-    # requires: none
-    # modifies: self.state_list, self.select_all_btn
-    # effects: toggles all state selections
-    def on_select_all_toggled(self):
-        any_unchecked = any(self.state_list.item(i).checkState() == Qt.Unchecked for i in range(self.state_list.count()))
+    # requires: list_widget and button
+    # modifies: check states of items
+    # effects: toggles all checkboxes and updates button text
+    def _toggle(self, list_widget, button):
+        any_unchecked = any(
+            list_widget.item(i).checkState() == Qt.Unchecked
+            for i in range(list_widget.count())
+        )
         new_state = Qt.Checked if any_unchecked else Qt.Unchecked
-        for i in range(self.state_list.count()):
-            self.state_list.item(i).setCheckState(new_state)
-        self.select_all_btn.setText("Unselect all" if new_state == Qt.Checked else "Select all")
-        self.recalc_estimated_time()
+        for i in range(list_widget.count()):
+            list_widget.item(i).setCheckState(new_state)
+        button.setText("Unselect all" if new_state == Qt.Checked else "Select all")
 
     # requires: none
-    # modifies: self.state_list, self.select_all_btn
-    # effects: toggles all state selections
-    def set_estimated_time(self, minutes: int, seconds: int):
-        parts = []
-        if minutes > 0:
-            parts.append(f"{minutes} min")
-        if seconds > 0 or not parts:
-            parts.append(f"{seconds} sec")
-        formatted = "~" + " ".join(parts)
-        self.estimated_time_value.setText(formatted)
-
-    # requires: none
-    # modifies: start_run signal
-    # effects: emits keywords and states for scraping
-    def on_run_clicked(self):
-        full_text = self.code_editor.toPlainText()
-        lines = [line.strip() for line in full_text.splitlines() if line.strip()]
-        keywords = "\n".join(lines)
-        selected = [self.state_list.item(i).text().lower() for i in range(self.state_list.count()) if self.state_list.item(i).checkState() == Qt.Checked]
-        self.start_run.emit(keywords, selected)
-
-    # requires: none
-    # modifies: self.code_editor, self.state_list, self.select_all_btn
-    # effects: clears input fields
-    def reset_fields(self):
-        self.code_editor.clear()
-        for i in range(self.state_list.count()):
-            self.state_list.item(i).setCheckState(Qt.Unchecked)
-        self.select_all_btn.setText("Select all")
-
-    # requires: item is a QListWidgetItem
-    # modifies: item
-    # effects: updates item appearance based on check state
-    def _on_state_item_changed(self, item: QListWidgetItem):
-        if item.checkState() == Qt.Checked:
-            item.setBackground(QColor("#FFD486"))
-            item.setForeground(QColor("#1A429A"))
-        else:
-            item.setBackground(QColor("#FFFFFF"))
-            item.setForeground(QColor("#1A429A"))
-        self.recalc_estimated_time()
-
-    # requires: event is a QResizeEvent
-    # modifies: self.state_label
-    # effects: adjusts state label position
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self._align_select_states_label()
-
-    # requires: none
-    # modifies: self.state_label
-    # effects: aligns state label with list
-    def _align_select_states_label(self):
-        global_list_top_left = self.state_list.mapToGlobal(QPoint(0, 0))
-        header_local = self.header_bar.mapFromGlobal(global_list_top_left)
-        new_x = header_local.x()
-        current_y = self.state_label.y()
-        self.state_label.move(new_x, current_y)
-
+    # modifies: self.estimated_time_value
+    # effects: recalculates based on selected states only
     def recalc_estimated_time(self):
         averages = load_averages()
-        
         selected = [
             self.state_list.item(i).text().lower()
             for i in range(self.state_list.count())
@@ -325,3 +280,48 @@ class HomePage(QWidget):
         ]
         mins, secs = estimate_total_time(averages, selected)
         self.set_estimated_time(mins, secs)
+
+    # requires: minutes, seconds
+    # modifies: time label
+    # effects: updates display
+    def set_estimated_time(self, minutes: int, seconds: int):
+        parts = []
+        if minutes > 0:
+            parts.append(f"{minutes} min")
+        if seconds > 0 or not parts:
+            parts.append(f"{seconds} sec")
+        self.estimated_time_value.setText("~" + " ".join(parts))
+
+    # requires: none
+    # modifies: start_run signal
+    # effects: emits keywords, states, and counties
+    def on_run_clicked(self):
+        keywords = self.code_editor.toPlainText().strip()
+        states = [
+            self.state_list.item(i).text().lower()
+            for i in range(self.state_list.count())
+            if self.state_list.item(i).checkState() == Qt.Checked
+        ]
+        counties = [
+            self.county_list.item(i).text().lower()
+            for i in range(self.county_list.count())
+            if self.county_list.item(i).checkState() == Qt.Checked
+        ]
+        self.start_run.emit(keywords, states, {"counties": counties})
+
+    # requires: none
+    # modifies: fields
+    # effects: resets editor, lists, and buttons
+    def reset_fields(self):
+        self.code_editor.clear()
+        for lw in (self.state_list, self.county_list):
+            for i in range(lw.count()):
+                lw.item(i).setCheckState(Qt.Unchecked)
+        self.state_select_all.setText("Select all")
+        self.county_select_all.setText("Select all")
+
+    # requires: timings
+    # modifies: persistence
+    # effects: updates averages
+    def persist_averages(self, timings: dict[str, float]):
+        update_averages(timings)

@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+build/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -178,3 +179,4 @@ rfpscraper/
 output/
 .editorconfig
 .gitignore
+src/scraper/scrapers/states/connecticut.py
