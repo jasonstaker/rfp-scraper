@@ -1,9 +1,11 @@
+# logging_config.py
 import logging
 from logging.handlers import RotatingFileHandler
 from logging import Formatter
 
 # a custom logging formatter that adjusts logger names for better readability
 class CustomFormatter(Formatter):
+    
     # requires: nothing
     # modifies: record.name
     # effects: formats the log record by adjusting logger names and returns the formatted string
@@ -15,20 +17,15 @@ class CustomFormatter(Formatter):
             record.name = f'[{file_name}]'
         return super().format(record)
 
+
 # requires: log_file is a string or Path object specifying the log file path
 # modifies: the logging configuration
-# effects: sets up logging to write to log_file with a custom formatter and suppresses unwanted logs from specific libraries
-#           also handles log rotation when file exceeds a given size
-
+# effects: sets up logging to write to log_file with a custom formatter and handles log rotation when file exceeds a given size
 def configure_logging(
     log_file,
     max_bytes: int = 10 * 1024 * 1024,
     backup_count: int = 5
 ):
-    """
-    max_bytes:    rollover when log file exceeds this many bytes
-    backup_count: how many old rotated files to keep
-    """
     handler = RotatingFileHandler(
         filename=log_file,
         maxBytes=max_bytes,
@@ -43,7 +40,6 @@ def configure_logging(
     root.addHandler(handler)
     root.setLevel(logging.INFO)
 
-    # Set levels for specific loggers to suppress unwanted output
     logging.getLogger('selenium').setLevel(logging.WARNING)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('WDM').setLevel(logging.WARNING)

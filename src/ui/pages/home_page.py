@@ -17,7 +17,6 @@ from PyQt5.QtWidgets import (
 from persistence.average_time_manager import load_averages, estimate_total_time, update_averages
 from src.config import AVAILABLE_STATES, AVAILABLE_COUNTIES
 from src.config import KEYWORDS_FILE
-from src.ui.ui_scale import px
 
 
 # line number display for code editor
@@ -56,6 +55,7 @@ class CodeEditor(QPlainTextEdit):
         self.cursorPositionChanged.connect(self.highlight_current_line)
         self.update_line_number_area_width(0)
         self.highlight_current_line()
+        from src.ui.ui_scale import px
         font = QFont("Courier", px(10))
         self.setFont(font)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
@@ -64,6 +64,7 @@ class CodeEditor(QPlainTextEdit):
     # modifies: none
     # effects: computes line number area width
     def line_number_area_width(self) -> int:
+        from src.ui.ui_scale import px
         digits = 1
         max_blocks = max(1, self.blockCount())
         while max_blocks >= 10:
@@ -118,6 +119,7 @@ class CodeEditor(QPlainTextEdit):
     # modifies: none
     # effects: paints line numbers
     def line_number_area_paint_event(self, event):
+        from src.ui.ui_scale import px
         painter = QPainter(self.line_number_area)
         painter.fillRect(event.rect(), QColor("#1A429A"))
         block = self.firstVisibleBlock()
@@ -145,6 +147,7 @@ class HomePage(QWidget):
     # effects: initializes ui for keyword, state, and county selection with tabs
     def __init__(self):
         super().__init__()
+        from src.ui.ui_scale import px
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(px(0), px(8), px(0), px(0))
         main_layout.setSpacing(0)
@@ -173,9 +176,17 @@ class HomePage(QWidget):
         # Keyword editor
         self.code_editor = CodeEditor()
         self.code_editor.setObjectName("code_editor")
-        self.code_editor.setPlaceholderText("e.g.\ngrant management\n...")
+        self.code_editor.setPlaceholderText("e.g.\ngrant management\nLIHEAP\n...")
         self.code_editor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         row_layout.addWidget(self.code_editor, 2)
+
+        try:
+            with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
+                existing = f.read().rstrip("\n")
+                if existing:
+                    self.code_editor.setPlainText(existing)
+        except FileNotFoundError:
+            pass
 
         # Tabs for States and Counties
         self.tab_widget = QTabWidget()
