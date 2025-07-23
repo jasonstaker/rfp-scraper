@@ -43,6 +43,7 @@ class StatusPage(QWidget):
         self.table.verticalHeader().setHighlightSections(False)
         self.table.setObjectName("status_table")
         self.table.setHorizontalHeaderLabels(["state", "status"])
+        self.table.setColumnWidth(0, px(300))
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         main_layout.addWidget(self.table)
@@ -78,7 +79,8 @@ class StatusPage(QWidget):
                 continue
 
             self.table.insertRow(row_index)
-            state_item = QTableWidgetItem(key.capitalize())
+            pretty = key.title().replace(" Of ", " of ")
+            state_item = QTableWidgetItem(pretty)
             state_item.setFlags(state_item.flags() ^ Qt.ItemIsEditable)
             self.table.setItem(row_index, 0, state_item)
 

@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
 from persistence.average_time_manager import load_averages, estimate_total_time, update_averages
 from src.config import AVAILABLE_STATES, AVAILABLE_COUNTIES
 from src.config import KEYWORDS_FILE
+from src.ui.ui_scale import px
 
 
 # line number display for code editor
@@ -55,7 +56,7 @@ class CodeEditor(QPlainTextEdit):
         self.cursorPositionChanged.connect(self.highlight_current_line)
         self.update_line_number_area_width(0)
         self.highlight_current_line()
-        font = QFont("Courier", 10)
+        font = QFont("Courier", px(10))
         self.setFont(font)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
 
@@ -68,7 +69,7 @@ class CodeEditor(QPlainTextEdit):
         while max_blocks >= 10:
             max_blocks //= 10
             digits += 1
-        space = 3 + self.fontMetrics().horizontalAdvance('9') * digits
+        space = px(3) + self.fontMetrics().horizontalAdvance('9') * digits
         return space
 
     # requires: none
@@ -128,7 +129,7 @@ class CodeEditor(QPlainTextEdit):
                 number = str(block_number + 1)
                 painter.setPen(QColor("#FFFFFF"))
                 font_metrics = self.fontMetrics()
-                painter.drawText(0, top, self.line_number_area.width() - 5, font_metrics.height(), Qt.AlignRight, number)
+                painter.drawText(0, top, self.line_number_area.width() - px(5), font_metrics.height(), Qt.AlignRight, number)
             block = block.next()
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())
@@ -137,7 +138,6 @@ class CodeEditor(QPlainTextEdit):
 
 # page for keyword, state, and county input
 class HomePage(QWidget):
-    # Added counties dict to signal
     start_run = pyqtSignal(str, list, dict)
 
     # requires: none
@@ -146,7 +146,6 @@ class HomePage(QWidget):
     def __init__(self):
         super().__init__()
         main_layout = QVBoxLayout()
-        from src.ui.ui_scale import px
         main_layout.setContentsMargins(px(0), px(8), px(0), px(0))
         main_layout.setSpacing(0)
         self.setLayout(main_layout)
