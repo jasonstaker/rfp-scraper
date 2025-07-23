@@ -9,7 +9,7 @@ import pandas as pd
 from src.scraper.config import KEYWORDS_FILE
 from src.scraper.utils.data_utils import filter_by_keywords
 from src.scraper.utils.date_utils import parse_date
-from src.scraper.utils.text_utils import clean_text
+from src.scraper.utils.text_utils import normalize_whitespace
 
 
 class TestDataUtils(unittest.TestCase):
@@ -65,16 +65,16 @@ class TestDateUtils(unittest.TestCase):
 class TestTextUtils(unittest.TestCase):
     def test_clean_text_normal(self):
         text = "  This   is   a   test  "
-        cleaned = clean_text(text)
+        cleaned = normalize_whitespace(text)
         self.assertEqual(cleaned, "This is a test")
 
     def test_clean_text_empty_string(self):
         text = ""
-        cleaned = clean_text(text)
+        cleaned = normalize_whitespace(text)
         self.assertEqual(cleaned, "")
 
     def test_clean_text_none(self):
-        result = clean_text(None)
+        result = normalize_whitespace(None)
         self.assertEqual(result, "")
 
 

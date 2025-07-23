@@ -2,12 +2,11 @@
 
 import re
 
-# requires: text is a string or none
-# modifies: nothing
-# effects: removes extra whitespace from text and returns the cleaned string; returns an empty string if text is none or empty
-def clean_text(text):
+# effects: removes extra whitespace from text and returns the cleaned string
+def normalize_whitespace(text):
     return " ".join(text.split()).strip() if text else ""
 
+# effects: gets rid of characters that excel files cannot process
 def sanitize(val):
     if isinstance(val, str):
         val = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F]', '', val)

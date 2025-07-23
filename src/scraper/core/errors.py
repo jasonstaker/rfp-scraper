@@ -1,3 +1,5 @@
+# errors.py
+
 class ScraperError(Exception):
     """Base class for all scraper errors."""
 
