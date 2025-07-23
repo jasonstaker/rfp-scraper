@@ -6,6 +6,7 @@ import ctypes
 import threading
 import traceback
 from pathlib import Path
+from src.config import OUTPUT_FILENAME_PREFIX, OUTPUT_FILE_EXTENSION
 
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
@@ -141,7 +142,7 @@ class MainWindow(QMainWindow):
         self.status_page.display_results(results)
         self.stack.setCurrentWidget(self.status_page)
         import os, platform
-        desktop_path = OUTPUT_DIR / "rfp_scraping_output.xlsx"
+        desktop_path = OUTPUT_DIR / f"{OUTPUT_FILENAME_PREFIX}{OUTPUT_FILE_EXTENSION}"
         if desktop_path.exists():
             if platform.system() == "Windows":
                 os.startfile(desktop_path)

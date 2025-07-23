@@ -48,7 +48,7 @@ def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
         if others.isna().all() or all((pd.isna(v) or v == '' for v in others)):
             return df.iloc[0:0].copy()
 
-    due_str = df["Due Date"].astype(str)
+    due_str = df["end_date"].astype(str)
     parsed = pd.to_datetime(due_str, errors="coerce").dt.date
 
     mask = parsed.notna() & (parsed >= today)

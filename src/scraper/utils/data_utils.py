@@ -1,11 +1,19 @@
 # data_utils.py
 
-import zipfile
 import pandas as pd
 import json
 from pathlib import Path
 
-from src.config import KEYWORDS_FILE, HIDDEN_IDS_FILE, OUTPUT_DIR, CACHE_DIR, ASSETS_DIR, PERSISTENCE_DIR
+from src.config import (
+    KEYWORDS_FILE,
+    HIDDEN_IDS_FILE,
+    OUTPUT_DIR,
+    CACHE_DIR,
+    ASSETS_DIR,
+    PERSISTENCE_DIR,
+    OUTPUT_FILE_EXTENSION,
+    OUTPUT_FILENAME_PREFIX,
+)
 
 # effects: loads and returns a set of hidden solicitation ids from a json file, or an empty set if the file is not found or invalid
 def load_hidden_ids() -> set[str]:
@@ -47,11 +55,11 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     return filtered.sort_values(by='Keyword Hits', ascending=False).reset_index(drop=True)
 
 
-# requires: excel_path is a Path object pointing to an excel file
-# modifies: the hidden ids json file
-# effects: reads the excel file, extracts hidden solicitation ids, and updates the hidden ids json file with the union of existing and new hidden ids
+# requires: excel_path points to an Excel file with sheets “All RFPs” and “Hidden RFPs”
+# modifies: HIDDEN_IDS_FILE on disk
+# effects: adds/removes any checked rfps from the previous excel file
 def sync_hidden_from_excel(
-    excel_path: Path = OUTPUT_DIR / "rfp_scraping_output.xlsx"
+    excel_path: Path = OUTPUT_DIR / f"{OUTPUT_FILENAME_PREFIX}{OUTPUT_FILE_EXTENSION}"
 ) -> None:
     path = Path(HIDDEN_IDS_FILE)
     try:
@@ -60,20 +68,24 @@ def sync_hidden_from_excel(
         existing = set()
 
     try:
-        df = pd.read_excel(excel_path, header=None, sheet_name=0, engine="openpyxl")
+        all_df    = pd.read_excel(excel_path, sheet_name="All RFPs",    engine="openpyxl")
+        hidden_df = pd.read_excel(excel_path, sheet_name="Hidden RFPs", engine="openpyxl")
     except (FileNotFoundError, PermissionError):
         return
 
     try:
-        data = df.iloc[1:, [0, 3]].copy()
-        data.columns = ['Hide', 'Solicitation#']
+        all_data    = all_df.iloc[:, [0, 3]].copy()
+        all_data.columns    = ['Hide', 'Solicitation#']
+        hidden_data = hidden_df.iloc[:, [0, 3]].copy()
+        hidden_data.columns = ['Hide', 'Solicitation#']
     except IndexError:
         return
 
-    newly = set(data.loc[data['Hide'] == True, 'Solicitation#'].astype(str).tolist())
+    to_add = set(all_data.loc[all_data['Hide'] == True, 'Solicitation#'].astype(str))
+    to_remove = set(hidden_data.loc[hidden_data['Hide'] == True, 'Solicitation#'].astype(str))
 
-    all_ids = sorted(existing.union(newly))
-    path.write_text(json.dumps(all_ids, indent=2), encoding='utf-8')
+    updated = (existing.union(to_add)).difference(to_remove)
+    path.write_text(json.dumps(sorted(updated), indent=2), encoding='utf-8')
 
 
 # requires: df is a pandas DataFrame

@@ -40,7 +40,7 @@ class NorthDakotaScraper(SeleniumScraper):
             start = quote(today, safe="")
             stop = quote("12/31/2100", safe="")
             base_no_amp = self.base_url.rstrip("&")
-            search_url = f"{base_no_amp}?searchDT.startDate={start}&searchDT.stopDate={stop}"
+            search_url = f"{base_no_amp}&searchDT.startDate={start}&searchDT.stopDate={stop}"
 
             self.driver.get(base_no_amp)
             self.logger.info(f"Loading search URL: {search_url}")
