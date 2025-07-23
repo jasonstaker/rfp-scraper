@@ -15,14 +15,23 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
+from scraper.core.errors import (
+    SearchTimeoutError,
+    ElementNotFoundError,
+    DataExtractionError,
+    PaginationError,
+    ScraperError,
+)
 
 # a scraper for North Carolina RFP data using Selenium
 class NorthCarolinaScraper(SeleniumScraper):
+
     # modifies: self
     # effects: initializes scraper with North Carolina RFP URL and configures logger
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("north carolina"))
         self.logger = logging.getLogger(__name__)
+
 
     # modifies: self.driver
     # effects: navigates to the North Carolina portal and waits for initial table rows to load
@@ -30,7 +39,6 @@ class NorthCarolinaScraper(SeleniumScraper):
         self.logger.info("Navigating to North Carolina RFP portal")
         try:
             self.driver.get(self.base_url)
-            # Wait until at least one row is present in the solicitations table
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((
                     By.CSS_SELECTOR,
@@ -38,9 +46,19 @@ class NorthCarolinaScraper(SeleniumScraper):
                 ))
             )
             return True
-        except (TimeoutException, NoSuchElementException) as e:
+        except TimeoutException as te:
+            self.logger.error(f"Search timeout: {te}", exc_info=False)
+            raise SearchTimeoutError("North Carolina search timed out") from te
+        except NoSuchElementException as ne:
+            self.logger.error(f"Search element not found: {ne}", exc_info=False)
+            raise ElementNotFoundError("North Carolina search element not found") from ne
+        except WebDriverException as we:
+            self.logger.error(f"Search WebDriver error: {we}", exc_info=True)
+            raise ScraperError("North Carolina search WebDriver error") from we
+        except Exception as e:
             self.logger.error(f"Search failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("North Carolina search failed") from e
+
 
     # requires: current page loaded in self.driver
     # effects: parses the solicitations table and returns list of raw records
@@ -50,12 +68,12 @@ class NorthCarolinaScraper(SeleniumScraper):
             table = soup.find("table", class_="table table-striped table-fluid")
             if not table:
                 self.logger.error("Solicitations table not found")
-                return []
+                raise ElementNotFoundError("North Carolina solicitations table not found")
 
             tbody = table.find("tbody")
             if not tbody:
                 self.logger.error("<tbody> not found in table")
-                return []
+                raise ElementNotFoundError("North Carolina table body not found")
 
             records = []
             for row in tbody.find_all("tr", attrs={"data-entity": "evp_solicitation"}):
@@ -63,18 +81,12 @@ class NorthCarolinaScraper(SeleniumScraper):
                 if len(cols) < 7:
                     continue
 
-                # Solicitation Number and link
                 a = cols[0].find("a", href=True)
                 code = a.get_text(strip=True) if a else ""
                 link = urljoin(self.base_url, a["href"]) if a else self.base_url
 
-                # Project Title
                 title = cols[1].get_text(strip=True)
 
-                # Description (not stored but could be logged)
-                # desc = cols[2].get_text(strip=True)
-
-                # Opening Date as end date
                 time_tag = cols[3].find("time")
                 end_date = time_tag.get_text(strip=True) if time_tag else cols[3].get_text(strip=True)
 
@@ -86,15 +98,17 @@ class NorthCarolinaScraper(SeleniumScraper):
                 })
 
             return records
+        except ElementNotFoundError:
+            raise
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise
+            raise DataExtractionError("North Carolina extract_data failed") from e
+
 
     # modifies: self.driver
     # effects: clicks next page if available, returns True if click succeeded
     def next_page(self):
         try:
-            # only clickable when aria-disabled is not true
             next_btn = WebDriverWait(self.driver, 5).until(
                 EC.element_to_be_clickable((
                     By.CSS_SELECTOR,
@@ -105,7 +119,6 @@ class NorthCarolinaScraper(SeleniumScraper):
             return False
 
         try:
-            # wait for current table to go stale
             old_tbody = self.driver.find_element(By.CSS_SELECTOR, "table.table-striped.table-fluid tbody")
             next_btn.click()
             WebDriverWait(self.driver, 10).until(EC.staleness_of(old_tbody))
@@ -113,25 +126,30 @@ class NorthCarolinaScraper(SeleniumScraper):
                 EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-striped.table-fluid tbody tr"))
             )
             return True
-        except (TimeoutException, WebDriverException):
-            return False
+        except WebDriverException as we:
+            self.logger.error(f"next_page WebDriver error: {we}", exc_info=False)
+            raise PaginationError("North Carolina pagination failed") from we
+        except Exception as e:
+            self.logger.error(f"next_page failed: {e}", exc_info=True)
+            raise ScraperError("North Carolina next_page failed") from e
+
 
     # effects: orchestrates full scrape: search -> extract_data & paginate -> filter -> return
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for North Carolina")
-        all_records = []
         try:
             if not self.search(**kwargs):
                 self.logger.warning("Search did not initialize correctly; aborting")
-                raise RuntimeError("NorthCarolinaScraper.search() failed")
+                raise ScraperError("North Carolina scrape aborted due to empty search")
 
+            all_records = []
             page = 1
             while True:
                 self.logger.info(f"Extracting page {page}")
                 batch = self.extract_data()
                 if page == 1 and not batch:
                     self.logger.error("No records found on first page; aborting")
-                    raise RuntimeError("NorthCarolinaScraper.extract_data() returned empty on first page")
+                    raise DataExtractionError("North Carolina extract_data returned empty on first page")
                 all_records.extend(batch)
 
                 if not self.next_page():
@@ -145,6 +163,8 @@ class NorthCarolinaScraper(SeleniumScraper):
             self.logger.info(f"Total records after filtering: {len(filtered)}")
             return filtered.to_dict("records")
 
+        except (SearchTimeoutError, ElementNotFoundError, DataExtractionError, PaginationError, ScraperError):
+            raise
         except Exception as e:
             self.logger.error(f"scrape failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("North Carolina scrape failed") from e

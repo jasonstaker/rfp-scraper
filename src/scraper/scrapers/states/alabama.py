@@ -15,16 +15,25 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
+from scraper.core.errors import (
+    SearchTimeoutError,
+    ElementNotFoundError,
+    DataExtractionError,
+    ScraperError,
+)
+
 # a scraper for Alabama RFP data using Selenium
 class AlabamaScraper(SeleniumScraper):
+
     # modifies: self
     # effects: initializes the scraper with Alabama's RFP url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["alabama"])
         self.logger = logging.getLogger(__name__)
 
+
     # modifies: self.driver
-    # effects: navigates to the Alabama portal, opens the solicitiations table, and returns page source
+    # effects: navigates to the Alabama portal, opens the solicitations table, and returns page source
     def search(self, **kwargs):
         self.logger.info("starting Alabama search")
         try:
@@ -57,27 +66,28 @@ class AlabamaScraper(SeleniumScraper):
 
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}")
-            raise
+            raise SearchTimeoutError("Alabama search timed out") from te
         except NoSuchElementException as ne:
             self.logger.error(f"search missing element: {ne}")
-            raise
+            raise ElementNotFoundError("Alabama search expected element not found") from ne
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Alabama search failed") from e
+
 
     # requires: page_source is a string containing html
     # effects: parses the HTML table into raw record dicts
     def extract_data(self, page_source):
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
-            raise
+            raise DataExtractionError("No page_source provided to Alabama extract_data")
         self.logger.info("extracting Alabama records")
         try:
             soup = BeautifulSoup(page_source, "html.parser")
             table = soup.find("table", attrs={"name": "tblT1SO_SRCH_QRY"})
             if not table:
                 self.logger.error("table not found in extract_data")
-                raise
+                raise ElementNotFoundError("Alabama results table not found in extract_data")
 
             records = []
             rows = table.find_all("tr", class_=lambda c: c and "advgrid" in c.lower())
@@ -105,7 +115,8 @@ class AlabamaScraper(SeleniumScraper):
 
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise
+            raise DataExtractionError("Alabama extract_data failed") from e
+
 
     # modifies: self.driver
     # effects: runs search -> pagination -> extract -> filter, returns filtered records
@@ -118,7 +129,7 @@ class AlabamaScraper(SeleniumScraper):
             page = self.search(**kwargs)
             if not page:
                 self.logger.warning("search returned no page; skipping")
-                raise
+                raise ScraperError("Alabama search returned no page")
 
             self.logger.info("processing page 1")
             first = self.extract_data(page)
@@ -161,4 +172,4 @@ class AlabamaScraper(SeleniumScraper):
 
         except Exception as e:
             self.logger.error(f"scrape failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Alabama scrape failed") from e

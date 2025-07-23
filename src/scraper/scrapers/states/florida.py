@@ -2,7 +2,6 @@
 # url: https://vendor.myfloridamarketplace.com/search/bids
 
 import logging
-import time
 
 import pandas as pd
 import requests
@@ -11,13 +10,21 @@ from scraper.core.requests_scraper import RequestsScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
+from scraper.core.errors import (
+    SearchTimeoutError,
+    DataExtractionError,
+    ScraperError,
+)
+
 # a scraper for Florida RFP data using Requests
 class FloridaScraper(RequestsScraper):
+
     # modifies: self
     # effects: initializes the scraper with Florida's RFP URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("florida"))
         self.logger = logging.getLogger(__name__)
+
 
     # effects: issues a POST to the Florida endpoint for the given page; returns JSON list or raises on failure
     def search(self, page: int = 1, **kwargs):
@@ -49,27 +56,30 @@ class FloridaScraper(RequestsScraper):
         }
         try:
             resp = self.session.post(self.base_url, json=payload, headers=headers, timeout=15)
-            if resp.status_code != 200:
-                self.logger.error(f"search HTTP status {resp.status_code} on page={page}: {resp.text!r}")
-                raise
-            data = resp.json()
-            if not isinstance(data, list):
-                self.logger.error(f"Expected JSON list but got: {data}")
-                raise
-            return data
+            resp.raise_for_status()
         except requests.exceptions.RequestException as re:
             self.logger.error(f"search HTTP error (page={page}): {re}", exc_info=False)
-            raise
+            raise SearchTimeoutError(f"Florida search HTTP error on page {page}") from re
+
+        try:
+            data = resp.json()
         except ValueError as ve:
-            self.logger.error(f"JSON decode failed (page={page}), response was: {resp.text!r}", exc_info=False)
-            raise
-        except Exception as e:
-            self.logger.error(f"search failed (page={page}): {e}", exc_info=True)
-            raise
+            self.logger.error(f"JSON decode failed (page={page}): {ve}", exc_info=False)
+            raise DataExtractionError(f"Florida JSON decode failed on page {page}") from ve
+
+        if not isinstance(data, list):
+            self.logger.error(f"Expected JSON list but got: {data}")
+            raise DataExtractionError(f"Florida search returned non‑list JSON on page {page}")
+
+        return data
+
 
     # requires: page_data is a list of dicts
     # effects: transforms each JSON dict into a record dict; returns list of records
     def extract_data(self, page_data: list[dict]):
+        if not isinstance(page_data, list):
+            self.logger.error("extract_data received invalid page_data")
+            raise DataExtractionError("Florida extract_data expected list input")
         records = []
         try:
             for item in page_data:
@@ -89,7 +99,8 @@ class FloridaScraper(RequestsScraper):
             return records
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise
+            raise DataExtractionError("Florida extract_data failed") from e
+
 
     # effects: paginates through search & extract_data, filters results; returns filtered records
     def scrape(self, **kwargs):
@@ -111,6 +122,9 @@ class FloridaScraper(RequestsScraper):
             filtered = filter_by_keywords(df)
             self.logger.info(f"Total records after filtering: {len(filtered)}")
             return filtered.to_dict("records")
+
+        except (SearchTimeoutError, DataExtractionError):
+            raise
         except Exception as e:
             self.logger.error(f"Florida scrape failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Florida scrape failed") from e

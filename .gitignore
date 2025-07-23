@@ -179,4 +179,3 @@ rfpscraper/
 output/
 .editorconfig
 .gitignore
-src/scraper/scrapers/states/connecticut.py

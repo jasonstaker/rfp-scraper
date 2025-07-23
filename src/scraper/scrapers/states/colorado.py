@@ -15,13 +15,23 @@ from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.config.settings import STATE_RFP_URL_MAP
 
+from scraper.core.errors import (
+    SearchTimeoutError,
+    ElementNotFoundError,
+    DataExtractionError,
+    PaginationError,
+    ScraperError,
+)
+
 # a scraper for Colorado RFP data using Selenium
 class ColoradoScraper(SeleniumScraper):
+
     # modifies: self
     # effects: initializes the scraper with Colorado's RFP url and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["colorado"])
         self.logger = logging.getLogger(__name__)
+
 
     # effects: navigates to the Colorado RFP portal, clicks to display solicitations, and returns True if successful
     def search(self, **kwargs):
@@ -39,35 +49,42 @@ class ColoradoScraper(SeleniumScraper):
             )
             self.logger.info("solicitations table loaded")
             return True
+
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}", exc_info=False)
-            raise
+            raise SearchTimeoutError("Colorado search timed out") from te
+
         except NoSuchElementException as ne:
             self.logger.error(f"search missing element: {ne}", exc_info=False)
-            raise
+            raise ElementNotFoundError("Colorado search element not found") from ne
+
         except WebDriverException as we:
             self.logger.error(f"search WebDriver error: {we}", exc_info=True)
-            raise
+            raise ScraperError("Colorado search WebDriver error") from we
+
         except Exception as e:
             self.logger.error(f"search() failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Colorado search failed") from e
+
 
     # requires: page_source is a string containing HTML page source
     # effects: parses the solicitations table from page_source and returns a list of raw record dicts
     def extract_data(self, page_source):
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
-            raise
+            raise DataExtractionError("No page_source provided to Colorado extract_data")
+
         try:
             soup = BeautifulSoup(page_source, "html.parser")
             table = soup.find("table", id="vsspageVVSSX10019gridView1group1cardGridgrid1")
             if not table:
                 self.logger.error("results table not found")
-                raise
+                raise ElementNotFoundError("Colorado results table not found")
+
             tbody = table.find("tbody")
             if not tbody:
                 self.logger.error("no <tbody> found in table")
-                raise
+                raise ElementNotFoundError("Colorado results <tbody> not found")
 
             records = []
             for row in tbody.find_all("tr"):
@@ -84,19 +101,25 @@ class ColoradoScraper(SeleniumScraper):
                     "link": STATE_RFP_URL_MAP["colorado"],
                 })
             return records
+
+        except (ElementNotFoundError, DataExtractionError):
+            raise
+
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise
+            raise DataExtractionError("Colorado extract_data failed") from e
+
 
     # effects: orchestrates search -> extract/paginate -> filter; returns filtered records or raises on failure
     def scrape(self, **kwargs):
         self.logger.info("starting Colorado scrape")
         all_records = []
+
         try:
             success = self.search(**kwargs)
             if not success:
-                self.logger.warning("search() returned False; raising exception to retry")
-                raise RuntimeError("ColoradoScraper.search() failed")
+                self.logger.warning("search() returned False; retryable failure")
+                raise SearchTimeoutError("Colorado search() returned False")
 
             page_num = 1
             while True:
@@ -105,19 +128,21 @@ class ColoradoScraper(SeleniumScraper):
                     page_source = self.driver.page_source
                 except WebDriverException as we:
                     self.logger.error(f"failed to get page_source: {we}", exc_info=False)
-                    raise RuntimeError(f"failed to get page_source: {we}")
+                    raise ScraperError(f"failed to get page_source: {we}") from we
 
                 batch = self.extract_data(page_source)
                 if page_num == 1 and not batch:
-                    self.logger.error("extract_data returned no records on first page; raising exception to retry")
-                    raise RuntimeError("ColoradoScraper.extract_data() returned empty on first page")
+                    self.logger.error("extract_data returned no records on first page; retryable failure")
+                    raise DataExtractionError("Colorado extract_data returned empty on first page")
+
                 all_records.extend(batch)
 
                 try:
                     next_buttons = self.driver.find_elements(By.CLASS_NAME, "css-1yn6b58")
                 except WebDriverException as we:
                     self.logger.error(f"failed to find next buttons: {we}", exc_info=False)
-                    raise RuntimeError(f"failed to find next buttons: {we}")
+                    raise PaginationError(f"failed to find next buttons: {we}") from we
+
                 next_btn = None
                 for btn in next_buttons:
                     try:
@@ -126,6 +151,7 @@ class ColoradoScraper(SeleniumScraper):
                             break
                     except WebDriverException:
                         continue
+
                 if not next_btn:
                     self.logger.info("no clickable 'Next' button; stopping pagination")
                     break
@@ -134,7 +160,8 @@ class ColoradoScraper(SeleniumScraper):
                     next_btn.click()
                 except WebDriverException as we:
                     self.logger.error(f"failed to click next button: {we}", exc_info=False)
-                    raise RuntimeError(f"failed to click next button: {we}")
+                    raise PaginationError(f"failed to click next button: {we}") from we
+
                 page_num += 1
 
             self.logger.info("completed parsing")
@@ -143,6 +170,10 @@ class ColoradoScraper(SeleniumScraper):
             filtered = filter_by_keywords(df)
             self.logger.info(f"found {len(filtered)} records after filtering")
             return filtered.to_dict("records")
+
+        except (SearchTimeoutError, ElementNotFoundError, DataExtractionError, PaginationError, ScraperError):
+            raise
+
         except Exception as e:
             self.logger.error(f"scrape failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Colorado scrape failed") from e

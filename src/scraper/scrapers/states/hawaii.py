@@ -10,19 +10,29 @@ import pandas as pd
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
+from scraper.core.errors import (
+    SearchTimeoutError,
+    ElementNotFoundError,
+    DataExtractionError,
+    PaginationError,
+    ScraperError,
+)
+
 # a scraper for Hawaii RFP data using Selenium
 class HawaiiScraper(SeleniumScraper):
+
     # modifies: self
     # effects: initializes the scraper with Hawaii's RFP URL and sets up logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP["hawaii"])
         self.logger = logging.getLogger(__name__)
+
 
     # modifies: self.driver
     # effects: navigates to the page, clicks search links/buttons to load data, and returns page source
@@ -42,15 +52,19 @@ class HawaiiScraper(SeleniumScraper):
                 )
             )
             return self.driver.page_source
+
         except TimeoutException as te:
             self.logger.error(f"search timeout: {te}", exc_info=False)
-            raise
+            raise SearchTimeoutError("Hawaii search timed out") from te
+
         except NoSuchElementException as ne:
             self.logger.error(f"search missing element: {ne}", exc_info=False)
-            raise
+            raise ElementNotFoundError("Hawaii search element not found") from ne
+
         except Exception as e:
             self.logger.error(f"search failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Hawaii search failed") from e
+
 
     # modifies: self.driver
     # effects: clicks 'Next' pagination button and waits for table refresh; returns True if next page exists
@@ -69,11 +83,17 @@ class HawaiiScraper(SeleniumScraper):
                 lambda d: d.find_element(By.CSS_SELECTOR, '#notices-list tbody tr').text != old_first
             )
             return True
+
         except (TimeoutException, NoSuchElementException):
             return False
+
+        except WebDriverException as we:
+            self.logger.error(f"next_page WebDriver error: {we}", exc_info=False)
+            raise PaginationError("Hawaii pagination failed") from we
+
         except Exception as e:
-            self.logger.error(f"next_page failed: {e}", exc_info=False)
-            return False
+            self.logger.error(f"next_page failed: {e}", exc_info=True)
+            raise ScraperError("Hawaii next_page failed") from e
 
 
     # requires: page_source containing the notices-list table
@@ -82,17 +102,25 @@ class HawaiiScraper(SeleniumScraper):
         self.logger.info("Parsing HTML for Hawaii records")
         if not page_source:
             self.logger.error("no page_source provided to extract_data")
-            raise ValueError("Empty page_source")
+            raise DataExtractionError("Empty page_source for Hawaii extract_data")
 
         try:
             soup = BeautifulSoup(page_source, 'html.parser')
             table = soup.find('table', id='notices-list')
+            if not table:
+                self.logger.error("notices-list table not found")
+                raise ElementNotFoundError("Hawaii results table not found")
             tbody = table.find('tbody')
+            if not tbody:
+                self.logger.error("no <tbody> found in table")
+                raise ElementNotFoundError("Hawaii results <tbody> not found")
             rows = tbody.find_all('tr')
             records = []
             for tr in rows:
                 cols = tr.find_all('td')
                 code_tag = cols[0].find('a', href=True)
+                if not code_tag:
+                    continue
                 code = code_tag.text.strip()
                 href = code_tag['href']
                 link = href if href.startswith('http') else f"https://hiepro.ehawaii.gov/{href}"
@@ -106,9 +134,14 @@ class HawaiiScraper(SeleniumScraper):
                     'link': link,
                 })
             return records
+
+        except (ElementNotFoundError, DataExtractionError):
+            raise
+
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise
+            raise DataExtractionError("Hawaii extract_data failed") from e
+
 
     # modifies: self.driver
     # effects: orchestrates the scrape: search -> extract -> paginate -> filter; returns filtered records
@@ -130,6 +163,10 @@ class HawaiiScraper(SeleniumScraper):
             filtered = filter_by_keywords(df)
             self.logger.info(f"Total records after filtering: {len(filtered)}")
             return filtered.to_dict('records')
+
+        except (SearchTimeoutError, ElementNotFoundError, DataExtractionError, PaginationError, ScraperError):
+            raise
+
         except Exception as e:
             self.logger.error(f"Hawaii scrape failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Hawaii scrape failed") from e

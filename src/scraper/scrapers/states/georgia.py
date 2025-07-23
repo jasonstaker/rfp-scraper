@@ -11,8 +11,15 @@ from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 
+from scraper.core.errors import (
+    SearchTimeoutError,
+    DataExtractionError,
+    ScraperError,
+)
+
 # a scraper for Georgia RFP data using Requests
 class GeorgiaScraper(RequestsScraper):
+
     # modifies: self
     # effects: initializes the scraper with Georgia's RFP URL and sets up logging
     def __init__(self):
@@ -20,8 +27,9 @@ class GeorgiaScraper(RequestsScraper):
         super().__init__(base)
         self.logger = logging.getLogger(__name__)
 
+
     # modifies: self.session (cookies)
-    # effects: performs an initial GET to establish session cookies, then issues a POST to Georgia's eventSearch endpoint; returns the parsed JSON dict or None on failure
+    # effects: performs an initial GET to establish session cookies, then issues a POST to Georgia's eventSearch endpoint; returns the parsed JSON dict or raises on failure
     def search(self, **kwargs):
         index_url = "https://ssl.doas.state.ga.us/gpr/index?persisted=true"
         headers_get = {
@@ -33,17 +41,14 @@ class GeorgiaScraper(RequestsScraper):
         }
         try:
             init_resp = self.session.get(index_url, headers=headers_get, timeout=15)
-            if init_resp.status_code != 200:
-                self.logger.error(f"Initial GET failed: {init_resp.status_code}")
-                raise
+            init_resp.raise_for_status()
         except requests.exceptions.RequestException as re:
             self.logger.error(f"Initial GET HTTP error: {re}", exc_info=False)
-            raise
+            raise SearchTimeoutError("Georgia initial GET failed") from re
         except Exception as e:
             self.logger.error(f"Initial GET failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Georgia initial GET failed") from e
 
-        # POST with full DataTables payload
         headers_post = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -130,31 +135,26 @@ class GeorgiaScraper(RequestsScraper):
 
         try:
             resp = self.session.post(self.base_url, data=payload, headers=headers_post, timeout=20)
-            if resp.status_code != 200:
-                self.logger.error(f"search HTTP status {resp.status_code}: {resp.text!r}")
-                raise
-
-            try:
-                data = resp.json()
-            except ValueError as ve:
-                self.logger.error(f"JSON decode failed: {ve}; response: {resp.text!r}", exc_info=False)
-                raise
-
+            resp.raise_for_status()
+            data = resp.json()
             return data
-
         except requests.exceptions.RequestException as re:
             self.logger.error(f"search HTTP error: {re}", exc_info=False)
-            raise
+            raise SearchTimeoutError("Georgia search HTTP error") from re
+        except ValueError as ve:
+            self.logger.error(f"JSON decode failed: {ve}", exc_info=False)
+            raise DataExtractionError("Georgia JSON decode failed") from ve
         except Exception as e:
             self.logger.error(f"search() failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Georgia search failed") from e
+
 
     # requires: response_json is a dict containing a "data" key with a list of event records
     # effects: parses the JSON "data" array into a list of standardized record dicts; returns that list
     def extract_data(self, response_json: dict):
         if not response_json or "data" not in response_json:
             self.logger.error('no valid "data" field in response for extract_data')
-            raise
+            raise DataExtractionError("Georgia extract_data missing 'data'")
 
         records = []
         try:
@@ -163,12 +163,9 @@ class GeorgiaScraper(RequestsScraper):
                 code = item.get("esourceNumber", "").strip()
                 closing_date_str = parse_date_generic(item.get("closingDateStr", "").strip())
                 source_id = item.get("sourceId", "").strip()
-                esource_number = code
-
-                # construct detail link using eSourceNumber and sourceId
                 link = (
                     "https://ssl.doas.state.ga.us/gpr/eventDetails"
-                    f"?eSourceNumber={esource_number}&sourceSystemType={source_id}"
+                    f"?eSourceNumber={code}&sourceSystemType={source_id}"
                 )
 
                 records.append({
@@ -177,11 +174,11 @@ class GeorgiaScraper(RequestsScraper):
                     "end_date": closing_date_str,
                     "link": link,
                 })
-
             return records
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise
+            raise DataExtractionError("Georgia extract_data failed") from e
+
 
     # effects: orchestrates search -> extract_data -> filter_by_keywords; returns filtered records or raises on failure
     def scrape(self, **kwargs):
@@ -190,7 +187,7 @@ class GeorgiaScraper(RequestsScraper):
             response_json = self.search(**kwargs)
             if response_json is None:
                 self.logger.warning("search returned no data; aborting scrape")
-                raise
+                raise ScraperError("Georgia scrape aborted due to no data")
 
             records = self.extract_data(response_json)
             df = pd.DataFrame(records)
@@ -199,6 +196,8 @@ class GeorgiaScraper(RequestsScraper):
             self.logger.info(f"Total records after filtering: {len(filtered)}")
             return filtered.to_dict("records")
 
+        except (SearchTimeoutError, DataExtractionError, ScraperError):
+            raise
         except Exception as e:
             self.logger.error(f"Georgia scrape failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Georgia scrape failed") from e

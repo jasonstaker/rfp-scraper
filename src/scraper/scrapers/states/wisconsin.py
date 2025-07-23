@@ -15,34 +15,50 @@ import pandas as pd
 from scraper.core.selenium_scraper import SeleniumScraper
 from scraper.config.settings import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
+from scraper.core.errors import (
+    SearchTimeoutError,
+    ElementNotFoundError,
+    DataExtractionError,
+    PaginationError,
+    ScraperError,
+)
 
 # a scraper for Wisconsin RFP data using Selenium
 class WisconsinScraper(SeleniumScraper):
+
     # modifies: self
     # effects: initializes the scraper with Wisconsin’s portal URL and configures logging
     def __init__(self):
         super().__init__(STATE_RFP_URL_MAP.get("wisconsin"))
         self.logger = logging.getLogger(__name__)
 
+
     # modifies: self.driver
     # effects: navigates to the Wisconsin bids page, switches into main content iframe, and waits for the grid
     def search(self, **kwargs):
         try:
             self.driver.get(self.base_url)
-            
             iframe = WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.ID, "ptifrmtgtframe"))
             )
-            
             self.driver.switch_to.frame(iframe)
-            
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "table.PSLEVEL1GRID"))
             )
             return True
-        except (TimeoutException, NoSuchElementException, WebDriverException) as e:
-            self.logger.error(f"search() failed: {e}", exc_info=True)
-            raise
+        except TimeoutException as te:
+            self.logger.error(f"Wisconsin search timeout: {te}", exc_info=False)
+            raise SearchTimeoutError("Wisconsin search timed out") from te
+        except NoSuchElementException as ne:
+            self.logger.error(f"Wisconsin search missing element: {ne}", exc_info=False)
+            raise ElementNotFoundError("Wisconsin search element not found") from ne
+        except WebDriverException as we:
+            self.logger.error(f"Wisconsin search WebDriver error: {we}", exc_info=True)
+            raise ScraperError("Wisconsin search WebDriver error") from we
+        except Exception as e:
+            self.logger.error(f"Wisconsin search failed: {e}", exc_info=True)
+            raise ScraperError("Wisconsin search failed") from e
+
 
     # requires: iframe switched and table present
     # effects: parses each row of the PSLEVEL1GRID into record dicts
@@ -78,18 +94,17 @@ class WisconsinScraper(SeleniumScraper):
                     continue
             return records
         except Exception as e:
-            self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise
+            self.logger.error(f"Wisconsin extract_data failed: {e}", exc_info=True)
+            raise DataExtractionError("Wisconsin extract_data failed") from e
 
-    # requires: search() succeeded and driver is within iframe
-    # modifies: self.driver
+
     # effects: orchestrates full scrape with date-based pagination stop
     def scrape(self, **kwargs):
         self.logger.info("Starting scrape for Wisconsin")
         try:
             if not self.search(**kwargs):
                 self.logger.error("Search failed; aborting Wisconsin scrape")
-                return []
+                raise ScraperError("Wisconsin scrape aborted due to search failure")
 
             all_records = []
             today = date.today()
@@ -118,9 +133,12 @@ class WisconsinScraper(SeleniumScraper):
                     next_btn.click()
                     WebDriverWait(self.driver, 20).until(EC.staleness_of(next_btn))
                     time.sleep(1)
-                except (NoSuchElementException, WebDriverException, StaleElementReferenceException):
-                    self.logger.info("No more pages or pagination error; ending loop")
+                except (NoSuchElementException, StaleElementReferenceException):
+                    self.logger.info("No more pages; ending loop")
                     break
+                except WebDriverException as we:
+                    self.logger.error(f"Wisconsin pagination WebDriver error: {we}", exc_info=False)
+                    raise PaginationError("Wisconsin pagination failed") from we
 
             df = pd.DataFrame(all_records)
             self.logger.info(f"Total raw records before filtering: {len(df)}")
@@ -128,6 +146,8 @@ class WisconsinScraper(SeleniumScraper):
             self.logger.info(f"Total records after filtering: {len(filtered)}")
             return filtered.to_dict("records")
 
+        except (SearchTimeoutError, ElementNotFoundError, DataExtractionError, PaginationError, ScraperError):
+            raise
         except Exception as e:
             self.logger.error(f"Wisconsin scrape failed: {e}", exc_info=True)
-            raise
+            raise ScraperError("Wisconsin scrape failed") from e
