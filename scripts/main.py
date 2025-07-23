@@ -1,24 +1,10 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt
 from src.ui.main_window import MainWindow
-from pathlib import Path
 from src.config import ASSETS_DIR
+from src.ui.ui_scale import px, compute_scale, SCALE
+from pathlib import Path
 from string import Template
-
-# DPI scaling baseline
-_BASE_WIDTH  = 2880
-_BASE_HEIGHT = 1080
-
-def compute_scale():
-    screen = QApplication.primaryScreen()
-    geo   = screen.availableGeometry()
-    sx = geo.width()  / _BASE_WIDTH
-    sy = geo.height() / _BASE_HEIGHT
-    return min(sx, sy)
-
-def px(value: int) -> int:
-    return max(1, int(value * SCALE))
 
 def load_stylesheet():
     qss_path = Path(ASSETS_DIR) / "styles.qss.tpl"
