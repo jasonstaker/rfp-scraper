@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
 from scraper.core.selenium_scraper import SeleniumScraper
-from scraper.config.settings import STATE_RFP_URL_MAP
+from src.config import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 
 from scraper.core.errors import (

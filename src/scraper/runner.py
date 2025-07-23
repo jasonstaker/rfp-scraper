@@ -11,7 +11,16 @@ from scraper.scrapers.states import SCRAPER_MAP as STATE_SCRAPERS
 from scraper.scrapers.counties import SCRAPER_MAP as COUNTY_SCRAPERS
 from scraper.exporters.excel_exporter import export_all
 from scraper.utils.data_utils import sync_hidden_from_excel
-from src.config import CACHE_DIR, DEFAULT_TIMEOUT, KEYWORDS_FILE, OUTPUT_DIR
+from src.config import (
+    CACHE_DIR, 
+    DEFAULT_TIMEOUT, 
+    KEYWORDS_FILE, 
+    OUTPUT_DIR, 
+    MAX_RETRIES, 
+    MAX_CACHE_FILES, 
+    OUTPUT_FILE_EXTENSION, 
+    OUTPUT_FILENAME_PREFIX
+)
 
 from scraper.core.errors import (
     SearchTimeoutError,
@@ -126,12 +135,12 @@ def _enforce_not_empty(
 # effects: keeps only 5 most recent cache files
 def _prune_old_cache() -> None:
     all_files = sorted(
-        [p for p in CACHE_DIR.iterdir() if p.suffix.lower() == ".xlsx"],
+        [p for p in CACHE_DIR.iterdir() if p.suffix.lower() == OUTPUT_FILE_EXTENSION],
         key=lambda p: p.stat().st_mtime
     )
-    if len(all_files) < 5:
+    if len(all_files) < MAX_CACHE_FILES:
         return
-    for old in all_files[:-5]:
+    for old in all_files[:-MAX_CACHE_FILES]:
         try:
             old.unlink()
             logging.info(f"Deleted old cache file: {old.name}")
@@ -170,7 +179,7 @@ def _build_export_map(
 def _write_outputs(export_map: dict[str, pd.DataFrame]) -> Path:
     now = datetime.datetime.now()
     ts = now.strftime("%Y%m%d_%H%M%S")
-    cache_path = CACHE_DIR / f"rfp_scraping_output_{ts}.xlsx"
+    cache_path = CACHE_DIR / f"{OUTPUT_FILENAME_PREFIX}{ts}{OUTPUT_FILE_EXTENSION}"
 
     if export_map:
         with pd.ExcelWriter(cache_path, engine="xlsxwriter") as writer:
@@ -178,7 +187,7 @@ def _write_outputs(export_map: dict[str, pd.DataFrame]) -> Path:
         logging.info(f"Saved new cache file: {cache_path.name}")
 
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        desktop_path = OUTPUT_DIR / "rfp_scraping_output.xlsx"
+        desktop_path = OUTPUT_DIR / f"{OUTPUT_FILENAME_PREFIX}{OUTPUT_FILE_EXTENSION}"
         with pd.ExcelWriter(desktop_path, engine="xlsxwriter") as writer:
             export_all(export_map, writer)
         logging.info(f"Saved new desktop file: {desktop_path.name}")
@@ -197,7 +206,7 @@ def _run_single_scraper(
     records: list[dict] = []
     success = False
 
-    for attempt in range(1, 4):
+    for attempt in range(1, MAX_RETRIES + 1):
         if cancel_event.is_set():
             break
         scraper_cls = scraper_map.get(key)

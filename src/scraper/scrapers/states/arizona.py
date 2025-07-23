@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import requests
 
 from scraper.core.requests_scraper import RequestsScraper
-from scraper.config.settings import FALLBACK_CSRF, STATE_RFP_URL_MAP
+from src.config import FALLBACK_CSRF, STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 

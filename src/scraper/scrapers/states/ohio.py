@@ -13,7 +13,7 @@ import requests
 from requests.exceptions import RequestException
 
 from scraper.core.requests_scraper import RequestsScraper
-from scraper.config.settings import STATE_RFP_URL_MAP
+from src.config import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
 from scraper.utils.date_utils import parse_date_generic
 from scraper.core.errors import (

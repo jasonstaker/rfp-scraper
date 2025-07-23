@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
 )
 
 from persistence.average_time_manager import load_averages, estimate_total_time, update_averages
-from scraper.config.settings import AVAILABLE_STATES, AVAILABLE_COUNTIES
+from src.config import AVAILABLE_STATES, AVAILABLE_COUNTIES
 from src.config import KEYWORDS_FILE
 
 

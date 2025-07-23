@@ -10,14 +10,14 @@ from pathlib import Path
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
-    QApplication,
     QMainWindow,
     QStackedWidget,
     QMessageBox,
 )
 import pandas as pd
 
-from src.config import ensure_dirs_exist, LOG_FILE, ASSETS_DIR, OUTPUT_DIR
+from src.scraper.utils.data_utils import ensure_dirs_exist
+from src.config import LOG_FILE, ASSETS_DIR, OUTPUT_DIR
 from scraper.logging_config import configure_logging
 from scraper.runner import run_scraping
 from ui.pages.home_page import HomePage

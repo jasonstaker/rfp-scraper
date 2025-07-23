@@ -16,7 +16,7 @@ from scraper.core.errors import (
     ScraperError,
 )
 from scraper.utils.data_utils import filter_by_keywords
-from scraper.config.settings import STATE_RFP_URL_MAP
+from src.config import STATE_RFP_URL_MAP
 
 # a scraper for Rhode Island RFP data using Requests
 class RhodeIslandScraper(RequestsScraper):

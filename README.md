@@ -161,8 +161,6 @@ python scripts/main.py
   * `KEYWORDS_FILE`: path to `keywords.txt`
   * `CACHE_DIR`: holds last five Excel exports
   * `LOG_FILE`: path to rotating `scraper.log`
-* **`scraper/config/settings.py`**
-
   * `STATE_RFP_URL_MAP`: state⇒portal URL mapping
   * `AVAILABLE_STATES`: ordered list for the UI
 

@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 from scraper.core.requests_scraper import RequestsScraper
 from scraper.utils.data_utils import filter_by_keywords
-from scraper.config.settings import STATE_RFP_URL_MAP
+from src.config import STATE_RFP_URL_MAP
 
 from scraper.core.errors import (
     SearchTimeoutError,
