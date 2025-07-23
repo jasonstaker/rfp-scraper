@@ -11,17 +11,18 @@ from scraper.scrapers.states import SCRAPER_MAP as STATE_SCRAPERS
 from scraper.scrapers.counties import SCRAPER_MAP as COUNTY_SCRAPERS
 from scraper.exporters.excel_exporter import export_all
 from scraper.utils.data_utils import sync_hidden_from_excel
+from scraper.utils.date_utils import filter_by_dates
+from scraper.utils.text_utils import sanitize
 from src.config import (
-    CACHE_DIR, 
-    DEFAULT_TIMEOUT, 
-    KEYWORDS_FILE, 
-    OUTPUT_DIR, 
-    MAX_RETRIES, 
-    MAX_CACHE_FILES, 
-    OUTPUT_FILE_EXTENSION, 
+    CACHE_DIR,
+    DEFAULT_TIMEOUT,
+    KEYWORDS_FILE,
+    OUTPUT_DIR,
+    MAX_RETRIES,
+    MAX_CACHE_FILES,
+    OUTPUT_FILE_EXTENSION,
     OUTPUT_FILENAME_PREFIX
 )
-
 from scraper.core.errors import (
     SearchTimeoutError,
     DataExtractionError,
@@ -29,18 +30,17 @@ from scraper.core.errors import (
     ScraperError,
 )
 
-
 # requires: states list, keywords list, optional cancel_event
 # modifies: KEYWORDS_FILE, CACHE_DIR, OUTPUT_DIR
-# effects: orchestrates the full scrape, returning dataframes, path, and timings
+# effects: orchestrates the full scrape, returning cleaned dataframes, path, and timings
 def run_scraping(
     states: list[str],
     keywords: list[str],
     counties: dict[str, list[str]] | None = None,
     cancel_event: threading.Event | None = None
 ) -> tuple[
-    dict[str, pd.DataFrame],  # state_to_df
-    dict[str, pd.DataFrame],  # county_to_df
+    dict[str, pd.DataFrame],  # cleaned state_to_df
+    dict[str, pd.DataFrame],  # cleaned county_to_df
     Path,                     # excel file path
     dict[str, float],         # state durations
     dict[str, float]          # county durations
@@ -55,8 +55,8 @@ def run_scraping(
 
     _prune_old_cache()
     export_map = _build_export_map(state_to_df, county_to_df)
-    cache_path = _write_outputs(export_map)
 
+    cache_path = _write_outputs(export_map)
     return state_to_df, county_to_df, cache_path, state_durations, county_durations
 
 
@@ -77,7 +77,7 @@ def _init_cancel_event(cancel_event: threading.Event | None) -> threading.Event:
 
 
 # requires: list of state keys, cancel_event
-# effects: runs each state scraper, returns state→DataFrame and durations
+# effects: runs each state scraper, cleans results, returns state→DataFrame and durations
 def _scrape_states(
     states: list[str], cancel_event: threading.Event
 ) -> tuple[dict[str, pd.DataFrame], dict[str, float]]:
@@ -89,14 +89,14 @@ def _scrape_states(
             break
         logging.info(f"[{state}] Starting scrape...")
         df, elapsed = _run_single_scraper(state, STATE_SCRAPERS, cancel_event)
-        state_to_df[state] = df
+        cleaned = _clean_dataframe(df)
+        state_to_df[state] = cleaned
         state_durations[state] = elapsed
     return state_to_df, state_durations
 
 
 # requires: mapping of state→counties or None, cancel_event
-# modifies: none
-# effects: runs each county scraper, returns key→DataFrame and durations
+# effects: runs each county scraper, cleans results, returns key→DataFrame and durations
 def _scrape_counties(
     counties: dict[str, list[str]] | None, cancel_event: threading.Event
 ) -> tuple[dict[str, pd.DataFrame], dict[str, float]]:
@@ -112,9 +112,26 @@ def _scrape_counties(
                 break
             logging.info(f"[{key}] Starting scrape...")
             df, elapsed = _run_single_scraper(county, COUNTY_SCRAPERS.get(state, {}), cancel_event)
-            county_to_df[key] = df
+            cleaned = _clean_dataframe(df)
+            county_to_df[key] = cleaned
             county_durations[key] = elapsed
     return county_to_df, county_durations
+
+
+# requires: DataFrame possibly with 'success' column
+# effects: returns sanitized, deduplicated, date‐filtered DataFrame
+#          placeholder rows (if any) will pass through date filter
+#          preserves 'success' for placeholder logic downstream
+def _clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    # drop duplicates first
+    df2 = df.drop_duplicates().copy()
+    # sanitize all text columns in one pass
+    for col in df2.select_dtypes(include='object').columns:
+        df2[col] = df2[col].apply(sanitize)
+    # date filter only applies if 'end_date' exists
+    if 'end_date' in df2.columns:
+        df2 = filter_by_dates(df2)
+    return df2
 
 
 # requires: state/county data, cancel_event
@@ -148,7 +165,7 @@ def _prune_old_cache() -> None:
             logging.warning(f"Failed to delete {old.name}: {e}")
 
 
-# requires: dataframes with 'success' column
+# requires: dataframes cleaned and possibly with 'success'
 # effects: returns only non-empty, non-placeholder sheets
 def _build_export_map(
     state_to_df: dict[str, pd.DataFrame],
@@ -227,17 +244,14 @@ def _run_single_scraper(
             scraper.close()
 
     if not success:
-        df = pd.DataFrame([{
-            'title': None, 'code': None, 'end_date': None,
+        df = pd.DataFrame([{                              'title': None, 'code': None, 'end_date': None,
             'Keyword Hits': None, 'link': None, 'success': False
         }])
     else:
-        df = pd.DataFrame(records) if records else pd.DataFrame([{
-            'title': None, 'code': None, 'end_date': None,
+        df = pd.DataFrame(records) if records else pd.DataFrame([{                                'title': None, 'code': None, 'end_date': None,
             'Keyword Hits': None, 'link': None, 'success': True
         }])
         df['success'] = True
 
     elapsed = time.perf_counter() - start
-    print(df)
     return df, elapsed
