@@ -55,7 +55,7 @@ def filter_by_keywords(df: pd.DataFrame) -> pd.DataFrame:
     return filtered.sort_values(by='Keyword Hits', ascending=False).reset_index(drop=True)
 
 
-# requires: excel_path points to an Excel file with sheets “All RFPs” and “Hidden RFPs”
+# requires: excel_path points to an Excel file with sheets "State RFPs”, "County RFPs", and “Hidden RFPs”
 # modifies: HIDDEN_IDS_FILE on disk
 # effects: adds/removes any checked rfps from the previous excel file
 def sync_hidden_from_excel(
@@ -68,8 +68,10 @@ def sync_hidden_from_excel(
         existing = set()
 
     try:
-        all_df    = pd.read_excel(excel_path, sheet_name="All RFPs",    engine="openpyxl")
-        hidden_df = pd.read_excel(excel_path, sheet_name="Hidden RFPs", engine="openpyxl")
+        state_df  = pd.read_excel(excel_path, sheet_name="State RFPs",   engine="openpyxl")
+        county_df = pd.read_excel(excel_path, sheet_name="County RFPs",  engine="openpyxl")
+        hidden_df = pd.read_excel(excel_path, sheet_name="Hidden RFPs",  engine="openpyxl")
+        all_df    = pd.concat([state_df, county_df], ignore_index=True)
     except (FileNotFoundError, PermissionError):
         return
 
@@ -81,7 +83,7 @@ def sync_hidden_from_excel(
     except IndexError:
         return
 
-    to_add = set(all_data.loc[all_data['Hide'] == True, 'Solicitation#'].astype(str))
+    to_add    = set(all_data.loc[all_data['Hide']    == True, 'Solicitation#'].astype(str))
     to_remove = set(hidden_data.loc[hidden_data['Hide'] == True, 'Solicitation#'].astype(str))
 
     updated = (existing.union(to_add)).difference(to_remove)

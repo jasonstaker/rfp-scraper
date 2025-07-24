@@ -30,6 +30,7 @@ from scraper.core.errors import (
     ScraperError,
 )
 
+
 # requires: states list, keywords list, optional cancel_event
 # modifies: KEYWORDS_FILE, CACHE_DIR, OUTPUT_DIR
 # effects: orchestrates the full scrape, returning cleaned dataframes, path, and timings
@@ -39,11 +40,11 @@ def run_scraping(
     counties: dict[str, list[str]] | None = None,
     cancel_event: threading.Event | None = None
 ) -> tuple[
-    dict[str, pd.DataFrame],  # cleaned state_to_df
-    dict[str, pd.DataFrame],  # cleaned county_to_df
-    Path,                     # excel file path
-    dict[str, float],         # state durations
-    dict[str, float]          # county durations
+    dict[str, pd.DataFrame],            # cleaned state_to_df
+    dict[str, dict[str, pd.DataFrame]], # cleaned county_to_df
+    Path,                               # excel file path
+    dict[str, float],                   # state durations
+    dict[str, dict[str, float]]         # county durations
 ]:
     _write_keywords(keywords)
     cancel_event = _init_cancel_event(cancel_event)
@@ -54,9 +55,11 @@ def run_scraping(
     _enforce_not_empty(state_to_df, county_to_df, cancel_event)
 
     _prune_old_cache()
-    export_map = _build_export_map(state_to_df, county_to_df)
 
-    cache_path = _write_outputs(export_map)
+    state_export_map  = _build_state_export_map(state_to_df)
+    county_export_map = _build_county_export_map(county_to_df)
+
+    cache_path = _write_outputs(state_export_map, county_export_map)
     return state_to_df, county_to_df, cache_path, state_durations, county_durations
 
 
@@ -96,39 +99,44 @@ def _scrape_states(
 
 
 # requires: mapping of state→counties or None, cancel_event
-# effects: runs each county scraper, cleans results, returns key→DataFrame and durations
+# effects: runs each county scraper, cleans results, returns key->DataFrame and durations
 def _scrape_counties(
     counties: dict[str, list[str]] | None, cancel_event: threading.Event
-) -> tuple[dict[str, pd.DataFrame], dict[str, float]]:
-    county_to_df: dict[str, pd.DataFrame] = {}
-    county_durations: dict[str, float] = {}
+) -> tuple[dict[str, dict[str, pd.DataFrame]], dict[str, dict[str, float]]]:
+    county_to_df: dict[str, dict[str, pd.DataFrame]] = {}
+    county_durations: dict[str, dict[str, float]] = {}
     if not counties:
-        return county_to_df, county_durations
+        return {}, {}
+
     for state, county_list in counties.items():
+        scraper_map = COUNTY_SCRAPERS.get(state, {})
+        county_to_df[state] = {}
+        county_durations[state] = {}
         for county in county_list:
-            key = f"{state}:{county}"
             if cancel_event.is_set():
-                logging.info(f"Cancellation before county [{key}]")
+                logging.info(f"Cancellation before county [{county}]")
                 break
-            logging.info(f"[{key}] Starting scrape...")
-            df, elapsed = _run_single_scraper(county, COUNTY_SCRAPERS.get(state, {}), cancel_event)
+
+            logging.info(f"[{county}] Starting scrape...")
+
+            scraper_cls = scraper_map.get(county)
+            if not scraper_cls:
+                logging.error(f"No county scraper for [{county}]")
+                continue
+
+            df, elapsed = _run_single_scraper(county, scraper_map, cancel_event)
             cleaned = _clean_dataframe(df)
-            county_to_df[key] = cleaned
-            county_durations[key] = elapsed
+            county_to_df[state][county] = cleaned
+            county_durations[state][county] = elapsed
     return county_to_df, county_durations
 
 
 # requires: DataFrame possibly with 'success' column
 # effects: returns sanitized, deduplicated, date‐filtered DataFrame
-#          placeholder rows (if any) will pass through date filter
-#          preserves 'success' for placeholder logic downstream
 def _clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    # drop duplicates first
     df2 = df.drop_duplicates().copy()
-    # sanitize all text columns in one pass
     for col in df2.select_dtypes(include='object').columns:
         df2[col] = df2[col].apply(sanitize)
-    # date filter only applies if 'end_date' exists
     if 'end_date' in df2.columns:
         df2 = filter_by_dates(df2)
     return df2
@@ -138,7 +146,7 @@ def _clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 # effects: raises RuntimeError if canceled or no data scraped
 def _enforce_not_empty(
     state_to_df: dict[str, pd.DataFrame],
-    county_to_df: dict[str, pd.DataFrame],
+    county_to_df: dict[str, dict[str, pd.DataFrame]],
     cancel_event: threading.Event
 ) -> None:
     if cancel_event.is_set():
@@ -165,48 +173,72 @@ def _prune_old_cache() -> None:
             logging.warning(f"Failed to delete {old.name}: {e}")
 
 
-# requires: dataframes cleaned and possibly with 'success'
-# effects: returns only non-empty, non-placeholder sheets
-def _build_export_map(
-    state_to_df: dict[str, pd.DataFrame],
-    county_to_df: dict[str, pd.DataFrame]
-) -> dict[str, pd.DataFrame]:
+# requires: cleaned state_to_df with possible 'success' column
+# effects: returns non-empty, non-placeholder state DataFrames
+def _build_state_export_map(state_to_df: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     def should_export(df: pd.DataFrame) -> bool:
-        if 'success' in df.columns:
+        if "success" in df.columns:
             placeholder = (
                 df.shape[0] == 1 and
-                df['success'].iat[0] and
-                df.drop(columns=['success']).isna().all().item()
+                df["success"].iat[0] and
+                df.drop(columns=["success"]).isna().all().item()
             )
             return not placeholder
         return True
 
     export_map: dict[str, pd.DataFrame] = {}
-    for name, df in {**state_to_df, **county_to_df}.items():
+    for state, df in state_to_df.items():
         if should_export(df):
-            export_map[name] = df
+            export_map[state] = df
         else:
-            logging.info(f"Skipping export for empty results of [{name}]")
+            logging.info(f"Skipping export for empty results of [{state}]")
     return export_map
 
 
-# requires: export_map of DataFrames
+# requires: cleaned county_to_df with possible 'success' columns
+# effects: returns nested dict[state][county] of non-placeholder DataFrames
+def _build_county_export_map(
+    county_to_df: dict[str, dict[str, pd.DataFrame]]
+) -> dict[str, dict[str, pd.DataFrame]]:
+    def should_export(df: pd.DataFrame) -> bool:
+        if "success" in df.columns:
+            placeholder = (
+                df.shape[0] == 1 and
+                df["success"].iat[0] and
+                df.drop(columns=["success"]).isna().all().item()
+            )
+            return not placeholder
+        return True
+
+    export_map: dict[str, dict[str, pd.DataFrame]] = {}
+    for state, county_dict in county_to_df.items():
+        for county, df in county_dict.items():
+            if should_export(df):
+                export_map.setdefault(state, {})[county] = df
+            else:
+                logging.info(f"Skipping export for empty results of [{county}, {state}]")
+    return export_map
+
+
 # modifies: writes timestamped and latest Excel files
 # effects: returns the Path to the timestamped cache file
-def _write_outputs(export_map: dict[str, pd.DataFrame]) -> Path:
+def _write_outputs(
+    state_map: dict[str, pd.DataFrame],
+    county_map: dict[str, dict[str, pd.DataFrame]]
+) -> Path:
     now = datetime.datetime.now()
     ts = now.strftime("%Y%m%d_%H%M%S")
     cache_path = CACHE_DIR / f"{OUTPUT_FILENAME_PREFIX}{ts}{OUTPUT_FILE_EXTENSION}"
 
-    if export_map:
+    if state_map or county_map:
         with pd.ExcelWriter(cache_path, engine="xlsxwriter") as writer:
-            export_all(export_map, writer)
+            export_all(state_map, county_map, writer)
         logging.info(f"Saved new cache file: {cache_path.name}")
 
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         desktop_path = OUTPUT_DIR / f"{OUTPUT_FILENAME_PREFIX}{OUTPUT_FILE_EXTENSION}"
         with pd.ExcelWriter(desktop_path, engine="xlsxwriter") as writer:
-            export_all(export_map, writer)
+            export_all(state_map, county_map, writer)
         logging.info(f"Saved new desktop file: {desktop_path.name}")
 
     return cache_path
@@ -244,11 +276,13 @@ def _run_single_scraper(
             scraper.close()
 
     if not success:
-        df = pd.DataFrame([{                              'title': None, 'code': None, 'end_date': None,
+        df = pd.DataFrame([{
+            'title': None, 'code': None, 'end_date': None,
             'Keyword Hits': None, 'link': None, 'success': False
         }])
     else:
-        df = pd.DataFrame(records) if records else pd.DataFrame([{                                'title': None, 'code': None, 'end_date': None,
+        df = pd.DataFrame(records) if records else pd.DataFrame([{
+            'title': None, 'code': None, 'end_date': None,
             'Keyword Hits': None, 'link': None, 'success': True
         }])
         df['success'] = True

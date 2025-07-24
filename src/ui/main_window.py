@@ -1,6 +1,5 @@
-# Updated main_window.py and home_page.py to include counties handling
-
 # main_window.py
+
 import sys
 import ctypes
 import threading
@@ -53,12 +52,12 @@ class ScrapeWorker(QThread):
                 "success": True,
                 "results": state_to_df,
                 "county_results": county_to_df,
-                "timings": {**state_durations, **county_durations},
+                "state_durations": state_durations,
+                "county_durations": county_durations,
             })
         except RuntimeError as e:
             msg = str(e)
             self.log_line.emit(msg)
-            # failure map
             results = {state: pd.DataFrame([{"success": False}]) for state in self.states}
             results['_error'] = msg
             self.finished.emit({"success": False, "results": results})
@@ -100,20 +99,26 @@ class MainWindow(QMainWindow):
         self._worker: ScrapeWorker | None = None
         self._canceled = False
 
-        # Updated signal to include counties
+        # connect signals with counties support
         self.home_page.start_run.connect(self.on_start_run)
         self.run_page.cancel_run.connect(self.on_cancel_run)
         self.status_page.back_to_home.connect(self.on_back_to_home)
 
     def on_start_run(self, keywords: str, states: list[str], counties: dict[str, list[str]]):
-        if not states:
-            QMessageBox.warning(self, "No States Selected", "please select at least one state.")
+        # require at least one state OR one county
+        has_counties = any(county_list for county_list in counties.values())
+        if not states and not has_counties:
+            QMessageBox.warning(
+                self,
+                "No States/Counties Selected",
+                "Please select at least one state or county."
+            )
             return
+
         keyword_list = [line.strip() for line in keywords.splitlines() if line.strip()]
         self._canceled = False
-        self.run_page.start_scraper(keywords, states)
+        self.run_page.start_scraper(keywords, states, counties)
         self.stack.setCurrentWidget(self.run_page)
-        # Pass counties (empty for now)
         self._worker = ScrapeWorker(states, keyword_list, counties)
         self._worker.log_line.connect(self.run_page.append_log)
         self._worker.finished.connect(self.on_run_finished)
@@ -134,12 +139,14 @@ class MainWindow(QMainWindow):
             self._worker = None
             self.stack.setCurrentWidget(self.home_page)
             return
-        results = payload.get("results", {})
-        state_timings = payload.get("timings", {})
-        if state_timings:
+        state_durs  = payload.get("state_durations", {})
+        county_durs = payload.get("county_durations", {})
+        if state_durs or county_durs:
             avg_data = load_averages()
-            persist_update_averages(avg_data, state_timings)
-        self.status_page.display_results(results)
+            persist_update_averages(avg_data, state_durs, county_durs)
+        state_results  = payload.get("results", {})
+        county_results = payload.get("county_results", {})
+        self.status_page.display_results(state_results, county_results)
         self.stack.setCurrentWidget(self.status_page)
         import os, platform
         desktop_path = OUTPUT_DIR / f"{OUTPUT_FILENAME_PREFIX}{OUTPUT_FILE_EXTENSION}"

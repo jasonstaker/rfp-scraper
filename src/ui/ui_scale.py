@@ -1,4 +1,5 @@
 # ui_scale.py
+
 from PyQt5.QtWidgets import QApplication
 
 _BASE_WIDTH  = 2880

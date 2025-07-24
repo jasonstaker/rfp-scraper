@@ -1,3 +1,7 @@
-# scraper/scrapers/counties/__init__.py
+# src/scraper/scrapers/counties/__init__.py
 
-SCRAPER_MAP = {}
+from .arizona import SCRAPER_MAP as ARIZONA_COUNTIES
+
+SCRAPER_MAP = {
+    "arizona": ARIZONA_COUNTIES,
+}

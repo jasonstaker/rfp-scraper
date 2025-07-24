@@ -1,4 +1,5 @@
-# scraper/scrapers/states/__init__.py
+# src/scraper/scrapers/states/__init__.py
+
 from .alabama import AlabamaScraper
 from .arkansas import ArkansasScraper
 from .arizona import ArizonaScraper

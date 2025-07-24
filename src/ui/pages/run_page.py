@@ -1,4 +1,5 @@
 # run_page.py
+
 import os
 import re
 from datetime import datetime
@@ -89,14 +90,17 @@ class RunPage(QWidget):
     # requires: states is a valid list of states
     # modifies: self
     # effects: begins the scraping process, loading averages, and logging
-    def start_scraper(self, keywords: str, states: list[str]):
+    def start_scraper(self, keywords: str, states: list[str], counties: dict[str, list[str]]):
         self._states = states
         self._completed_count = 0
         self._last_state = None
+        self._counties = counties
+
+        self._total_tasks = len(states) + sum(len(clist) for clist in counties.values())
 
         # load historical averages and estimate total time
         averages = load_averages()
-        mins, secs = estimate_total_time(averages, self._states)
+        mins, secs = estimate_total_time(averages, self._states, self._counties)
         self._total_seconds = mins * 60 + secs
         self._start_time = datetime.now()
 
@@ -141,7 +145,7 @@ class RunPage(QWidget):
         mins = int(remaining) // 60
         secs = int(remaining) % 60
         # update label text
-        self.time_left_label.setText(f"Time left: {mins}m {secs}s  (Completed {self._completed_count}/{len(self._states)})")
+        self.time_left_label.setText(f"Time left: {mins}m {secs}s  (Completed {self._completed_count}/{self._total_tasks})")
 
     # modifies: self
     # effects: adds text to the log

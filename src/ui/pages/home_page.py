@@ -1,4 +1,6 @@
-from PyQt5.QtCore import Qt, pyqtSignal, QRect, QSize, QTimer, QPoint
+# home_page.py
+
+from PyQt5.QtCore import Qt, pyqtSignal, QRect, QSize, QTimer
 from PyQt5.QtGui import QColor, QPainter, QFont, QTextCharFormat, QTextFormat
 from PyQt5.QtWidgets import (
     QWidget,
@@ -15,8 +17,7 @@ from PyQt5.QtWidgets import (
 )
 
 from persistence.average_time_manager import load_averages, estimate_total_time, update_averages
-from src.config import AVAILABLE_STATES, AVAILABLE_COUNTIES
-from src.config import KEYWORDS_FILE
+from src.config import AVAILABLE_STATES, AVAILABLE_COUNTIES_BY_STATE, KEYWORDS_FILE, AVAILABLE_STATE_ABBR
 
 
 # line number display for code editor
@@ -201,6 +202,7 @@ class HomePage(QWidget):
             item = QListWidgetItem(" ".join(p.capitalize() for p in state.split()))
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Unchecked)
+            item.setData(Qt.UserRole, state)
             self.state_list.addItem(item)
         sp_layout.addWidget(self.state_list)
         self.state_select_all = QPushButton("Select all")
@@ -216,11 +218,15 @@ class HomePage(QWidget):
         cp_layout.setSpacing(px(8))
         self.county_list = QListWidget()
         self.county_list.setObjectName("state_list")  # reuse same QSS ID
-        for county in AVAILABLE_COUNTIES:
-            item = QListWidgetItem(" ".join(p.capitalize() for p in county.split()))
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Unchecked)
-            self.county_list.addItem(item)
+        for state, counties in AVAILABLE_COUNTIES_BY_STATE.items():
+            for county in counties:
+                abbr = AVAILABLE_STATE_ABBR[state]
+                display = f"{county.title()} County, {abbr}"
+                item = QListWidgetItem(display)
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                item.setCheckState(Qt.Unchecked)
+                item.setData(Qt.UserRole, (state, county))
+                self.county_list.addItem(item)
         cp_layout.addWidget(self.county_list)
         self.county_select_all = QPushButton("Select all")
         self.county_select_all.setObjectName("select_all_btn")
@@ -280,15 +286,20 @@ class HomePage(QWidget):
 
     # requires: none
     # modifies: self.estimated_time_value
-    # effects: recalculates based on selected states only
+    # effects: recalculates based on selected states & counties
     def recalc_estimated_time(self):
         averages = load_averages()
-        selected = [
-            self.state_list.item(i).text().lower()
+        states = [
+            self.state_list.item(i).data(Qt.UserRole)
             for i in range(self.state_list.count())
             if self.state_list.item(i).checkState() == Qt.Checked
         ]
-        mins, secs = estimate_total_time(averages, selected)
+        counties: dict[str, list[str]] = {}
+        for i in range(self.county_list.count()):
+            if self.county_list.item(i).checkState() == Qt.Checked:
+                st, co = self.county_list.item(i).data(Qt.UserRole)
+                counties.setdefault(st, []).append(co)
+        mins, secs = estimate_total_time(averages, states, counties)
         self.set_estimated_time(mins, secs)
 
     # requires: minutes, seconds
@@ -308,16 +319,18 @@ class HomePage(QWidget):
     def on_run_clicked(self):
         keywords = self.code_editor.toPlainText().strip()
         states = [
-            self.state_list.item(i).text().lower()
+            self.state_list.item(i).data(Qt.UserRole)
             for i in range(self.state_list.count())
             if self.state_list.item(i).checkState() == Qt.Checked
         ]
-        counties = [
-            self.county_list.item(i).text().lower()
-            for i in range(self.county_list.count())
-            if self.county_list.item(i).checkState() == Qt.Checked
-        ]
-        self.start_run.emit(keywords, states, {"counties": counties})
+        counties_by_state: dict[str, list[str]] = {}
+        for i in range(self.county_list.count()):
+            if self.county_list.item(i).checkState() != Qt.Checked:
+                continue
+            st, co = self.county_list.item(i).data(Qt.UserRole)  # unpack our tuple
+            counties_by_state.setdefault(st, []).append(co)
+
+        self.start_run.emit(keywords, states, counties_by_state)
 
     # requires: none
     # modifies: fields
