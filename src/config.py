@@ -83,6 +83,7 @@ STATE_RFP_URL_MAP = {
 COUNTY_RFP_URL_MAP = {
     "arizona": {
         "maricopa": 'https://www.bidnetdirect.com/arizona/maricopacounty?srchoid_override=217285&posting=1&curronly=1',
+        "pima": 'https://www.bidnetdirect.com/arizona/pimacounty',
     },
 }
 
