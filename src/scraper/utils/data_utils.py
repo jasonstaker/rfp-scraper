@@ -110,7 +110,6 @@ def split_by_keywords(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     hidden_mask.loc[dropped_idx] = True
 
     hidden = df.loc[hidden_mask].reset_index(drop=True)
-
     return visible, hidden
 
 
