@@ -22,8 +22,14 @@ def export_all(
         raw_state = _assemble_raw_df(state_to_df_map)
         raw_county = _assemble_county_raw_df(county_to_df_map)
 
-        vs, hs = _clean_and_split(raw_state)
-        vc, hc = _clean_and_split(raw_county)
+        vs, hs = {}, {}
+        vc, hc = {}, {}
+        
+        if len(raw_state) != 0:
+            vs, hs = _clean_and_split(raw_state)
+
+        if len(raw_county) != 0:
+            vc, hc = _clean_and_split(raw_county)
 
         visible_state  = _format_for_excel(vs)
         visible_county = _format_for_excel(vc)

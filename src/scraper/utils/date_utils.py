@@ -40,8 +40,9 @@ def parse_date_generic(date_str: str) -> str:
 # effects: filters to keep only rows whose date (parsed via parse_date_generic) is today or later
 def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
     today = datetime.now().date()
-
-    if len(df) == 1:
+    if len(df) == 0:
+        return df
+    elif len(df) == 1:
         row = df.iloc[0]
         others = row.drop(labels=['State'], errors='ignore')
         if others.isna().all() or all((pd.isna(v) or v == '' for v in others)):

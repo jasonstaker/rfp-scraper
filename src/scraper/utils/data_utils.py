@@ -95,6 +95,9 @@ def sync_hidden_from_excel(
 #   visible: rows matching filter_by_keywords AND not manually hidden
 #   hidden: all other rows (manually hidden or no keyword hits)
 def split_by_keywords(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    if 'code' not in df.columns:
+        raise ValueError("Missing 'code' column in DataFrame")
+    
     kw_visible = filter_by_keywords(df)
 
     hidden_ids = load_hidden_ids()

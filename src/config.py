@@ -85,6 +85,9 @@ COUNTY_RFP_URL_MAP = {
         "maricopa": 'https://www.bidnetdirect.com/arizona/maricopacounty?srchoid_override=217285&posting=1&curronly=1',
         "pima": 'https://www.bidnetdirect.com/arizona/pimacounty',
     },
+    "california": {
+        "alameda": 'https://api.procurement.opengov.com/api/v1/government/acgov/project/public',
+    }
 }
 
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
