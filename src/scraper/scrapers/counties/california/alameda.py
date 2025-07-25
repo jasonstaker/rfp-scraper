@@ -17,6 +17,7 @@ from scraper.core.errors import (
 
 # a scraper for Alameda County RFP data using Requests and the OpenGov API
 class AlamedaScraper(RequestsScraper):
+
     # modifies: self
     # effects: initializes the scraper with the Alameda base URL and sets up logging and headers
     def __init__(self):
@@ -31,6 +32,7 @@ class AlamedaScraper(RequestsScraper):
                                  " AppleWebKit/537.36 (KHTML, like Gecko)"
                                  " Chrome/138.0.0.0 Safari/537.36",
         })
+
 
     # effects: issues a POST to the OpenGov API endpoint with pagination; returns raw JSON dict or raises
     def search(self, page: int = 1, limit: int = 200, **kwargs) -> dict:
@@ -60,6 +62,7 @@ class AlamedaScraper(RequestsScraper):
 
         return data
 
+
     # requires: data is a dict containing a 'rows' list
     # effects: transforms API JSON rows into standardized record dicts
     def extract_data(self, data: dict) -> list[dict]:
@@ -84,6 +87,7 @@ class AlamedaScraper(RequestsScraper):
                 continue
 
         return records
+
 
     # effects: orchestrates search -> extract_data -> filter; returns filtered list of record dicts or raises
     def scrape(self, **kwargs) -> list[dict]:
