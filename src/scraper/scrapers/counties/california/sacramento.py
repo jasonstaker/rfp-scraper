@@ -1,4 +1,4 @@
-# orange.py
+# sacramento.py
 # url: https://api.procurement.opengov.com/api/v1/government/ocgov/project/public
 
 import logging
@@ -16,15 +16,15 @@ from scraper.core.errors import (
     ScraperError,
 )
 
-# a scraper for Orange County solicitations via the OpenGov API
-class OrangeScraper(RequestsScraper):
+# a scraper for Sacramento County solicitations via the OpenGov API
+class SacramentoScraper(RequestsScraper):
 
-    DETAIL_URL = "https://procurement.opengov.com/portal/ocgov/projects/{id}"
+    DETAIL_URL = "https://procurement.opengov.com/portal/saccounty/projects/{id}"
 
     # modifies: self
     # effects: initializes with API URL and sets up logger & JSON headers
     def __init__(self):
-        super().__init__(COUNTY_RFP_URL_MAP["california"]["orange"])
+        super().__init__(COUNTY_RFP_URL_MAP["california"]["sacramento"])
         self.logger = logging.getLogger(__name__)
         self.session.headers.update({
             "Content-Type": "application/json",
@@ -50,17 +50,17 @@ class OrangeScraper(RequestsScraper):
             return resp.json()
         except requests.RequestException as e:
             self.logger.error(f"search HTTP error (page={page}): {e}", exc_info=False)
-            raise SearchTimeoutError("Orange search HTTP error") from e
+            raise SearchTimeoutError("Sacramento search HTTP error") from e
         except ValueError as e:
             self.logger.error(f"search JSON decode error: {e}", exc_info=False)
-            raise DataExtractionError("Orange search JSON decode failed") from e
+            raise DataExtractionError("Sacramento search JSON decode failed") from e
 
 
     # requires: response_json from search()
     # effects: extracts list of {title, code, end_date, link} dicts
     def extract_data(self, response_json):
         if not response_json or "rows" not in response_json:
-            raise DataExtractionError("Orange extract_data missing 'rows'")
+            raise DataExtractionError("Sacramento extract_data missing 'rows'")
         try:
             records = []
             
@@ -88,12 +88,12 @@ class OrangeScraper(RequestsScraper):
             return records
         except Exception as e:
             self.logger.error(f"extract_data failed: {e}", exc_info=True)
-            raise DataExtractionError("Orange extract_data failed") from e
+            raise DataExtractionError("Sacramento extract_data failed") from e
 
 
     # effects: orchestrates pagination -> extract -> filter; returns filtered records
     def scrape(self, **kwargs):
-        self.logger.info("Starting scrape for Orange County")
+        self.logger.info("Starting scrape for Sacramento County")
         all_records = []
         page  = 1
         limit = kwargs.get("limit", 100)
@@ -119,8 +119,8 @@ class OrangeScraper(RequestsScraper):
             return filtered.to_dict("records")
 
         except (SearchTimeoutError, DataExtractionError) as e:
-            self.logger.error(f"Orange scrape failed: {e}", exc_info=True)
+            self.logger.error(f"Sacramento scrape failed: {e}", exc_info=True)
             raise
         except Exception as e:
-            self.logger.error(f"Orange scrape unexpected error: {e}", exc_info=True)
-            raise ScraperError("Orange scrape failed") from e
+            self.logger.error(f"Sacramento scrape unexpected error: {e}", exc_info=True)
+            raise ScraperError("Sacramento scrape failed") from e

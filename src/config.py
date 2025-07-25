@@ -90,6 +90,9 @@ COUNTY_RFP_URL_MAP = {
         "contra costa": 'https://www.bidnetdirect.com/california/contracostacounty',
         "los angeles": 'https://camisvr.co.la.ca.us/LACoBids/BidLookUp/OpenBidList',
         "orange": 'https://api.procurement.opengov.com/api/v1/government/ocgov/project/public',
+        "sacramento": 'https://api.procurement.opengov.com/api/v1/government/saccounty/project/public',
+        "san bernadino": 'https://epro.sbcounty.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
+        "santa clara": 'https://api.biddingousa.com/restapi/bidding/list/noauthorize/1/41284411',
     }
 }
 
