@@ -7,6 +7,7 @@ from .orange import OrangeScraper
 from .sacramento import SacramentoScraper
 from .san_bernadino import SanBernadinoScraper
 from .santa_clara import SantaClaraScraper
+from .san_diego import SanDiegoScraper
 
 SCRAPER_MAP = {
     "alameda": AlamedaScraper,
@@ -15,5 +16,6 @@ SCRAPER_MAP = {
     "orange": OrangeScraper,
     "sacramento": SacramentoScraper,
     "san bernadino": SanBernadinoScraper,
-    "santa clara": SantaClaraScraper
+    "santa clara": SantaClaraScraper,
+    "san diego": SanDiegoScraper,
 }

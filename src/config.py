@@ -93,6 +93,7 @@ COUNTY_RFP_URL_MAP = {
         "sacramento": 'https://api.procurement.opengov.com/api/v1/government/saccounty/project/public',
         "san bernadino": 'https://epro.sbcounty.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',
         "santa clara": 'https://api.biddingousa.com/restapi/bidding/list/noauthorize/1/41284411',
+        "san diego": 'https://sdbuynet.sandiegocounty.gov/page.aspx/en/rfp/request_browse_public'
     }
 }
 
