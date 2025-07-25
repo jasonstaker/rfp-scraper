@@ -2,8 +2,10 @@
 
 from .alameda import AlamedaScraper
 from .contra_costa import ContraCostaScraper
+from .los_angeles import LosAngelesScraper
 
 SCRAPER_MAP = {
     "alameda": AlamedaScraper,
-    "contra costa": ContraCostaScraper
+    "contra costa": ContraCostaScraper,
+    "los angeles": LosAngelesScraper,
 }

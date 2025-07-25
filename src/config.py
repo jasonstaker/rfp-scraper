@@ -88,6 +88,7 @@ COUNTY_RFP_URL_MAP = {
     "california": {
         "alameda": 'https://api.procurement.opengov.com/api/v1/government/acgov/project/public',
         "contra costa": 'https://www.bidnetdirect.com/california/contracostacounty',
+        "los angeles": 'https://camisvr.co.la.ca.us/LACoBids/BidLookUp/OpenBidList',
     }
 }
 
