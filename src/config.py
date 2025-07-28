@@ -123,6 +123,7 @@ COUNTY_RFP_URL_MAP = {
     },
     "north carolina": {
         "mecklenburg": 'https://mecknc-vss.hostams.com/PRDVSS1X1/Advantage4',
+        "wake": 'https://wake.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_='
     }
 }
 
