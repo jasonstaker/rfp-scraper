@@ -128,6 +128,9 @@ COUNTY_RFP_URL_MAP = {
     "nevada": {
         "clark": 'https://api.demandstar.com/contents/agency/search?id=e43ae9f5-b03b-400b-87ba-874dedef1951',
     },
+    "new york": {
+        "every": 'https://a0333-passportpublic.nyc.gov/rfx.html',
+    },
 }
 
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
