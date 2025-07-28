@@ -97,6 +97,7 @@ COUNTY_RFP_URL_MAP = {
     },
     "florida": {
         "broward": 'https://broward.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
+        "hillsborough": 'https://hillsboroughcounty.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
     }
 }
 
