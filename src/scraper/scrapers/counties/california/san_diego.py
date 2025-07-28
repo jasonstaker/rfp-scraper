@@ -1,5 +1,5 @@
 # san_diego.py
-# url: use COUNTY_RFP_URL_MAP["california"]["san diego"]
+# url: https://sdbuynet.sandiegocounty.gov/page.aspx/en/rfp/request_browse_public
 
 import logging
 import pandas as pd
