@@ -200,12 +200,17 @@ def _build_state_export_map(state_to_df: dict[str, pd.DataFrame]) -> dict[str, p
 def _build_county_export_map(
     county_to_df: dict[str, dict[str, pd.DataFrame]]
 ) -> dict[str, dict[str, pd.DataFrame]]:
+    print(county_to_df)
+
     def should_export(df: pd.DataFrame) -> bool:
         if "success" in df.columns:
             placeholder = (
-                df.shape[0] == 1 and
-                df["success"].iat[0] and
-                df.drop(columns=["success"]).isna().all().item()
+                df.shape[0] == 1
+                and df["success"].iat[0]
+                and df.drop(columns=["success"])
+                    .isna()
+                    .all()
+                    .all()
             )
             return not placeholder
         return True
