@@ -3,9 +3,11 @@
 from .broward import BrowardScraper
 from .hillsborough import HillsboroughScraper
 from .orange import OrangeScraper
+from .palm_beach import PalmBeachScraper
 
 SCRAPER_MAP = {
     "broward": BrowardScraper,
     "hillsborough": HillsboroughScraper,
-    "orange": OrangeScraper
+    "orange": OrangeScraper,
+    "palm beach": PalmBeachScraper,
 }
