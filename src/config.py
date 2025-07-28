@@ -113,6 +113,9 @@ COUNTY_RFP_URL_MAP = {
     },
     "maryland": {
         "montgomery": 'https://www.bidnetdirect.com/maryland/montgomerycounty',
+    },
+    "michigan": {
+        "oakland": 'https://www.bidnetdirect.com/mitn/oakland-county',
     }
 }
 
