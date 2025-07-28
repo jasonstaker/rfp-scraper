@@ -100,6 +100,9 @@ COUNTY_RFP_URL_MAP = {
         "hillsborough": 'https://hillsboroughcounty.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
         "orange": 'https://api.procurement.opengov.com/api/v1/government/orangecountyfl/project/public',
         "palm beach": 'https://pbcvssp.pbc.gov/vssprd/Advantage4',
+    },
+    "georgia": {
+        "fulton": 'https://www.bidnetdirect.com/georgia/fultoncounty',
     }
 }
 
