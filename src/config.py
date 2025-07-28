@@ -24,7 +24,7 @@ KEYWORDS_FILE = SCRAPER_DIR / "keywords.txt"
 # defaults
 DEFAULT_TIMEOUT   = 30
 USER_AGENT        = "RFP-Scraper/1.0"
-SELENIUM_HEADLESS = True
+SELENIUM_HEADLESS = False
 MAX_RETRIES       = 3
 MAX_CACHE_FILES = 5
 
@@ -120,6 +120,9 @@ COUNTY_RFP_URL_MAP = {
     },
     "minnesota": {
         "hennepin": 'https://supplier.hennepin.us/psc/fprd/SUPPLIER/ERP/c/SCP_PUBLIC_MENU_FL.SCP_PUB_BID_CMP_FL.GBL?&',
+    },
+    "north carolina": {
+        "mecklenburg": 'https://mecknc-vss.hostams.com/PRDVSS1X1/Advantage4',
     }
 }
 
