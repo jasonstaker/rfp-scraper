@@ -124,7 +124,10 @@ COUNTY_RFP_URL_MAP = {
     "north carolina": {
         "mecklenburg": 'https://mecknc-vss.hostams.com/PRDVSS1X1/Advantage4',
         "wake": 'https://wake.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_='
-    }
+    },
+    "nevada": {
+        "clark": 'https://api.demandstar.com/contents/agency/search?id=e43ae9f5-b03b-400b-87ba-874dedef1951',
+    },
 }
 
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
