@@ -117,6 +117,9 @@ COUNTY_RFP_URL_MAP = {
     "michigan": {
         "oakland": 'https://www.bidnetdirect.com/mitn/oakland-county',
         "wayne": 'https://www.bidnetdirect.com/mitn/county-of-wayne',
+    },
+    "minnesota": {
+        "hennepin": 'https://supplier.hennepin.us/psc/fprd/SUPPLIER/ERP/c/SCP_PUBLIC_MENU_FL.SCP_PUB_BID_CMP_FL.GBL?&',
     }
 }
 

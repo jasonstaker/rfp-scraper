@@ -8,6 +8,7 @@ from .illinois import SCRAPER_MAP as ILLINOIS_COUNTIES
 from .massachusetts import SCRAPER_MAP as MASSACHUSETTS_COUNTIES
 from .maryland import SCRAPER_MAP as MARYLAND_COUNTIES
 from .michigan import SCRAPER_MAP as MICHIGAN_COUNTIES
+from .minnesota import SCRAPER_MAP as MINNESOTA_COUNTIES
 
 SCRAPER_MAP = {
     "arizona": ARIZONA_COUNTIES,
@@ -18,4 +19,5 @@ SCRAPER_MAP = {
     "massachusetts": MASSACHUSETTS_COUNTIES,
     "maryland": MARYLAND_COUNTIES,
     "michigan": MICHIGAN_COUNTIES,
+    "minnesota": MINNESOTA_COUNTIES,
 }
