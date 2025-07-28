@@ -103,6 +103,7 @@ COUNTY_RFP_URL_MAP = {
     },
     "georgia": {
         "fulton": 'https://www.bidnetdirect.com/georgia/fultoncounty',
+        "gwinnett": 'https://www.gwinnettcounty.com/departments/financialservices/purchasing/bidsandrfps',
     }
 }
 
