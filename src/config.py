@@ -108,6 +108,9 @@ COUNTY_RFP_URL_MAP = {
     "illinois": {
         "cook": 'https://cookcountyil.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
     },
+    "massachusetts": {
+        "middlesex": 'https://api.procurement.opengov.com/api/v1/government/cambridgema/project/public',
+    }
 }
 
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
