@@ -110,6 +110,9 @@ COUNTY_RFP_URL_MAP = {
     },
     "massachusetts": {
         "middlesex": 'https://api.procurement.opengov.com/api/v1/government/cambridgema/project/public',
+    },
+    "maryland": {
+        "montgomery": 'https://www.bidnetdirect.com/maryland/montgomerycounty',
     }
 }
 
