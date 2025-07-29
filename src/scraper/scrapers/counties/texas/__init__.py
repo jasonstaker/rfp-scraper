@@ -6,6 +6,7 @@ from .dallas import DallasScraper
 from .denton import DentonScraper
 from .harris import HarrisScraper
 from .tarrant import TarrantScraper
+from .travis import TravisScraper
 
 SCRAPER_MAP = {
     "bexar": BexarScraper,
@@ -14,4 +15,5 @@ SCRAPER_MAP = {
     "denton": DentonScraper,
     "harris": HarrisScraper,
     "tarrant": TarrantScraper,
+    "travis": TravisScraper,
 }

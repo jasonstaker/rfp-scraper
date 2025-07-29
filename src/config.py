@@ -146,6 +146,7 @@ COUNTY_RFP_URL_MAP = {
         "denton": 'https://dentoncounty.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
         "harris": 'https://harriscountytx.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
         "tarrant": 'https://tarrantcountytx.ionwave.net/SourcingEvents.aspx?SourceType=1',
+        "travis": 'https://www.bidnetdirect.com/texas/traviscounty',
     },
 }
 
