@@ -141,6 +141,7 @@ COUNTY_RFP_URL_MAP = {
     },
     "texas": {
         "bexar": 'https://bexarprod-lm01.cloud.infor.com:1442/lmscm/SourcingSupplier/list/SourcingEvent.OpenForBid?csk.CHP=LMPROC&csk.SupplierGroup=100&fk=SourcingEvent(100,1185)&lk=SourcingEvent(100,1188)&rk=SourcingEvent(_niu_,_niu_)&pageSize=20&pageop=load&menu=EventManagement.BrowseOpenEvents',
+        "collin": 'https://api.procurement.opengov.com/api/v1/government/collincountytx/project/public',
     }
 }
 
