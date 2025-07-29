@@ -132,13 +132,16 @@ COUNTY_RFP_URL_MAP = {
         "every": 'https://a0333-passportpublic.nyc.gov/rfx.html',
     },
     "ohio": {
-        "cuyahoga": "https://ccprod-lm01.cloud.infor.com:1442/lmscm/SourcingSupplier/list/SourcingEvent.OpenForBid?sortOrderName=SourcingEvent.SymbolicKey&fk=SourcingEvent(10,4080)&csk.CHP=LMPROC&hasNext=false&menu=EventManagement.BrowseOpenEvents&previousDisabled=true&pageop=load&pagesize=200&csk.SupplierGroup=CUYA&hasPrevious=false&rk=SourcingEvent(_niu_,_niu_)&isAscending=true&lk=SourcingEvent(10,6572)",
+        "cuyahoga": 'https://ccprod-lm01.cloud.infor.com:1442/lmscm/SourcingSupplier/list/SourcingEvent.OpenForBid?sortOrderName=SourcingEvent.SymbolicKey&fk=SourcingEvent(10,4080)&csk.CHP=LMPROC&hasNext=false&menu=EventManagement.BrowseOpenEvents&previousDisabled=true&pageop=load&pagesize=200&csk.SupplierGroup=CUYA&hasPrevious=false&rk=SourcingEvent(_niu_,_niu_)&isAscending=true&lk=SourcingEvent(10,6572)',
         "franklin": 'https://bids.franklincountyohio.gov/table.cfm',
     },
     "pennsylvania": {
         "allegheny": 'https://solicitations.alleghenycounty.us/',
         "philadelphia": 'https://philawx.phila.gov//ECONTRACT/Documents/FrmOpportunityList.aspx',
     },
+    "texas": {
+        "bexar": 'https://bexarprod-lm01.cloud.infor.com:1442/lmscm/SourcingSupplier/list/SourcingEvent.OpenForBid?csk.CHP=LMPROC&csk.SupplierGroup=100&fk=SourcingEvent(100,1185)&lk=SourcingEvent(100,1188)&rk=SourcingEvent(_niu_,_niu_)&pageSize=20&pageop=load&menu=EventManagement.BrowseOpenEvents',
+    }
 }
 
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
