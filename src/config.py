@@ -137,6 +137,7 @@ COUNTY_RFP_URL_MAP = {
     },
     "pennsylvania": {
         "allegheny": 'https://solicitations.alleghenycounty.us/',
+        "philadelphia": 'https://philawx.phila.gov//ECONTRACT/Documents/FrmOpportunityList.aspx',
     },
 }
 
