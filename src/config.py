@@ -144,6 +144,7 @@ COUNTY_RFP_URL_MAP = {
         "collin": 'https://api.procurement.opengov.com/api/v1/government/collincountytx/project/public',
         "dallas": 'https://www.bidnetdirect.com/texas/dallas-county/',
         "denton": 'https://dentoncounty.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
+        "harris": 'https://harriscountytx.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
     },
 }
 
