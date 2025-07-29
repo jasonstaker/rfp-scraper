@@ -16,6 +16,7 @@ from .ohio import SCRAPER_MAP as OHIO_COUNTIES
 from .pennsylvania import SCRAPER_MAP as PENNSYLVANIA_COUNTIES
 from .texas import SCRAPER_MAP as TEXAS_COUNTIES
 from .utah import SCRAPER_MAP as UTAH_COUNTIES
+from .virginia import SCRAPER_MAP as VIRGINIA_COUNTIES
 
 SCRAPER_MAP = {
     "arizona": ARIZONA_COUNTIES,
@@ -34,4 +35,5 @@ SCRAPER_MAP = {
     "pennsylvania": PENNSYLVANIA_COUNTIES,
     "texas": TEXAS_COUNTIES,
     "utah": UTAH_COUNTIES,
+    "virginia": VIRGINIA_COUNTIES,
 }

@@ -150,6 +150,9 @@ COUNTY_RFP_URL_MAP = {
     },
     "utah": {
         "salt lake": 'https://utah.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
+    },
+    "virginia": {
+        "fairfax": 'https://fairfaxcounty.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
     }
 }
 
