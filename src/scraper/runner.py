@@ -200,8 +200,6 @@ def _build_state_export_map(state_to_df: dict[str, pd.DataFrame]) -> dict[str, p
 def _build_county_export_map(
     county_to_df: dict[str, dict[str, pd.DataFrame]]
 ) -> dict[str, dict[str, pd.DataFrame]]:
-    print(county_to_df)
-
     def should_export(df: pd.DataFrame) -> bool:
         if "success" in df.columns:
             placeholder = (
