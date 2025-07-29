@@ -148,6 +148,9 @@ COUNTY_RFP_URL_MAP = {
         "tarrant": 'https://tarrantcountytx.ionwave.net/SourcingEvents.aspx?SourceType=1',
         "travis": 'https://www.bidnetdirect.com/texas/traviscounty',
     },
+    "utah": {
+        "salt lake": 'https://utah.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
+    }
 }
 
 AVAILABLE_STATES = list(STATE_RFP_URL_MAP.keys())
