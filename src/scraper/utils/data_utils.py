@@ -71,7 +71,12 @@ def sync_hidden_from_excel(
         state_df  = pd.read_excel(excel_path, sheet_name="State RFPs",   engine="openpyxl")
         county_df = pd.read_excel(excel_path, sheet_name="County RFPs",  engine="openpyxl")
         hidden_df = pd.read_excel(excel_path, sheet_name="Hidden RFPs",  engine="openpyxl")
-        all_df    = pd.concat([state_df, county_df], ignore_index=True)
+        frames = []
+        for df in (state_df, county_df):
+            if not df.dropna(how='all').empty:
+                frames.append(df)
+
+        all_df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     except (FileNotFoundError, PermissionError):
         return
 
