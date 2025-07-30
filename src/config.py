@@ -1,34 +1,58 @@
 # config.py
 
 from pathlib import Path
+import sys
+import os
+import shutil
 
-# project root
-PROJECT_ROOT = Path(__file__).parent.parent.resolve()
+# effects: gets the base dir for reading bundled assets, .exe proof
+def get_base_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS)
+    return Path(__file__).parent.parent.resolve()
 
-# resource directories
-ASSETS_DIR      = PROJECT_ROOT / "assets"
+# effects: gets a user‐writable data dir outside the bundle
+def get_data_dir() -> Path:
+    root = Path(os.getenv("LOCALAPPDATA", Path.home() / ".rfp_scraper"))
+    data_dir = root / "rfp_scraper"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
+
+# project root for code/assets
+BASE_DIR = get_base_dir()
+
+# persistent data root for cache, logs, hidden IDs, etc.
+DATA_DIR = get_data_dir()
+
+# resource directories (read‐only assets under BASE_DIR)
+ASSETS_DIR      = BASE_DIR / "assets"
 OUTPUT_DIR      = Path.home() / "Desktop"
-CACHE_DIR       = PROJECT_ROOT / "output" / "cache"
-LOG_FILE        = PROJECT_ROOT / "output" / "scraper.log"
-PERSISTENCE_DIR = PROJECT_ROOT / "persistence"
+SCRAPER_DIR     = BASE_DIR / "src" / "scraper"
+
+
+# persistence directories (user‐writable under DATA_DIR)
+CACHE_DIR       = DATA_DIR / "cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+PERSISTENCE_DIR = DATA_DIR / "persistence"
+PERSISTENCE_DIR.mkdir(parents=True, exist_ok=True)
+
+KEYWORDS_FILE     = PERSISTENCE_DIR / "keywords.txt"
+
+LOG_FILE        = DATA_DIR / "scraper.log"
 HIDDEN_IDS_FILE = PERSISTENCE_DIR / "hidden_ids.json"
 
-# output
+# output naming
 OUTPUT_FILENAME_PREFIX = "rfp_scraping_output_"
 OUTPUT_FILE_EXTENSION   = ".xlsx"
-
-# scraper config folder
-SCRAPER_DIR   = PROJECT_ROOT / "src" / "scraper"
-KEYWORDS_FILE = SCRAPER_DIR / "keywords.txt"
 
 # defaults
 DEFAULT_TIMEOUT   = 30
 USER_AGENT        = "RFP-Scraper/1.0"
-SELENIUM_HEADLESS = False
+SELENIUM_HEADLESS = True
 MAX_RETRIES       = 3
-MAX_CACHE_FILES = 5
+MAX_CACHE_FILES   = 5
 
-from pathlib import Path
 STATE_RFP_URL_MAP = {
     "alabama": 'https://procurement.staars.alabama.gov/PRDVSS1X1/AltSelfService',
     "arkansas": 'https://arbuy.arkansas.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true',

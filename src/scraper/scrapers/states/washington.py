@@ -14,7 +14,6 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 from scraper.core.selenium_scraper import SeleniumScraper
 from src.config import STATE_RFP_URL_MAP
 from scraper.utils.data_utils import filter_by_keywords
-from scraper.utils.date_utils import parse_date_generic
 from scraper.core.errors import (
     SearchTimeoutError,
     ElementNotFoundError,
