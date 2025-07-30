@@ -35,13 +35,11 @@ class SanDiegoScraper(SeleniumScraper):
 
     # modifies: self.driver
     # effects: navigates to the San Diego RFP portal, filters to Open status, and waits for the main table
-    # modifies: self.driver
-    # effects: navigates to the San Diego RFP portal, filters to Open status, and waits for the main table
     def search(self, **kwargs):
         try:
             self.logger.info("Navigating to San Diego RFP portal and applying Open filter")
             self.driver.get(self.base_url)
-            # open status filter: click filter dropdown toggle
+            
             filter_toggle = WebDriverWait(self.driver, 15).until(
                 EC.element_to_be_clickable((
                     By.XPATH,
@@ -49,7 +47,7 @@ class SanDiegoScraper(SeleniumScraper):
                 ))
             )
             filter_toggle.click()
-            # select 'Open' first item in dropdown
+            
             open_item = WebDriverWait(self.driver, 15).until(
                 EC.element_to_be_clickable((
                     By.XPATH,
@@ -57,7 +55,7 @@ class SanDiegoScraper(SeleniumScraper):
                 ))
             )
             open_item.click()
-            # wait for table to load after filtering
+            
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.ID, "body_x_grid_grd"))
             )

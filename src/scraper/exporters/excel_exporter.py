@@ -209,7 +209,10 @@ def _apply_styles(writer, vs: pd.DataFrame, vc: pd.DataFrame, hidden: pd.DataFra
                 elif j == 6: fmt = f['link']
                 else: fmt = f['default']
                 if j == 6:
-                    ws.write_url(i, j, val or "", fmt)
+                    try:
+                        ws.write_url(i, j, val or "", fmt)
+                    except Exception:
+                        ws.write(i, j, val or "", fmt)
                 else:
                     ws.write(i, j, val, fmt)
             lines = math.ceil(len(str(row[1])) / 41)
