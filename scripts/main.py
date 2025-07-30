@@ -13,7 +13,6 @@ def load_stylesheet():
 
     with open(qss_path, "r", encoding="utf-8") as f:
         raw_tpl = f.read()
-
     tpl = Template(raw_tpl)
     return tpl.substitute({
         "font_size_base":         f"{px(25)}px",
@@ -39,9 +38,12 @@ def load_stylesheet():
     })
 
 def main():
-    global SCALE
     app = QApplication(sys.argv)
-    SCALE = compute_scale()
+
+    from src.ui import ui_scale
+    ui_scale.SCALE = ui_scale.compute_scale()
+
+    from src.ui.ui_scale import px
 
     qss = load_stylesheet()
     if qss:
