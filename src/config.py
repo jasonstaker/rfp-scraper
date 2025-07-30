@@ -100,6 +100,7 @@ COUNTY_RFP_URL_MAP = {
     "florida": {
         "broward": 'https://broward.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
         "hillsborough": 'https://hillsboroughcounty.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData?_=',
+        "miami dade": 'https://supplier.miamidade.gov/psc/EXTSUPP_1/SUPPLIER/ERP/c/SCP_PUBLIC_MENU_FL.SCP_PUB_BID_CMP_FL.GBL',
         "orange": 'https://api.procurement.opengov.com/api/v1/government/orangecountyfl/project/public',
         "palm beach": 'https://pbcvssp.pbc.gov/vssprd/Advantage4',
     },
