@@ -72,15 +72,35 @@ class MassachusettsScraper(RequestsScraper):
             raise DataExtractionError("Massachusetts did not receive CSV")
 
         try:
-            with open(temp_path, "wb") as f:
-                f.write(resp.content)
-            df = pd.read_csv(temp_path, dtype=str)
-            df.columns = [col.strip() for col in df.columns]
-            self.logger.info(f"Read {len(df)} rows from CSV")
+            content = resp.content
+
+            peek = content.lstrip()[:5]
+            if peek.startswith(b"<"):
+                raise DataExtractionError("Received HTML instead of CSV/XLSX")
+
+            ctype = resp.headers.get("Content-Type", "").lower()
+            disp  = resp.headers.get("Content-Disposition", "").lower()
+            if "excel" in ctype or disp.endswith((".xls", ".xlsx")):
+                temp_path = temp_path.replace(".csv", ".xlsx")
+                with open(temp_path, "wb") as f:
+                    f.write(content)
+                df = pd.read_excel(temp_path, dtype=str)
+            else:
+                with open(temp_path, "wb") as f:
+                    f.write(content)
+                df = pd.read_csv(temp_path, dtype=str)
+
+            df.columns = [c.strip() for c in df.columns]
+            self.logger.info(f"Read {len(df)} rows from CSV/XLSX")
             return df
+
         except Exception as e:
-            self.logger.error(f"Failed to read CSV: {e}", exc_info=True)
-            raise DataExtractionError("Massachusetts CSV read failed") from e
+            if os.path.exists(temp_path):
+                try: os.remove(temp_path)
+                except OSError: pass
+            self.logger.error(f"Failed to read spreadsheet: {e}", exc_info=True)
+            raise DataExtractionError("Massachusetts CSV/XLSX read failed") from e
+
 
 
     # requires: df is a pandas DataFrame
