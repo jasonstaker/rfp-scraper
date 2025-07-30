@@ -44,9 +44,9 @@ def filter_by_dates(df: pd.DataFrame) -> pd.DataFrame:
         return df
     elif len(df) == 1:
         row = df.iloc[0]
-        others = row.drop(labels=['State'], errors='ignore')
+        others = row.drop(labels=['State'], errors='ignore').drop(labels=['success'], errors='ignore')
         if others.isna().all() or all((pd.isna(v) or v == '' for v in others)):
-            return df.iloc[0:0].copy()
+            return df
 
     parsed_dates = df["end_date"].astype(str).apply(parse_date_generic)
     parsed = pd.to_datetime(parsed_dates, errors="coerce").dt.date
