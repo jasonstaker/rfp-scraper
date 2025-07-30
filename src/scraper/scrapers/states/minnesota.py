@@ -102,9 +102,6 @@ class MinnesotaScraper(RequestsScraper):
                     })
                 except Exception as e:
                     snippet = str(li)[:200].replace("\n", " ")
-                    self.logger.warning(
-                        f"Skipping LI due to {e!r}. LI snippet: {snippet}…"
-                    )
                     continue
 
             return pd.DataFrame(records)
