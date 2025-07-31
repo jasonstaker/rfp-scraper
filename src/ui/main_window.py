@@ -5,6 +5,7 @@ import ctypes
 import threading
 import traceback
 from pathlib import Path
+from shutil import copy2
 from src.config import OUTPUT_FILENAME_PREFIX, OUTPUT_FILE_EXTENSION
 
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -13,6 +14,7 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QStackedWidget,
     QMessageBox,
+    QFileDialog,
 )
 import pandas as pd
 
@@ -76,6 +78,7 @@ class ScrapeWorker(QThread):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self._build_menu()
         ensure_dirs_exist()
         configure_logging(LOG_FILE)
         if sys.platform == "win32":
@@ -103,6 +106,43 @@ class MainWindow(QMainWindow):
         self.home_page.start_run.connect(self.on_start_run)
         self.run_page.cancel_run.connect(self.on_cancel_run)
         self.status_page.back_to_home.connect(self.on_back_to_home)
+
+    def _build_menu(self):
+        menu = self.menuBar()
+        file_menu = menu.addMenu("&File")
+
+        download_action = file_menu.addAction("Download &Log…")
+        download_action.setStatusTip("Save a copy of the current log file")
+        download_action.triggered.connect(self._download_log)
+
+        file_menu.addSeparator()
+        quit_action = file_menu.addAction("&Quit")
+        quit_action.setShortcut("Ctrl+Q")
+        quit_action.triggered.connect(self.close)
+
+    def _download_log(self):
+
+        # suggest the current log filename
+        src = Path(LOG_FILE)
+        if not src.exists():
+            QMessageBox.warning(self, "No Log File", f"Log file not found:\n{src}")
+            return
+
+        # ask where to save it
+        dest_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Log As…",
+            str(src.name),
+            "Log files (*.log);;All files (*.*)"
+        )
+        if not dest_path:
+            return  # user cancelled
+
+        try:
+            copy2(src, dest_path)
+            QMessageBox.information(self, "Log Saved", f"Log successfully saved to:\n{dest_path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error Saving Log", str(e))
 
     def on_start_run(self, keywords: str, states: list[str], counties: dict[str, list[str]]):
         # require at least one state OR one county
