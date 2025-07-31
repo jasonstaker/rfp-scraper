@@ -2,6 +2,7 @@
 
 import os
 import re
+import logging
 from datetime import datetime
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtWidgets import (
@@ -17,6 +18,8 @@ from PyQt5.QtWidgets import (
 from src.config import LOG_FILE
 from persistence.average_time_manager import load_averages, estimate_total_time
 
+logger = logging.getLogger('[run_page]')
+
 # page for showing scraper progress with time-left indicator
 class RunPage(QWidget):
     cancel_run = pyqtSignal()
@@ -24,6 +27,7 @@ class RunPage(QWidget):
 
     def __init__(self):
         super().__init__()
+        logger.info("Initialized RunPage")
         self._timer = QTimer(self)
         self._timer.setInterval(100)
         self._timer.timeout.connect(self._poll_log_file)
@@ -43,7 +47,7 @@ class RunPage(QWidget):
         main_layout.setContentsMargins(px(12), px(12), px(12), px(12))
         main_layout.setSpacing(px(8))
 
-        self.info_label = QLabel("Scraper is running…")
+        self.info_label = QLabel("Scraper is running...")
         self.info_label.setObjectName("run_info_label")
         self.info_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.info_label)
@@ -76,6 +80,7 @@ class RunPage(QWidget):
     # modifies: self 
     # effects: begin polling and initialize log position
     def start_tailing(self):
+        logger.info("start tailing log")
         self.scraper_started.emit()
         self._log_file_pos = os.path.getsize(LOG_FILE)
         self.log_output.clear()
@@ -86,12 +91,15 @@ class RunPage(QWidget):
     def stop_tailing(self):
         if self._timer.isActive():
             self._timer.stop()
+            logger.info("Stopped tailing log")
 
     # requires: states is a valid list of states
     # modifies: self
     # effects: begins the scraping process, loading averages, and logging
     def start_scraper(self, keywords: str, states: list[str], counties: dict[str, list[str]]):
         self._states = states
+        logger.info("Scraper start with %d states, %d counties",
+                    len(states), sum(len(v) for v in counties.values()))
         self._completed_count = 0
         self._last_state = None
         self._counties = counties
@@ -135,6 +143,7 @@ class RunPage(QWidget):
         except Exception as e:
             self.log_output.appendPlainText(f"<error reading log file: {e}>")
             self.stop_tailing()
+            logger.warning("Error polling log file: %s", e)
 
     # effects: calculate and display remaining time based on elapsed and completed
     def _update_time_left(self):
@@ -150,4 +159,6 @@ class RunPage(QWidget):
     # modifies: self
     # effects: adds text to the log
     def append_log(self, text: str):
+        self.log_output.appendPlainText(text)
+        logger.info("Append_log → %s", text.strip())
         self.log_output.appendPlainText(text)

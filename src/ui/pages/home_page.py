@@ -1,5 +1,6 @@
 # home_page.py
 
+import logging
 from PyQt5.QtCore import Qt, pyqtSignal, QRect, QSize, QTimer
 from PyQt5.QtGui import QColor, QPainter, QFont, QTextCharFormat, QTextFormat
 from PyQt5.QtWidgets import (
@@ -19,37 +20,27 @@ from PyQt5.QtWidgets import (
 from persistence.average_time_manager import load_averages, estimate_total_time, update_averages
 from src.config import AVAILABLE_STATES, AVAILABLE_COUNTIES_BY_STATE, KEYWORDS_FILE, AVAILABLE_STATE_ABBR
 
+logger = logging.getLogger('[home_page]')
 
 # line number display for code editor
 class LineNumberArea(QWidget):
 
-    # requires: editor is a CodeEditor instance
-    # modifies: self.code_editor
-    # effects: initializes line number area
     def __init__(self, editor: 'CodeEditor'):
         super().__init__(editor)
         self.code_editor = editor
 
-    # requires: none
-    # modifies: none
-    # effects: returns size hint for line number area
     def sizeHint(self) -> QSize:
         return QSize(self.code_editor.line_number_area_width(), 0)
 
-    # requires: event is a QPaintEvent
-    # modifies: none
-    # effects: renders line numbers
     def paintEvent(self, event):
         self.code_editor.line_number_area_paint_event(event)
 
 
 # text editor with line numbering
 class CodeEditor(QPlainTextEdit):
-    # requires: parent is a QWidget or None
-    # modifies: self.line_number_area
-    # effects: initializes editor with line numbers
     def __init__(self, parent=None):
         super().__init__(parent)
+        logger.info("CodeEditor: initialized")
         self.line_number_area = LineNumberArea(self)
         self.blockCountChanged.connect(self.update_line_number_area_width)
         self.updateRequest.connect(self.update_line_number_area)
@@ -61,9 +52,6 @@ class CodeEditor(QPlainTextEdit):
         self.setFont(font)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
 
-    # requires: none
-    # modifies: none
-    # effects: computes line number area width
     def line_number_area_width(self) -> int:
         from src.ui.ui_scale import px
         digits = 1
@@ -74,15 +62,9 @@ class CodeEditor(QPlainTextEdit):
         space = px(3) + self.fontMetrics().horizontalAdvance('9') * digits
         return space
 
-    # requires: none
-    # modifies: viewport margins
-    # effects: adjusts margin for line numbers
     def update_line_number_area_width(self, _):
         self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
 
-    # requires: rect is a QRect, dy is an integer
-    # modifies: self.line_number_area
-    # effects: updates line number area on scroll
     def update_line_number_area(self, rect, dy):
         if dy:
             self.line_number_area.scroll(0, dy)
@@ -91,17 +73,11 @@ class CodeEditor(QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self.update_line_number_area_width(0)
 
-    # requires: event is a QResizeEvent
-    # modifies: self.line_number_area
-    # effects: resizes line number area
     def resizeEvent(self, event):
         super().resizeEvent(event)
         cr = self.contentsRect()
         self.line_number_area.setGeometry(QRect(cr.left(), cr.top(), self.line_number_area_width(), cr.height()))
 
-    # requires: none
-    # modifies: self extra selections
-    # effects: highlights current line
     def highlight_current_line(self):
         extra_selections = []
         if not self.isReadOnly():
@@ -116,9 +92,6 @@ class CodeEditor(QPlainTextEdit):
             extra_selections.append(selection)
         self.setExtraSelections(extra_selections)
 
-    # requires: event is a QPaintEvent
-    # modifies: none
-    # effects: paints line numbers
     def line_number_area_paint_event(self, event):
         from src.ui.ui_scale import px
         painter = QPainter(self.line_number_area)
@@ -143,11 +116,9 @@ class CodeEditor(QPlainTextEdit):
 class HomePage(QWidget):
     start_run = pyqtSignal(str, list, dict)
 
-    # requires: none
-    # modifies: self.code_editor, self.tab_widget, self.select_buttons, self.counties
-    # effects: initializes ui for keyword, state, and county selection with tabs
     def __init__(self):
         super().__init__()
+        logger.info("HomePage: widget constructed")
         from src.ui.ui_scale import px
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(px(0), px(8), px(0), px(0))
@@ -165,7 +136,6 @@ class HomePage(QWidget):
         self.kw_label = QLabel("Enter keywords (one per line):")
         self.kw_label.setStyleSheet("color: white;")
         header_layout.addWidget(self.kw_label, 2, alignment=Qt.AlignVCenter)
-
         main_layout.addWidget(self.header_bar)
 
         # Content row
@@ -186,8 +156,9 @@ class HomePage(QWidget):
                 existing = f.read().rstrip("\n")
                 if existing:
                     self.code_editor.setPlainText(existing)
+                    logger.info("HomePage: loaded %d keywords", len(existing.splitlines()))
         except FileNotFoundError:
-            pass
+            logger.warning("HomePage: no existing keywords file (%s)", KEYWORDS_FILE)
 
         # Tabs for States and Counties
         self.tab_widget = QTabWidget()
@@ -236,7 +207,6 @@ class HomePage(QWidget):
 
         row_layout.addWidget(self.tab_widget, 1)
 
-        # Placeholder for county selections
         self.counties = {}
 
         # Time estimate & Run button
@@ -271,22 +241,18 @@ class HomePage(QWidget):
         self.county_list.itemChanged.connect(self.recalc_estimated_time)
         QTimer.singleShot(0, self.recalc_estimated_time)
 
-    # requires: list_widget and button
-    # modifies: check states of items
-    # effects: toggles all checkboxes and updates button text
     def _toggle(self, list_widget, button):
         any_unchecked = any(
             list_widget.item(i).checkState() == Qt.Unchecked
             for i in range(list_widget.count())
         )
+        logger.info("HomePage: toggle %s → %s", list_widget.objectName(),
+                    "check all" if any_unchecked else "uncheck all")
         new_state = Qt.Checked if any_unchecked else Qt.Unchecked
         for i in range(list_widget.count()):
             list_widget.item(i).setCheckState(new_state)
         button.setText("Unselect all" if new_state == Qt.Checked else "Select all")
 
-    # requires: none
-    # modifies: self.estimated_time_value
-    # effects: recalculates based on selected states & counties
     def recalc_estimated_time(self):
         averages = load_averages()
         states = [
@@ -300,11 +266,10 @@ class HomePage(QWidget):
                 st, co = self.county_list.item(i).data(Qt.UserRole)
                 counties.setdefault(st, []).append(co)
         mins, secs = estimate_total_time(averages, states, counties)
+        logger.info("HomePage: estimated time %d min %d sec for %d states, %d counties",
+                    mins, secs, len(states), sum(len(v) for v in counties.values()))
         self.set_estimated_time(mins, secs)
 
-    # requires: minutes, seconds
-    # modifies: time label
-    # effects: updates display
     def set_estimated_time(self, minutes: int, seconds: int):
         parts = []
         if minutes > 0:
@@ -313,9 +278,6 @@ class HomePage(QWidget):
             parts.append(f"{seconds} sec")
         self.estimated_time_value.setText("~" + " ".join(parts))
 
-    # requires: none
-    # modifies: start_run signal
-    # effects: emits keywords, states, and counties
     def on_run_clicked(self):
         keywords = self.code_editor.toPlainText().strip()
         states = [
@@ -327,15 +289,14 @@ class HomePage(QWidget):
         for i in range(self.county_list.count()):
             if self.county_list.item(i).checkState() != Qt.Checked:
                 continue
-            st, co = self.county_list.item(i).data(Qt.UserRole)  # unpack our tuple
+            st, co = self.county_list.item(i).data(Qt.UserRole)
             counties_by_state.setdefault(st, []).append(co)
 
+        logger.info("HomePage: Run clicked → emitting start_run")
         self.start_run.emit(keywords, states, counties_by_state)
 
-    # requires: none
-    # modifies: fields
-    # effects: resets editor, lists, and buttons
     def reset_fields(self):
+        logger.info("Resetting all fields to default")
         self.code_editor.clear()
         for lw in (self.state_list, self.county_list):
             for i in range(lw.count()):
@@ -343,8 +304,5 @@ class HomePage(QWidget):
         self.state_select_all.setText("Select all")
         self.county_select_all.setText("Select all")
 
-    # requires: timings
-    # modifies: persistence
-    # effects: updates averages
     def persist_averages(self, timings: dict[str, float]):
         update_averages(timings)

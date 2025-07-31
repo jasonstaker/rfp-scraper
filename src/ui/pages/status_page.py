@@ -12,7 +12,10 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QHBoxLayout,
 )
+import logging
 from src.config import AVAILABLE_STATE_ABBR
+
+logger = logging.getLogger('[status_page]')
 
 # page for displaying scrape outcomes
 class StatusPage(QWidget):
@@ -23,6 +26,7 @@ class StatusPage(QWidget):
     # effects: initializes UI with separate state and county result tables
     def __init__(self):
         super().__init__()
+        logger.info("Initialized")
         from src.ui.ui_scale import px
         self.px = px
 
@@ -31,6 +35,7 @@ class StatusPage(QWidget):
         main_layout.setSpacing(px(8))
         self.setLayout(main_layout)
 
+        logger.info("Creating state table")
         header_label = QLabel("State Scrape Results")
         header_label.setObjectName("status_header_label")
         header_label.setAlignment(Qt.AlignCenter)
@@ -51,6 +56,7 @@ class StatusPage(QWidget):
         main_layout.addWidget(self.state_table)
 
         # County results
+        logger.info("Creating county table")
         county_label = QLabel("County Scrape Results")
         county_label.setObjectName("county_header_label")
         county_label.setAlignment(Qt.AlignCenter)
@@ -61,6 +67,7 @@ class StatusPage(QWidget):
         self._configure_table(self.county_table, header="county")
         main_layout.addWidget(self.county_table)
 
+        logger.info("Creating back button")
         button_container = QWidget()
         button_container.setObjectName("status_button_container")
         button_layout = QHBoxLayout()
@@ -96,10 +103,12 @@ class StatusPage(QWidget):
         if "_error" in state_results:
             self.error_label.setText(f"error: {state_results['_error']}")
             self.error_label.setVisible(True)
+            logger.warning("Scraping error → %s", state_results['_error'])
 
         # clear both tables
         self.state_table.setRowCount(0)
         self.county_table.setRowCount(0)
+        logger.info("Cleared previous table rows")
 
         state_row = 0
         county_row = 0
@@ -177,6 +186,7 @@ class StatusPage(QWidget):
 
         # placeholders if empty
         if state_row == 0:
+            logger.info("No state scrapes to show, inserting placeholder")
             self.state_table.insertRow(0)
             place = QTableWidgetItem("No completed scrapes")
             place.setFlags(place.flags() ^ Qt.ItemIsEditable)
@@ -186,6 +196,7 @@ class StatusPage(QWidget):
             self.state_table.item(0, 1).setTextAlignment(Qt.AlignCenter)
 
         if county_row == 0:
+            logger.info("No county scrapes to show, inserting placeholder")
             self.county_table.insertRow(0)
             place = QTableWidgetItem("No completed scrapes")
             place.setFlags(place.flags() ^ Qt.ItemIsEditable)

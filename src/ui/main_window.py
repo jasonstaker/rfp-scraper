@@ -1,5 +1,6 @@
 # main_window.py
 
+import logging
 import sys
 import ctypes
 import threading
@@ -49,7 +50,7 @@ class ScrapeWorker(QThread):
             )
             state_to_df['_output_file'] = cache_path
 
-            self.log_line.emit(f"✅ saved output to: {cache_path.name}")
+            self.log_line.emit(f" saved output to: {cache_path.name}")
             self.finished.emit({
                 "success": True,
                 "results": state_to_df,
@@ -115,6 +116,10 @@ class MainWindow(QMainWindow):
         download_action.setStatusTip("Save a copy of the current log file")
         download_action.triggered.connect(self._download_log)
 
+        clear_action = file_menu.addAction("&Clear Log")
+        clear_action.setStatusTip("Clear the on-screen log output")
+        clear_action.triggered.connect(self._clear_log)
+
         file_menu.addSeparator()
         quit_action = file_menu.addAction("&Quit")
         quit_action.setShortcut("Ctrl+Q")
@@ -143,6 +148,17 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Log Saved", f"Log successfully saved to:\n{dest_path}")
         except Exception as e:
             QMessageBox.critical(self, "Error Saving Log", str(e))
+
+    def _clear_log(self):
+        if getattr(self, 'run_page', None):
+            self.run_page.log_output.clear()
+        
+        try:
+            with open(LOG_FILE, 'w', encoding='utf-8'):
+                pass
+        except Exception as e:
+            logging.error(self, "Error Clearing Log", f"Could not clear log file:\n{e}")
+
 
     def on_start_run(self, keywords: str, states: list[str], counties: dict[str, list[str]]):
         # require at least one state OR one county
