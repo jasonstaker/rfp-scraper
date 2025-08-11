@@ -2,13 +2,15 @@
 
 import os
 import subprocess
+import logging
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from contextlib import redirect_stdout
-from webdriver_manager.chrome import ChromeDriverManager
 from .base_scraper import BaseScraper
 from src.config import SELENIUM_HEADLESS
+
+logging.getLogger("selenium.webdriver.common.selenium_manager").setLevel(logging.CRITICAL)
 
 class SeleniumScraper(BaseScraper):
     def __init__(self, base_url):
@@ -17,7 +19,6 @@ class SeleniumScraper(BaseScraper):
         # tell ChromeDriver to dump its stdout/stderr to nul
         null_log = "nul"
         service = Service(
-            executable_path=ChromeDriverManager().install(),
             log_path=null_log,
             creationflags=subprocess.CREATE_NO_WINDOW
         )

@@ -6,7 +6,7 @@ import unittest
 
 import pandas as pd
 
-from src.scraper.config import KEYWORDS_FILE
+from src.config import KEYWORDS_FILE
 from src.scraper.utils.data_utils import filter_by_keywords
 from src.scraper.utils.date_utils import parse_date
 from src.scraper.utils.text_utils import normalize_whitespace

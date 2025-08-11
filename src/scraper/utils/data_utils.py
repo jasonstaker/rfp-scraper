@@ -68,9 +68,9 @@ def sync_hidden_from_excel(
         existing = set()
 
     try:
-        state_df  = pd.read_excel(excel_path, sheet_name="State RFPs",   engine="openpyxl")
-        county_df = pd.read_excel(excel_path, sheet_name="County RFPs",  engine="openpyxl")
-        hidden_df = pd.read_excel(excel_path, sheet_name="Hidden RFPs",  engine="openpyxl")
+        state_df  = pd.read_excel(excel_path, sheet_name="State RFPs",   engine="openpyxl").reset_index(drop=True)
+        county_df = pd.read_excel(excel_path, sheet_name="County RFPs",  engine="openpyxl").reset_index(drop=True)
+        hidden_df = pd.read_excel(excel_path, sheet_name="Hidden RFPs",  engine="openpyxl").reset_index(drop=True)
         frames = []
         for df in (state_df, county_df):
             if not df.dropna(how='all').empty:
@@ -81,10 +81,16 @@ def sync_hidden_from_excel(
         return
 
     try:
-        all_data    = all_df.iloc[:, [0, 3]].copy()
-        all_data.columns    = ['Hide', 'Solicitation#']
-        hidden_data = hidden_df.iloc[:, [0, 3]].copy()
+        try:
+            hidden_data = hidden_df.iloc[:, [0, 3]].copy()
+        except Exception:
+            hidden_data = ['Hide', 'Solicitation#']
         hidden_data.columns = ['Hide', 'Solicitation#']
+        try:
+            all_data = all_df.iloc[:, [0, 3]].copy()
+        except Exception:
+            all_data = pd.DataFrame({'Hide': [], 'Solicitation#': []})
+        all_data.columns    = ['Hide', 'Solicitation#']
     except IndexError:
         return
 

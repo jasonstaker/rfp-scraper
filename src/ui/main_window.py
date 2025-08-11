@@ -150,18 +150,15 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Error Saving Log", str(e))
 
     def _clear_log(self):
-        if getattr(self, 'run_page', None):
-            self.run_page.log_output.clear()
-        
         try:
             with open(LOG_FILE, 'w', encoding='utf-8'):
+                self.run_page.start_tailing()
                 pass
         except Exception as e:
             logging.error(self, "Error Clearing Log", f"Could not clear log file:\n{e}")
 
 
     def on_start_run(self, keywords: str, states: list[str], counties: dict[str, list[str]]):
-        # require at least one state OR one county
         has_counties = any(county_list for county_list in counties.values())
         if not states and not has_counties:
             QMessageBox.warning(

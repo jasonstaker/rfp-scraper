@@ -129,6 +129,9 @@ class StatusPage(QWidget):
 
             # status text logic
             if hasattr(df, "columns") and "success" in df.columns:
+                if not isinstance(df, pd.DataFrame) or df.shape[0] == 0:
+                    status_text = "❌ Failed"
+
                 success = bool(df["success"].iat[0])
                 data_cols = [c for c in df.columns if c != "success"]
                 placeholder = (df.shape[0] == 1 and success and df[data_cols].isna().all(axis=None))
@@ -165,6 +168,9 @@ class StatusPage(QWidget):
 
                 # status text logic
                 if hasattr(df, "columns") and "success" in df.columns:
+                    if not isinstance(df, pd.DataFrame) or df.shape[0] == 0:
+                        status_text = "❌ Failed"
+                
                     success = bool(df["success"].iat[0])
                     data_cols = [c for c in df.columns if c != "success"]
                     placeholder = (df.shape[0] == 1 and success and df[data_cols].isna().all(axis=None))
