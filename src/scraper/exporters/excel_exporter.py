@@ -22,8 +22,8 @@ def export_all(
         raw_state = _assemble_raw_df(state_to_df_map)
         raw_county = _assemble_county_raw_df(county_to_df_map)
 
-        vs, hs = {}, {}
-        vc, hc = {}, {}
+        vs, hs = pd.DataFrame(), pd.DataFrame()
+        vc, hc = pd.DataFrame(), pd.DataFrame()
         
         if len(raw_state) != 0:
             vs, hs = _clean_and_split(raw_state)

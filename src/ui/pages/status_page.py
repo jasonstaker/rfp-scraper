@@ -131,16 +131,16 @@ class StatusPage(QWidget):
             if hasattr(df, "columns") and "success" in df.columns:
                 if not isinstance(df, pd.DataFrame) or df.shape[0] == 0:
                     status_text = "❌ Failed"
-
-                success = bool(df["success"].iat[0])
-                data_cols = [c for c in df.columns if c != "success"]
-                placeholder = (df.shape[0] == 1 and success and df[data_cols].isna().all(axis=None))
-                if not success:
-                    status_text = "❌ Failed"
-                elif placeholder:
-                    status_text = "🔶 0 Found"
                 else:
-                    status_text = f"✅ {len(df)} Found"
+                    success = bool(df["success"].iat[0])
+                    data_cols = [c for c in df.columns if c != "success"]
+                    placeholder = (df.shape[0] == 1 and success and df[data_cols].isna().all(axis=None))
+                    if not success:
+                        status_text = "❌ Failed"
+                    elif placeholder:
+                        status_text = "🔶 0 Found"
+                    else:
+                        status_text = f"✅ {len(df)} Found"
             else:
                 status_text = "❌ Failed"
 
@@ -170,16 +170,16 @@ class StatusPage(QWidget):
                 if hasattr(df, "columns") and "success" in df.columns:
                     if not isinstance(df, pd.DataFrame) or df.shape[0] == 0:
                         status_text = "❌ Failed"
-                
-                    success = bool(df["success"].iat[0])
-                    data_cols = [c for c in df.columns if c != "success"]
-                    placeholder = (df.shape[0] == 1 and success and df[data_cols].isna().all(axis=None))
-                    if not success:
-                        status_text = "❌ Failed"
-                    elif placeholder:
-                        status_text = "🔶 0 Found"
                     else:
-                        status_text = f"✅ {len(df)} Found"
+                        success = bool(df["success"].iat[0])
+                        data_cols = [c for c in df.columns if c != "success"]
+                        placeholder = (df.shape[0] == 1 and success and df[data_cols].isna().all(axis=None))
+                        if not success:
+                            status_text = "❌ Failed"
+                        elif placeholder:
+                            status_text = "🔶 0 Found"
+                        else:
+                            status_text = f"✅ {len(df)} Found"
                 else:
                     status_text = "❌ Failed"
 

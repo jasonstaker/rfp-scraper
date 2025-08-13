@@ -77,14 +77,14 @@ def sync_hidden_from_excel(
                 frames.append(df)
 
         all_df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
-    except (FileNotFoundError, PermissionError):
+    except Exception:
         return
 
     try:
         try:
             hidden_data = hidden_df.iloc[:, [0, 3]].copy()
         except Exception:
-            hidden_data = ['Hide', 'Solicitation#']
+            hidden_data = pd.DataFrame(columns=['Hide', 'Solicitation#'])
         hidden_data.columns = ['Hide', 'Solicitation#']
         try:
             all_data = all_df.iloc[:, [0, 3]].copy()

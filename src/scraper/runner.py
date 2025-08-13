@@ -3,6 +3,7 @@
 import logging
 import datetime
 from pathlib import Path
+import random
 import pandas as pd
 import threading
 import time
@@ -262,18 +263,26 @@ def _run_single_scraper(
         if not scraper_cls:
             logging.error(f"No scraper for key [{key}]")
             break
-        scraper = scraper_cls()
+        scraper = None
         try:
+            scraper = scraper_cls()
             records = scraper.scrape(timeout=DEFAULT_TIMEOUT)
             success = True
             break
         except (SearchTimeoutError, PaginationError, ScraperError) as retryable:
             logging.warning(f"[{key}] retryable error on attempt {attempt}: {retryable}")
+            backoff = min(2 ** (attempt - 1), 30)
+            jitter = random.uniform(0, 1.0)
+            time.sleep(backoff + jitter)
         except DataExtractionError as de:
             logging.error(f"[{key}] unrecoverable data error: {de}")
             break
         finally:
-            scraper.close()
+            if scraper is not None:
+                try:
+                    scraper.close()
+                except Exception as e:
+                    logging.debug(f"Error closing scraper for {key}: {e}")
 
     if not success:
         df = pd.DataFrame([{
