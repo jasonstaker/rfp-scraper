@@ -5,7 +5,6 @@ from .arkansas import ArkansasScraper
 from .arizona import ArizonaScraper
 from .california import CaliforniaScraper
 from .colorado import ColoradoScraper
-from .connecticut import ConnecticutScraper
 from .dc import DCScraper
 from .delaware import DelawareScraper
 from .florida import FloridaScraper
@@ -19,7 +18,6 @@ from .kansas import KansasScraper
 from .kentucky import KentuckyScraper
 from .louisiana import LouisianaScraper
 from .massachusetts import MassachusettsScraper
-from .maryland import MarylandScraper
 from .maine import MaineScraper
 from .michigan import MichiganScraper
 from .minnesota import MinnesotaScraper
@@ -55,7 +53,6 @@ SCRAPER_MAP = {
     "arizona": ArizonaScraper,
     "california": CaliforniaScraper,
     "colorado": ColoradoScraper,
-    "connecticut": ConnecticutScraper,
     "district of columbia": DCScraper,
     "delaware": DelawareScraper,
     "florida": FloridaScraper,
@@ -69,7 +66,6 @@ SCRAPER_MAP = {
     "kentucky": KentuckyScraper,
     "louisiana": LouisianaScraper,
     "massachusetts": MassachusettsScraper,
-    "maryland": MarylandScraper,
     "maine": MaineScraper,
     "michigan": MichiganScraper,
     "minnesota": MinnesotaScraper,

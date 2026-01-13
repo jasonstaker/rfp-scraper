@@ -36,41 +36,57 @@ class IdahoScraper(SeleniumScraper):
     # effects: navigates to the Idaho RFP portal, pages through all results, and returns list of page_source strings
     def search(self, **kwargs):
         self.logger.info("navigating to Idaho RFP portal")
-        table_xpath = (
-            "/html/body/lm-app/soho-module-nav-container/div/div/"
-            "lm-list/div[1]/div/div[1]/div/div[2]/lm-list-content/"
-            "lm-list-grid/div/div[1]/div[1]/div/div[1]/table"
-        )
-        next_button_xpath = (
-            "/html/body/lm-app/soho-module-nav-container/div/div[1]/lm-list/"
-            "div[1]/div/div[1]/div/div[2]/lm-list-content/lm-list-grid/div/"
-            "div[1]/div[2]/ul/li[3]"
-        )
+
+        table_css = "table.datagrid.extra-small-rowheight"
+        row_css = "table.datagrid.extra-small-rowheight tbody tr.datagrid-row"
+        next_btn_css = "#XiOpenForBid_pager-btn-next"
+
         all_html = []
 
         try:
             self.driver.get(self.base_url)
+
             while True:
-                # wait for table and rows
-                WebDriverWait(self.driver, 30).until(
-                    EC.presence_of_element_located((By.XPATH, table_xpath))
+                WebDriverWait(self.driver, 45).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, table_css))
                 )
-                WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_all_elements_located((By.XPATH, table_xpath + "/tbody/tr[@role='row']"))
+                WebDriverWait(self.driver, 45).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, row_css))
                 )
+
                 all_html.append(self.driver.page_source)
 
-                # find next button and check if disabled
-                next_button = WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, next_button_xpath))
+                next_btn = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, next_btn_css))
                 )
-                class_attr = next_button.get_attribute("class")
-                if "pager-next is-disabled" in class_attr:
-                    self.logger.info("Last page reached, stopping pagination")
+
+                next_li = next_btn.find_element(By.XPATH, "./ancestor::li[1]")
+                next_li_class = next_li.get_attribute("class") or ""
+                if "is-disabled" in next_li_class:
+                    self.logger.info("Last page reached (pager-next is-disabled), stopping pagination")
                     break
 
+                def first_row_signature(drv):
+                    r = drv.find_element(By.CSS_SELECTOR, row_css)
+                    spans = r.find_elements(By.CSS_SELECTOR, "td.lm-datagrid-card-container span.lm-card-field")
+                    title = spans[0].text.strip() if len(spans) > 0 else ""
+                    event = spans[1].text.strip() if len(spans) > 1 else ""
+                    close_date = r.find_elements(By.CSS_SELECTOR, "td:nth-child(6) .datagrid-cell-wrapper")
+                    close = close_date[0].text.strip() if close_date else ""
+                    return f"{title}||{event}||{close}"
+
+                before_sig = first_row_signature(self.driver)
+
                 self.logger.info("Clicking next page")
-                next_button.click()
+                self.driver.execute_script("arguments[0].click();", next_btn)
+
+                try:
+                    WebDriverWait(self.driver, 45).until(lambda d: first_row_signature(d) != before_sig)
+                except TimeoutException:
+                    self.logger.info("Next click did not advance (signature unchanged). Stopping pagination.")
+                    break
+
+
             return all_html
 
         except TimeoutException as te:
@@ -88,6 +104,7 @@ class IdahoScraper(SeleniumScraper):
         except Exception as e:
             self.logger.error(f"search() failed: {e}", exc_info=True)
             raise ScraperError("Idaho search failed") from e
+
 
 
     # requires: page_source is a string containing html page source

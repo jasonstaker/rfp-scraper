@@ -68,21 +68,22 @@ class DelawareScraper(SeleniumScraper):
                     continue
 
                 try:
-                    bid_id = (cols[0].get_attribute('title') or cols[0].text).strip()
-                    code = (cols[1].get_attribute('title') or cols[1].text).strip()
-                    title = (cols[2].get_attribute('title') or cols[2].text).strip()
-                    closing_date = (cols[4].get_attribute('title') or cols[4].text).strip()
-
+                    bid_id = (row_el.get_attribute("id") or "").strip()
                     if not bid_id:
-                        self.logger.warning(f"[Row {idx}] Missing bid_id. Skipping.")
+                        self.logger.warning(f"[Row {idx}] Missing <tr id>. Skipping.")
                         continue
+
+                    code = cols[1].text.strip()
+                    title_link = cols[2].find_element(By.TAG_NAME, "a")
+                    title = title_link.text.strip()
+                    closing_date = cols[4].text.strip()
 
                     link = f"https://mmp.delaware.gov/Bids/Details/{bid_id}"
                     records.append({
-                        'title': title,
-                        'code': code,
-                        'end_date': closing_date,
-                        'link': link,
+                        "title": title,
+                        "code": code,
+                        "end_date": closing_date,
+                        "link": link,
                     })
                 except Exception as e:
                     self.logger.error(f"[Row {idx}] Error parsing row: {e}", exc_info=False)
