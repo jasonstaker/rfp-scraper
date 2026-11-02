@@ -1,5 +1,7 @@
 # RFP Scraper
 
+> **No longer maintained.** Built during my 2025 internship at HOTB Software Solutions. The procurement sites have changed since, so the scrapers have likely broken.
+
 **Automated RFP scraping for all U.S. states and major counties, with a modern, user-friendly GUI.**
 
 ## Table of Contents
@@ -19,24 +21,22 @@
 8. [Project Structure](#project-structure)
 9. [Dependencies](#dependencies)
 10. [Testing](#testing)
-11. [Roadmap](#roadmap)
-12. [Contributing](#contributing)
-13. [License](#license)
-14. [Contact / Support](#contact--support)
+11. [License](#license)
+12. [Contact / Support](#contact--support)
 
 
 ## Introduction
-RFP Scraper is a cross-platform desktop application that automates the collection of Requests for Proposals (RFPs) from all 50 U.S. states, D.C., and major counties. It features a PyQt5 GUI for keyword-driven searches, state/county selection, real-time progress, and Excel export. The codebase is modular, extensible, and robust for production use.
+RFP Scraper is a cross-platform desktop application that automates the collection of Requests for Proposals (RFPs) from 48 U.S. states, D.C., and 42 major counties. It features a PyQt5 GUI for keyword-driven searches, state/county selection, real-time progress, and Excel export. The codebase is modular, with one scraper per state or county.
 
 ## Features
-- **Comprehensive Coverage:** Scrapes RFPs from all 50 states, D.C., and 17 major counties (with individual modules for each).
+- **Comprehensive Coverage:** Scrapes RFPs from 48 states, D.C., and 42 major counties (2 states couldn't be scraped), with a module for each.
 - **Keyword Search:** Enter keywords to filter RFPs; supports multi-line input and persistent storage.
 - **State & County Selection:** Select any combination of states and counties, or use "Select All" for batch runs.
 - **Responsive GUI:** PyQt5 interface with Home, Run, and Status pages; background scraping keeps UI responsive.
 - **Progress & Logging:** Real-time log tailing, time estimates, and rotating log files for error tracking.
 - **Excel Export & Caching:** Results exported to Excel, with recent outputs cached and auto-opened on completion.
 - **Persistent Data:** Stores averages, hidden IDs, and keywords for future runs.
-- **Robust Error Handling:** Exception management, retry logic, and status reporting for each region.
+- **Error Handling:** Exception management, retry logic, and status reporting for each region.
 - **Extensible Architecture:** Modular scrapers for each state/county; easy to add new regions or features.
 
 ## Screenshots
@@ -140,17 +140,8 @@ pytest
 ```
 Covers core logic, utilities, and basic runner integration. GUI testing is manual.
 
-## Roadmap
-- Progress bars per state/county
-- Auto-complete keyword suggestions
-- CSV/PDF export options
-- Extended GUI improvements
-
-## Contributing
-Contributions are welcome! Please submit focused, high-quality PRs or email ideas.
-
 ## License
 MIT License — see [LICENSE](LICENSE).
 
 ## Contact / Support
-**Author:** Jason Staker ([jason.staker@yahoo.com](mailto:jason.staker@yahoo.com))
+**Author:** Jason Staker
